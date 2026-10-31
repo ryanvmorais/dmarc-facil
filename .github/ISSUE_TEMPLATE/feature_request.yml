@@ -1,0 +1,28 @@
+# Formulário de ideia — lido pelo GitHub ao abrir uma issue nova.
+# Uma ideia aceita vira spec em specs/ antes de ser construída.
+name: "Sugerir uma ideia"
+description: "Sugira algo que o DMARC Fácil deveria fazer"
+labels:
+  - "enhancement"
+body:
+  - type: textarea
+    id: problema
+    attributes:
+      label: "O problema"
+      description: "O que você está tentando fazer e o que atrapalha hoje?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: ideia
+    attributes:
+      label: "O que você gostaria"
+      description: "Como você imagina isso funcionando na página."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternativas
+    attributes:
+      label: "Alternativas"
+      description: "Opcional. Outras ferramentas ou soluções que você tentou."
