@@ -6,7 +6,7 @@ Este arquivo orienta o Claude Code (claude.ai/code) ao trabalhar neste repositó
 
 **DMARC Fácil** é um site estático que consulta o DMARC, o SPF e o DKIM de um domínio, explica cada registro em português e diz o próximo passo (de `p=none` para `quarantine` e `reject`). Tudo roda no navegador do visitante, por DNS-over-HTTPS: nenhum servidor nosso vê o domínio. É o funil do MailVigil e material de conteúdo do canal.
 
-Stack: JavaScript puro (módulos ES, sem build), HTML e CSS, Node 26 e pnpm 12 só para as ferramentas de desenvolvimento. Público, Apache-2.0. Ainda não lançado: o primeiro lançamento será a `1.0.0`; hospedagem em `dmarcfacil.ryanmorais.com.br`, a decidir na fase de operação.
+Stack: JavaScript puro (módulos ES, sem build), HTML e CSS, Node 26 e pnpm 12 só para as ferramentas de desenvolvimento. Público, Apache-2.0. Ainda não lançado: o primeiro lançamento será a `1.0.0`; hospedado como Workers Static Assets da Cloudflare em `dmarcfacil.ryanmorais.com.br` (spec 007; publicar e desfazer um deploy: [docs/hospedagem.md](docs/hospedagem.md)).
 
 ## Comandos comuns
 
@@ -28,6 +28,9 @@ pnpm test:coverage
 
 # Confere os links da lista de seletores DKIM
 pnpm links:dkim
+
+# Confere o que está no ar contra public/ (rede; endereço lido do wrangler.json)
+pnpm hospedagem:conferir
 ```
 
 O portão de qualidade, na ordem do CI e do pre-commit:
@@ -54,8 +57,11 @@ pnpm format
 ## Arquitetura
 
 ```text
+wrangler.json            # projeto de hospedagem (Worker só de assets): rota do domínio, ./public, 404-page; FONTE ÚNICA do endereço
 public/                  # o site: é o que vai para a hospedagem, sem build
-  index.html, 404.html   # as duas páginas (CSP por <meta>, sem style= nem script inline; caminhos absolutos)
+  index.html, 404.html   # as duas páginas (CSP por <meta>, sem style= nem script inline; caminhos absolutos; canonical só no index)
+  _headers               # cabeçalhos de segurança (/*) e cache longo das fontes (/fonts/*); a plataforma o consome, não o publica
+  robots.txt, sitemap.xml # descoberta; citam o endereço da rota do wrangler.json
   css/pagina.css         # a folha das duas páginas (tokens, cartões, escada); fontes em fonts/ (OFL ao lado)
   js/                    # módulos ES carregados direto pelo navegador
     dominio.js           # valida e normaliza o domínio digitado (módulo puro: sem DOM, sem rede)
@@ -81,14 +87,15 @@ public/                  # o site: é o que vai para a hospedagem, sem build
     dom.js               # criar, urlHttps: o único jeito de um texto virar nó (lista fixa de tags e atributos)
     pagina.js            # o único módulo com document/history: liga o formulário e desenha o resultado
 test/                    # testes com o runner nativo do Node (node:test); ajudas/ monta chaves, estados e um documento falso
-scripts/                 # scripts em Node (conferir-links-dkim.mjs: links dos provedores; listar-textos-provisorios.mjs)
+scripts/                 # scripts em Node (conferir-links-dkim.mjs: links dos provedores; conferir-hospedagem.mjs: o que está no ar; listar-textos-provisorios.mjs)
 docs/                    # documentação do projeto
+  hospedagem.md          # passo a passo do Ryan: token, ambiente producao, painel, primeiro deploy, rollback
   stack.md               # mapa de cada tecnologia: o que faz, por que, o que estudar
   images/                # logo oficial (SVG)
 specs/                   # specs de cada marco (requirements, design, tasks)
 .githooks/pre-commit     # portão de qualidade local, o mesmo do CI
 .claude/                 # hooks do Claude Code (scripts em hooks/, ligados por settings.json)
-.github/                 # workflows (ci, codeql, dependency-review, links-dkim, lighthouse), Dependabot, templates; lighthouse/ tem os limites
+.github/                 # workflows (ci, codeql, dependency-review, links-dkim, lighthouse, deploy), Dependabot, templates; lighthouse/ tem os limites (producao-*.json medem o endereço real)
 ```
 
 Camadas: a lógica de parsing (DMARC, SPF, DKIM) e de validação mora em módulos puros de `public/js/`, sem DOM nem rede, para rodar igual no navegador e nos testes. O que toca o DOM e a rede fica em módulos separados, finos. Detalhe da stack em [docs/stack.md](docs/stack.md); o porquê de cada decisão, nas specs de [specs/](specs/).
@@ -96,6 +103,8 @@ Camadas: a lógica de parsing (DMARC, SPF, DKIM) e de validação mora em módul
 > ⚠️ **Não regredir: conteúdo de registro TXT é dado de terceiros.** Todo texto vindo de DNS entra na página só com `textContent`, nunca `innerHTML`. Um registro TXT pode conter `<script>`. Duas camadas: a regra de lint de `public/**` (`innerHTML`, `outerHTML`, `insertAdjacentHTML`, `document.write`, `eval`, `new Function`; `test/lint-dom.test.js`) e `criar` de `dom.js`, que recusa tag, atributo e `href` fora da lista (`test/dom.test.js`).
 
 > ⚠️ **Não regredir: o domínio vai dentro de uma URL.** Tudo o que o visitante digita passa por `normalizarDominio` antes de virar consulta DoH. Nenhum módulo monta URL de consulta com texto cru.
+
+> ⚠️ **Não regredir: o endereço público tem uma fonte só, a rota do `wrangler.json`.** `canonical`, `robots.txt`, `sitemap.xml`, os limites `producao-*.json` e a conferência derivam dele; os testes (`descoberta`, `lighthouse-producao`) falham se divergirem. A CSP de `public/_headers` é a da `<meta>` do `index.html` mais `frame-ancestors 'none'` (`test/cabecalhos.test.js`).
 
 > ⚠️ **Não regredir: sem log e sem rastreador.** Nenhum log de domínios consultados, nenhum script de terceiro na página. Só a estatística agregada da hospedagem. A página diz ao visitante que o resolvedor DoH (Cloudflare, ou Google no fallback) vê o domínio e o IP.
 
@@ -112,6 +121,7 @@ Camadas: a lógica de parsing (DMARC, SPF, DKIM) e de validação mora em módul
 - **CI** (`.github/workflows/ci.yml`): job `qualidade` (Prettier, ESLint, `tsc`, testes) e job `seguranca` (`pnpm audit`). Mais CodeQL e `dependency-review`. Toda `uses:` fixada por SHA, `runs-on: ubuntu-26.04`.
 - **Links DKIM** (`.github/workflows/links-dkim.yml`, `pnpm links:dkim`): toda segunda abre cada `documentacao` de `public/js/seletores-dkim.js`; run vermelho = link quebrado (404/410/rede) ou página que não cita mais o seletor; 403 e site fora do ar são só aviso. Não é check obrigatório. Ao mexer na lista, atualize o `conferido` do item.
 - **Lighthouse CI** (`.github/workflows/lighthouse.yml`, limites em `.github/lighthouse/{mobile,desktop}.json`): mede `index.html` e `404.html` sobre `public/`; acessibilidade = 1 e as outras notas ≥ 0,95, peso abaixo de 150 KB. Não é check obrigatório. O `@lhci/cli` entra por `npx` numa variável do workflow, nunca como dependência (a árvore dele derruba o `pnpm audit`). `pnpm textos:provisorios` lista os textos que o Ryan ainda revisa antes da `1.0.0`.
+- **Deploy** (`.github/workflows/deploy.yml`, spec 007): roda depois do `CI` verde na `main` (`workflow_run`, só `push` do próprio repositório) e por `workflow_dispatch`; ambiente `producao` com os segredos da Cloudflare; publica com `npx wrangler@<WRANGLER_VERSION>` (não é dependência: a árvore derrubaria o `pnpm audit`), confere o que ficou no ar (`scripts/conferir-hospedagem.mjs`: cabeçalhos, 404, HTML byte a byte) e mede o endereço real com o Lighthouse (`producao-{mobile,desktop}.json`). As versões do `wrangler` e do `@lhci/cli` são revistas à mão todo mês (o Dependabot não vê `npx`). **Publicar, o token e rollback são do Ryan** (`docs/hospedagem.md`).
 - **Ruleset `proteger-main`:** PR obrigatório, só squash, histórico linear, `qualidade` e `seguranca` exigidos. Nada de commit direto na `main`.
 - **Pre-commit** (`.githooks/pre-commit`): o mesmo portão do CI em modo verificação.
 - **Hooks do Claude** em `.claude/` (scripts `.mjs` em `.claude/hooks/`, ligados por `.claude/settings.json`): `proteger-gerados` (PreToolUse, bloqueia edição manual do `pnpm-lock.yaml`), `formatar` (PostToolUse, Prettier no arquivo editado) e `validar` (Stop, ESLint + `tsc` se há `.js`/`.mjs` alterado; testes ficam no pre-commit); `ferramentas.mjs` guarda os utilitários que os três usam.

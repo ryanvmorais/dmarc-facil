@@ -233,9 +233,11 @@ describe("public/: nada de fora e nada inline", () => {
       assert.doesNotMatch(texto, /@import/, arquivo);
       assert.doesNotMatch(texto, /url\(\s*["']?(?:https?:)?\/\//, arquivo);
       // Âncora para fora (rodapé, MailVigil) é link que o visitante clica; o que o navegador
-      // carrega sozinho (script, imagem, moldura, folha de estilo) nunca é de fora.
+      // carrega sozinho (script, imagem, moldura, folha de estilo) nunca é de fora. O
+      // `<link rel="canonical">` (spec 007, ADR-8) é endereço absoluto por exigência do padrão,
+      // mas é metadado: o navegador não baixa nada dele.
       assert.doesNotMatch(
-        texto,
+        texto.replace(/<link\s+rel="canonical"[^>]*>/gi, ""),
         /<(?:script|img|iframe|link)\b[^>]*(?:src|href)="(?:https?:)?\/\//i,
         arquivo,
       );
