@@ -35,6 +35,9 @@ const AGENTE = "dmarc-facil-conferir-hospedagem (+https://github.com/ryanvmorais
 const CAMINHO_INEXISTENTE = "/conferencia-caminho-inexistente/a/b";
 // `http://` só pode terminar em redirecionamento (para `https://`) ou em conexão recusada; nunca em 200.
 const REDIRECIONAMENTOS = [301, 302, 307, 308];
+// A zona tem o "Bot Preference Sync" ligado: a Cloudflare põe o seu bloco de content signals na
+// frente de todo `robots.txt`, e o bloco termina nesta linha. Só o que vem depois é nosso.
+const FIM_BLOCO_GERENCIADO = "# END Cloudflare Managed Content";
 
 // ---------------------------------------------------------------------------
 // CABEÇALHOS
@@ -178,6 +181,24 @@ const conferirCorpo = (aberto, statusEsperado, arquivo) => {
 };
 
 /**
+ * Tira da resposta o bloco que a Cloudflare acrescenta na frente do `robots.txt`.
+ *
+ * @param {Aberto} aberto - A resposta do `robots.txt`.
+ * @returns {Aberto} A mesma resposta com o corpo a partir do fim do bloco; sem o bloco, a
+ *   resposta como veio (e a comparação com o arquivo decide).
+ */
+const semBlocoGerenciado = (aberto) => {
+  const texto = aberto.corpo.toString("utf8");
+  const fim = texto.indexOf(FIM_BLOCO_GERENCIADO);
+  if (fim === -1) {
+    return aberto;
+  }
+  // Só o bloco e a linha em branco depois dele ficam de fora.
+  const resto = texto.slice(fim + FIM_BLOCO_GERENCIADO.length).trimStart();
+  return { ...aberto, corpo: Buffer.from(resto, "utf8") };
+};
+
+/**
  * Roda as verificações de RF-07 contra o endereço publicado.
  *
  * @param {{ endereco: string, pasta: string, buscar?: typeof fetch }} opcoes - ``endereco`` é a
@@ -282,7 +303,10 @@ export const conferirHospedagem = async ({ endereco, pasta, buscar = fetch }) =>
   /** @type {string[]} */
   const problemasDescoberta = [];
   for (const nome of ["robots.txt", "sitemap.xml"]) {
-    const aberto = await abrir(url(`/${nome}`), buscar);
+    const recebido = await abrir(url(`/${nome}`), buscar);
+    // O `robots.txt` chega com o bloco gerenciado da zona na frente; o resto tem de ser o nosso.
+    const aberto =
+      recebido !== null && nome === "robots.txt" ? semBlocoGerenciado(recebido) : recebido;
     problemasDescoberta.push(
       ...(aberto === null ? naoAbriu : conferirCorpo(aberto, 200, await arquivo(nome))).map(
         (p) => `${nome}: ${p}`,
@@ -290,7 +314,11 @@ export const conferirHospedagem = async ({ endereco, pasta, buscar = fetch }) =>
     );
   }
   verificacoes.push(
-    resultado("robots.txt e sitemap.xml", problemasDescoberta, "200, corpos idênticos"),
+    resultado(
+      "robots.txt e sitemap.xml",
+      problemasDescoberta,
+      "200, corpos idênticos (o bloco gerenciado da Cloudflare no robots.txt não conta)",
+    ),
   );
 
   // 6. O `_headers` é consumido pela plataforma e não pode ser publicado.
@@ -307,7 +335,8 @@ export const conferirHospedagem = async ({ endereco, pasta, buscar = fetch }) =>
     ),
   );
 
-  // 7. `http://` redireciona para `https://` ou é recusado; nunca é servido.
+  // 7. `http://` redireciona para `https://` ou é recusado; nunca é servido. Se nem o https abre
+  //    (DNS, certificado), "recusado" seria um falso verde: não dá para afirmar nada.
   const claro = new URL("/", endereco);
   claro.protocol = "http:";
   const semTls = await abrir(claro.href, buscar);
@@ -315,10 +344,13 @@ export const conferirHospedagem = async ({ endereco, pasta, buscar = fetch }) =>
   verificacoes.push(
     resultado(
       "http:// não é servido",
-      semTls === null || // conexão recusada
-        (REDIRECIONAMENTOS.includes(semTls.resposta.status) && destino.startsWith("https://"))
-        ? []
-        : [`http:// respondeu ${semTls?.resposta.status} sem redirecionar para https://`],
+      semTls === null
+        ? inicial === null
+          ? ["o endereço não abre nem por https://, e a recusa do http:// não prova nada"]
+          : [] // conexão recusada
+        : REDIRECIONAMENTOS.includes(semTls.resposta.status) && destino.startsWith("https://")
+          ? []
+          : [`http:// respondeu ${semTls.resposta.status} sem redirecionar para https://`],
       semTls === null ? "conexão recusada" : "redireciona para https://",
     ),
   );
