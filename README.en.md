@@ -30,15 +30,15 @@ It is built for site owners, developers and small agencies in Brazil. It is plai
 
 DMARC Fácil is built milestone by milestone, each one designed first as a spec, in [`specs/`](specs/) (in Portuguese). The milestones are the construction history, not published versions: `1.0.0` is the first release and will contain all of them.
 
-| Milestone | Focus                                                                                                                                                        | Status      |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- |
-| `v0.1`    | Foundation: validation and normalization of the typed domain, skeleton with no build step, tests, CI and quality gate                                        | shipped     |
-| `v0.2`    | DoH query: TXT records of a name over DNS-over-HTTPS, with fallback between resolvers                                                                        | shipped     |
-| `v0.3`    | DMARC parser: picks the record among the TXT strings, reads the tags and reports the findings and the stage on the ladder                                    | shipped     |
-| `v0.4`    | SPF parser: reads the record, follows `include` and `redirect`, counts the DNS lookups and reports the findings                                              | shipped     |
-| `v0.5`    | DKIM: looks for the key in common and typed selectors with a bounded number of parallel lookups, reads the record, measures the key and reports the findings | shipped     |
-| `v0.6`    | Page: form, DMARC ladder, DMARC, SPF and DKIM cards with a badge, finding texts, privacy on screen, 404 page and Lighthouse CI                               | shipped     |
-| `v0.7`    | Hosting: Workers Static Assets, security headers, a 404 with status 404, deploy through GitHub Actions and a check of what is live                           | in progress |
+| Milestone | Focus                                                                                                                                                        | Status  |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
+| `v0.1`    | Foundation: validation and normalization of the typed domain, skeleton with no build step, tests, CI and quality gate                                        | shipped |
+| `v0.2`    | DoH query: TXT records of a name over DNS-over-HTTPS, with fallback between resolvers                                                                        | shipped |
+| `v0.3`    | DMARC parser: picks the record among the TXT strings, reads the tags and reports the findings and the stage on the ladder                                    | shipped |
+| `v0.4`    | SPF parser: reads the record, follows `include` and `redirect`, counts the DNS lookups and reports the findings                                              | shipped |
+| `v0.5`    | DKIM: looks for the key in common and typed selectors with a bounded number of parallel lookups, reads the record, measures the key and reports the findings | shipped |
+| `v0.6`    | Page: form, DMARC ladder, DMARC, SPF and DKIM cards with a badge, finding texts, privacy on screen, 404 page and Lighthouse CI                               | shipped |
+| `v0.7`    | Hosting: Workers Static Assets, security headers, a 404 with status 404, deploy through GitHub Actions and a check of what is live                           | shipped |
 
 ## Development
 

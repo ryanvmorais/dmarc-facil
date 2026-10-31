@@ -1,6 +1,6 @@
 ---
 feature: Hospedagem — a pasta public/ no ar em dmarcfacil.ryanmorais.com.br, com cabeçalhos de segurança e a 404 certa
-status: em andamento
+status: concluído
 date: 2026-10-31
 related: [001-fundacao, 006-pagina]
 origin: conception
@@ -49,9 +49,9 @@ Tarefas pequenas, na ordem. Cada etapa de código fecha com o portão de qualida
 
 Etapa sem código, por isso sem portão de qualidade: o que ela entrega é o site no ar, conferido pelo `deploy.yml` (RF-07).
 
-- [ ] Ryan segue `docs/hospedagem.md` até o primeiro deploy por `workflow_dispatch`. — RF-01, RF-05, RF-08
-- [ ] Resumo da conferência lido: todas as verificações verdes, ou cada falha tratada (cabeçalho na 404, `Cache-Control` das fontes, permissão do token, os riscos do design) com o desvio registrado em "Ajustes feitos na implementação" do `design.md`. — RF-02, RF-03, RF-04, RF-06, RF-07
-- [ ] Lighthouse de produção verde nos dois modos, com as notas e o peso registrados aqui. — RF-07, RNF-04
-- [ ] Um rollback real feito e voltado, antes de divulgar o endereço. — RF-05, ADR-9
-- [ ] `*.workers.dev` e o endereço de pré-visualização conferidos como fora do ar. — RF-01
-- [ ] Os três arquivos da spec com `status: concluído` e a linha da 007 em `specs/README.md` como `concluído`. — Impacto
+- [x] Ryan segue `docs/hospedagem.md` até o primeiro deploy (2026-10-31: token, ambiente `producao`, domínio no ar; o Deploy #1, disparado pelo CI da `main`, publicou, e a conferência dele falhou só porque o domínio e o certificado ainda não estavam de pé). — RF-01, RF-05, RF-08
+- [x] Resumo da conferência lido (Deploy #2, run 41251796843: as sete verificações verdes; a única falha real do primeiro deploy foi o bloco gerenciado do `robots.txt`, tratado no PR #15 e registrado no design; o `_headers` valeu na 404 e o `Cache-Control` das fontes não se juntou ao padrão): todas as verificações verdes, ou cada falha tratada (cabeçalho na 404, `Cache-Control` das fontes, permissão do token, os riscos do design) com o desvio registrado em "Ajustes feitos na implementação" do `design.md`. — RF-02, RF-03, RF-04, RF-06, RF-07
+- [x] Lighthouse de produção verde nos dois modos, com as notas e o peso registrados aqui (Deploy #2: desempenho, acessibilidade, boas práticas e SEO com nota 1,0 em mobile e desktop; peso ~122 KB nos dois; CLS 0 no mobile e ~0,001 no desktop; conferida também a página aberta no Chrome, só com o próprio site e `cloudflare-dns.com` na rede, sem beacon e com a 404 certa). — RF-07, RNF-04
+- [x] Um rollback real feito e voltado, antes de divulgar o endereço (2026-10-31, pelo painel: Rollback para a `2c50f806` e Promote version de volta para a `6d756cff`; a conferência passou nas duas pontas). — RF-05, ADR-9
+- [x] `*.workers.dev` e o endereço de pré-visualização conferidos como fora do ar (aba Domains do Worker: só `dmarcfacil.ryanmorais.com.br`, tipo Production). — RF-01
+- [x] Os três arquivos da spec com `status: concluído` e a linha da 007 em `specs/README.md` como `concluído`. — Impacto
