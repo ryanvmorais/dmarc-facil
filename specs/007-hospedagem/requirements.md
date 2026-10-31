@@ -1,6 +1,6 @@
 ---
 feature: Hospedagem — a pasta public/ no ar em dmarcfacil.ryanmorais.com.br, com cabeçalhos de segurança e a 404 certa
-status: aprovado
+status: em andamento
 date: 2026-10-31
 related: [001-fundacao, 006-pagina]
 origin: conception

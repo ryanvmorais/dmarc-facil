@@ -1,6 +1,6 @@
 ---
 feature: Hospedagem — a pasta public/ no ar em dmarcfacil.ryanmorais.com.br, com cabeçalhos de segurança e a 404 certa
-status: aprovado
+status: em andamento
 date: 2026-10-31
 related: [001-fundacao, 006-pagina]
 origin: conception
@@ -248,3 +248,18 @@ jobs:
 - `test/conferir-hospedagem.test.js`: `lerCabecalhosEsperados` e `compararCabecalhos` com `_headers` sintético (cabeçalho faltando, valor diferente, valor repetido); `conferirHospedagem` com um `buscar` falso que responde bem e com variações que o fazem falhar: HTML alterado (script injetado), 404 com status 200, cabeçalho ausente na 404, `http://` servido em 200, `_headers` público, `Cache-Control` diferente nas fontes.
 - Conferência real: passo do `deploy.yml` (RF-07), fora do `pnpm test`.
 - O CI roda o portão completo em todo PR.
+
+## Ajustes feitos na implementação
+
+O que a implementação mudou em relação ao texto acima, com o motivo:
+
+- **`test/pagina-estatica.test.js` mudou uma linha.** O teste "nenhum recurso externo em HTML nem CSS" recusava qualquer `<link href="https://…">`; o `<link rel="canonical">` é absoluto por exigência do padrão (ADR-8) e não carrega nada. O teste passou a ignorar só esse `<link>`.
+- **Conferência: o CSS entra na verificação 3.** A lista de sete verificações do design fala só do JavaScript, mas o ADR-7 manda comparar também o CSS; ele foi para a mesma verificação, "JavaScript e CSS", para manter as sete. A verificação 2 usa o caminho `/conferencia-caminho-inexistente/a/b`.
+- **`deploy.yml` chama `node scripts/conferir-hospedagem.mjs`, e não `pnpm hospedagem:conferir`.** O script só usa o Node, então o job dispensa o `pnpm` e o `install` (como o `links-dkim.yml`). O script `pnpm hospedagem:conferir` existe para a conferência à mão.
+- **A ponta da `main` é lida por `gh api`** (`repos/<repo>/commits/main`), com o token do GitHub só nesse passo, e o checkout usa `persist-credentials: false`: o token não fica no disco quando o `npx` roda.
+- **O disparo à mão (`workflow_dispatch`) só publica na `main`** (`github.ref == 'refs/heads/main'` na condição do job), além da restrição de branch do ambiente `producao`.
+- **O deploy leva `--message "<sha>"`** (a flag existe na 4.152.0, conferida em `deploy --help`), para o histórico de versões da Cloudflare registrar o commit, e `WRANGLER_SEND_METRICS=false`.
+- **Os relatórios do Lighthouse de produção** viram o artefato `lighthouse-producao` (14 dias), como no `lighthouse.yml`.
+- **`wrangler deploy --dry-run`** na 4.152.0 leu o `wrangler.json` e a pasta `public/` sem erro (36 arquivos), antes do primeiro deploy real.
+- **Teste a mais:** `test/workflow-deploy.test.js` confere que os comandos `wrangler@…` de `docs/hospedagem.md` usam a mesma versão do workflow.
+- **A seção sobre a zona de `docs/hospedagem.md` não mexe na zona.** `ryanmorais.com.br` também serve o site principal (Django no Railway, atrás da Cloudflare). Olhado em 2026-10-31: sem Rocket Loader nem beacon no HTML; a ofuscação de e-mail está ligada (não se desliga na zona, e `public/` não tem e-mail); a regra "Segredo de origem" vale para todas as requisições e fica como está (o Worker não lê nem devolve o cabeçalho); o Bot Preference Sync prepende um bloco ao `robots.txt`, e a conferência deve aceitar esse prefixo se a primeira conferência o apontar.

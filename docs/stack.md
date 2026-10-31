@@ -2,7 +2,7 @@
 
 Cada tecnologia que sustenta o DMARC Fácil: o que faz, por que foi escolhida no lugar da alternativa e os poucos conceitos que valem estudar primeiro.
 
-Este mapa não é exaustivo: o grafo completo de versões está no `pnpm-lock.yaml` e as decisões de cada marco vão nos blocos `### ADR-N` de `specs/*/design.md`. Aqui está a forma do projeto e o raciocínio por trás de cada peça. Hoje ele cobre os marcos até o `v0.6`; depois do `v0.2`, só o `v0.6` trouxe tecnologia nova (a página: fontes locais, CSP por `<meta>`, History API e Lighthouse CI).
+Este mapa não é exaustivo: o grafo completo de versões está no `pnpm-lock.yaml` e as decisões de cada marco vão nos blocos `### ADR-N` de `specs/*/design.md`. Aqui está a forma do projeto e o raciocínio por trás de cada peça. Hoje ele cobre os marcos até o `v0.7`; depois do `v0.2`, só o `v0.6` (a página: fontes locais, CSP por `<meta>`, History API e Lighthouse CI) e o `v0.7` (a hospedagem: Workers Static Assets, `_headers`, HSTS e o deploy por `wrangler`) trouxeram tecnologia nova.
 
 O projeto é um site estático e um conjunto de ferramentas que só existem na máquina de quem desenvolve:
 
@@ -157,6 +157,48 @@ Formata JavaScript, JSON, YAML e Markdown. O `pnpm format:check` falha se algum 
 
 ---
 
+## Hospedagem
+
+### Workers Static Assets (Cloudflare)
+
+O site é a pasta `public/` servida como um Worker só de arquivos: o `wrangler.json` não tem `main`, só o nome, a pasta (`./public`), a rota do domínio `dmarcfacil.ryanmorais.com.br` e `not_found_handling: "404-page"`, que serve a `404.html` com status 404 em qualquer caminho que não existe. Nenhum código de servidor. O `workers_dev` e as pré-visualizações públicas ficam desligados, para o domínio ser o único endereço.
+
+**Por que esta:** a zona `ryanmorais.com.br` já está na Cloudflare, requisição a arquivo estático é grátis e ilimitada, `_headers` vale, e a doc da Cloudflare manda começar projeto novo por Workers, não por Pages. Alternativas descartadas: Cloudflare Pages e outra hospedagem estática (sem ganho aqui).
+
+**Estudar:** o que é um Worker, `assets.directory`, `not_found_handling`, domínio personalizado (`custom_domain`) e a diferença entre `workers.dev` e a rota própria.
+
+**Docs:** [Workers Static Assets](https://developers.cloudflare.com/workers/static-assets/).
+
+### `_headers`: cabeçalhos de segurança e cache
+
+`public/_headers` dá ao servidor o que a `<meta>` não consegue: a `Content-Security-Policy` com `frame-ancestors 'none'`, `X-Content-Type-Options`, `Referrer-Policy: no-referrer`, `Permissions-Policy`, `Cross-Origin-Opener-Policy` e `Cross-Origin-Resource-Policy`. A CSP repete a da `<meta>` do `index.html` (um teste compara). O cache segue a regra "revalidar o código, guardar as fontes": HTML, CSS e JS ficam com o padrão da plataforma e só `/fonts/*` leva `max-age` de um ano. O arquivo é consumido pela hospedagem e não é publicado.
+
+**Por que esta:** um cabeçalho para o site todo é o mais simples de testar. Os módulos ES importam uns aos outros por caminho fixo; cache longo neles misturaria versões.
+
+**Estudar:** `Content-Security-Policy` (`frame-ancestors`, `connect-src`), `Cache-Control` (`must-revalidate`, `immutable`), `ETag` e resposta 304.
+
+### HSTS (`Strict-Transport-Security`)
+
+`max-age=31536000` (um ano), sem `includeSubDomains` e sem `preload`: o navegador passa a falar só HTTPS com este subdomínio.
+
+**Por que esta:** o escopo é um subdomínio só deste site, e nada mais de `ryanmorais.com.br` é afetado. `preload` é quase irreversível e fica de fora.
+
+**Estudar:** o que o HSTS protege (o primeiro acesso por `http://`), por que `preload` e `includeSubDomains` ampliam o alcance.
+
+**Docs:** [MDN: Strict-Transport-Security](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security).
+
+### `wrangler` por `npx` e o ambiente `producao`
+
+O `deploy.yml` publica com `npx --yes wrangler@<versão fixa> deploy`; o `wrangler` não é dependência do `package.json`, porque a árvore dele derrubaria o `pnpm audit` (o mesmo caso do `@lhci/cli`). Os segredos da Cloudflare (`CLOUDFLARE_API_TOKEN`, com o menor escopo possível, e `CLOUDFLARE_ACCOUNT_ID`) vivem só no **ambiente** `producao` do GitHub, restrito à `main`. O workflow roda depois do `CI` verde (`workflow_run`) e depois de publicar confere o que está no ar (`scripts/conferir-hospedagem.mjs`) e mede o endereço real com o Lighthouse.
+
+**Por que esta:** o deploy encadeia no CI sem repeti-lo, e PR ou fork nunca toca o segredo. Alternativas descartadas: `cloudflare/wrangler-action` (mais uma ação de terceiro no caminho do segredo) e a integração Git da Cloudflare (build e conferência ficariam fora do nosso CI).
+
+**Estudar:** `workflow_run` contra `push`, ambientes e segredos de ambiente do GitHub, `wrangler rollback`, e por que um token se limita à conta e à zona.
+
+**Docs:** [Wrangler](https://developers.cloudflare.com/workers/wrangler/), [ambientes do GitHub](https://docs.github.com/pt/actions/deployment/targeting-different-environments).
+
+---
+
 ## Automação e segurança
 
 ### GitHub Actions
@@ -189,7 +231,7 @@ Abre um PR por semana (domingo, 09:00, horário de Brasília) com as atualizaç�
 
 ### Lighthouse CI
 
-Roda o Lighthouse sobre a pasta `public/` (`lhci autorun`, servidor estático embutido) nas duas páginas, em celular e em desktop, três medições e a mediana. Limites em `.github/lighthouse/{mobile,desktop}.json`: acessibilidade = 1 e desempenho, boas práticas e SEO a partir de 0,95, além de contraste, console, CLS e peso (150 KB). Não é check obrigatório: a nota varia em runner compartilhado. O `@lhci/cli` entra por `npx` numa variável do workflow, e não no `package.json`, porque a árvore dele traz vulnerabilidades altas que derrubariam o `pnpm audit` do job `seguranca`. A auditoria `robots-txt` fica de fora: a CSP sem `connect-src 'self'` impede o Lighthouse de baixar o arquivo.
+Roda o Lighthouse sobre a pasta `public/` (`lhci autorun`, servidor estático embutido) nas duas páginas, em celular e em desktop, três medições e a mediana. Limites em `.github/lighthouse/{mobile,desktop}.json`: acessibilidade = 1 e desempenho, boas práticas e SEO a partir de 0,95, além de contraste, console, CLS e peso (150 KB). Não é check obrigatório: a nota varia em runner compartilhado. Depois de cada deploy, o `deploy.yml` mede também o endereço real, com os mesmos limites (`producao-{mobile,desktop}.json`). O `@lhci/cli` entra por `npx` numa variável do workflow, e não no `package.json`, porque a árvore dele traz vulnerabilidades altas que derrubariam o `pnpm audit` do job `seguranca`. A auditoria `robots-txt` fica de fora: a CSP sem `connect-src 'self'` impede o Lighthouse de baixar o arquivo.
 
 **Por que esta:** pega regressão de carga, de acessibilidade e de estrutura antes do deploy. Não exercita a consulta DoH real.
 
@@ -218,4 +260,5 @@ Roda o Lighthouse sobre a pasta `public/` (`lhci autorun`, servidor estático em
 - **Biblioteca de DNS ou de punycode:** o `URL` da plataforma converte domínio internacional, e a consulta é um `fetch`.
 - **Servidor ou banco de dados:** a promessa é que nenhum servidor nosso vê o domínio digitado.
 - **Rastreador, analytics de terceiros, CDN de fonte ou de script:** a página não carrega nada de fora; só a estatística agregada da hospedagem.
+- **`wrangler` como dependência, Cloudflare Pages e ações de terceiros para o deploy:** o `wrangler` entra por `npx` numa versão fixa; o Pages foi preterido pelos Workers Static Assets.
 - **Jest ou Vitest:** o `node:test` basta para funções puras.
