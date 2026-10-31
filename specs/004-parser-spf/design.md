@@ -1,6 +1,6 @@
 ---
 feature: Parser SPF — escolher o registro SPF entre os TXT do domínio, lê-lo, contar as consultas DNS e apontar os achados
-status: aprovado
+status: concluído
 date: 2026-10-31
 related: [001-fundacao, 002-consulta-doh, 003-parser-dmarc]
 origin: conception
