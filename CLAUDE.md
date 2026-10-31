@@ -62,6 +62,7 @@ public/                  # o site: é o que vai para a hospedagem, sem build
   index.html, 404.html   # as duas páginas (CSP por <meta>, sem style= nem script inline; caminhos absolutos; canonical só no index)
   _headers               # cabeçalhos de segurança (/*) e cache longo das fontes (/fonts/*); a plataforma o consome, não o publica
   robots.txt, sitemap.xml # descoberta; citam o endereço da rota do wrangler.json
+  favicon.svg            # ícone da aba, referenciado pelas duas páginas
   css/pagina.css         # a folha das duas páginas (tokens, cartões, escada); fontes em fonts/ (OFL ao lado)
   js/                    # módulos ES carregados direto pelo navegador
     dominio.js           # valida e normaliza o domínio digitado (módulo puro: sem DOM, sem rede)
@@ -88,6 +89,7 @@ public/                  # o site: é o que vai para a hospedagem, sem build
     pagina.js            # o único módulo com document/history: liga o formulário e desenha o resultado
 test/                    # testes com o runner nativo do Node (node:test); ajudas/ monta chaves, estados e um documento falso
 scripts/                 # scripts em Node (conferir-links-dkim.mjs: links dos provedores; conferir-hospedagem.mjs: o que está no ar; listar-textos-provisorios.mjs)
+BRIEFING.md              # briefing da primeira fase (2026-10-26): por que existe, concorrência, cuidados de segurança
 docs/                    # documentação do projeto
   hospedagem.md          # passo a passo do Ryan: token, ambiente producao, painel, primeiro deploy, rollback
   stack.md               # mapa de cada tecnologia: o que faz, por que, o que estudar

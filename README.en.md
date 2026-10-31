@@ -75,7 +75,26 @@ pnpm typecheck
 pnpm test
 ```
 
-More on how to contribute in [CONTRIBUTING.md](CONTRIBUTING.md); the stack, in [docs/stack.md](docs/stack.md) (in Portuguese); the guide for Claude Code users, in [CLAUDE.md](CLAUDE.md) (in Portuguese). To report a vulnerability, see [SECURITY.md](SECURITY.md).
+Other commands:
+
+```bash
+# Fix the formatting
+pnpm format
+
+# Tests with coverage
+pnpm test:coverage
+
+# Check the links of the DKIM selector list (network)
+pnpm links:dkim
+
+# Check what is live against public/ (network)
+pnpm hospedagem:conferir
+
+# List the interface texts that are not final yet
+pnpm textos:provisorios
+```
+
+More on how to contribute in [CONTRIBUTING.md](CONTRIBUTING.md); the stack, in [docs/stack.md](docs/stack.md) (in Portuguese); how to publish the site and roll back a deploy, in [docs/hospedagem.md](docs/hospedagem.md) (in Portuguese); the guide for Claude Code users, in [CLAUDE.md](CLAUDE.md) (in Portuguese). To report a vulnerability, see [SECURITY.md](SECURITY.md).
 
 ## License
 
