@@ -28,7 +28,7 @@ const configuracao = [
     languageOptions: { globals: globals.browser },
   },
   {
-    files: ["test/**/*.js", "*.mjs", ".claude/**/*.mjs"],
+    files: ["test/**/*.js", "*.mjs", ".claude/**/*.mjs", "scripts/**/*.mjs"],
     languageOptions: { globals: globals.node },
   },
 ];

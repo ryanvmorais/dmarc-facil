@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+# Conferência semanal dos links de documentação da lista de seletores DKIM
+# (public/js/seletores-dkim.js). Os provedores trocam de seletor e de endereço, e o teste de
+# dados só confere a forma da lista. Este workflow abre cada link e acusa o que quebrou ou
+# deixou de citar o seletor (run vermelho; o GitHub avisa o dono do repositório por e-mail).
+# Site que responde 403 ou fica fora do ar vira aviso, nunca falha: o robô é barrado em vários
+# deles. Também roda à mão (workflow_dispatch) e com `pnpm links:dkim`. Não é check
+# obrigatório do PR: depende de sites de terceiros.
+name: Links DKIM
+
+on:
+  schedule:
+    # Segunda-feira, 09:00 em São Paulo (12:00 UTC).
+    - cron: "0 12 * * 1"
+  workflow_dispatch:
+
+# Somente leitura: o script só lê a lista do repositório e abre páginas públicas.
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  conferir:
+    name: conferir
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Instalar o Node
+        # O script usa só o `fetch` do Node e não tem dependência: dispensa o pnpm e o install.
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 26
+
+      - name: Conferir os links
+        run: node scripts/conferir-links-dkim.mjs
