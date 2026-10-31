@@ -60,6 +60,7 @@ docs/                    # documentação do projeto
   images/                # logo oficial (SVG)
 specs/                   # specs de cada marco (requirements, design, tasks)
 .githooks/pre-commit     # portão de qualidade local, o mesmo do CI
+.claude/                 # hooks do Claude Code (scripts em hooks/, ligados por settings.json)
 .github/                 # workflows (ci, codeql, dependency-review), Dependabot, templates
 ```
 
@@ -84,7 +85,7 @@ Camadas: a lógica de parsing (SPF, DMARC) e de validação mora em módulos pur
 - **CI** (`.github/workflows/ci.yml`): job `qualidade` (Prettier, ESLint, `tsc`, testes) e job `seguranca` (`pnpm audit`). Mais CodeQL e `dependency-review`. Toda `uses:` fixada por SHA, `runs-on: ubuntu-26.04`.
 - **Ruleset `proteger-main`:** PR obrigatório, só squash, histórico linear, `qualidade` e `seguranca` exigidos. Nada de commit direto na `main`.
 - **Pre-commit** (`.githooks/pre-commit`): o mesmo portão do CI em modo verificação.
-- **Hooks do Claude** em `.claude/`: ainda não há.
+- **Hooks do Claude** em `.claude/` (scripts `.mjs` em `.claude/hooks/`, ligados por `.claude/settings.json`): `proteger-gerados` (PreToolUse, bloqueia edição manual do `pnpm-lock.yaml`), `formatar` (PostToolUse, Prettier no arquivo editado) e `validar` (Stop, ESLint + `tsc` se há `.js`/`.mjs` alterado; testes ficam no pre-commit).
 
 ## Fluxo de trabalho
 
