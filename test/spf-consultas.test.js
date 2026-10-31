@@ -851,7 +851,7 @@ describe("RF-03 — o estágio de um registro com redirect é o do destino", () 
     });
     assert.equal(teto.r.consultas.interrompida, true);
     assert.equal(teto.r.estagio, "indeterminado");
-    assert.ok(!teto.chamadas.includes("b.exemplo.net"));
+    assert.deepEqual(teto.chamadas, [RAIZ, "x.exemplo.net"]);
   });
 
   it("sem redirect, o estágio é o do próprio all, mesmo passando do limite", async () => {
