@@ -33,6 +33,20 @@ const TEXTO_HEADERS = await readFile(`${PASTA}/_headers`, "utf8");
 const GERAIS = lerCabecalhosEsperados(TEXTO_HEADERS, "/*");
 const FONTES = lerCabecalhosEsperados(TEXTO_HEADERS, "/fonts/*");
 const FONTE = (await readdir(`${PASTA}/fonts`)).filter((f) => f.endsWith(".woff2")).sort()[0];
+// O que a Cloudflare põe na frente do `robots.txt` com o "Bot Preference Sync" ligado.
+const BLOCO_GERENCIADO = [
+  "# As a condition of accessing this website, you agree to abide by the following",
+  "# content signals:",
+  "",
+  "User-agent: *",
+  "Content-Signal: search=yes,ai-train=no",
+  "",
+  "User-agent: GPTBot",
+  "Disallow: /",
+  "",
+  "# END Cloudflare Managed Content",
+  "",
+].join("\n");
 // O código é revalidado a cada visita, sem `max-age` (ADR-4): o padrão da plataforma para assets.
 const REVALIDAR = "public, max-age=0, must-revalidate";
 
@@ -364,6 +378,53 @@ describe("conferirHospedagem: o que derruba cada verificação", () => {
     );
     assert.deepEqual(falhas(resultado), ["robots.txt e sitemap.xml"]);
     assert.match(resultado.verificacoes[4]?.detalhe ?? "", /^robots\.txt: /);
+  });
+
+  it("robots.txt com o bloco gerenciado da Cloudflare na frente passa (Bot Preference Sync)", async () => {
+    const resultado = await conferir(async (url) =>
+      url.pathname === "/robots.txt"
+        ? resposta(
+            `${BLOCO_GERENCIADO}
+${await arquivo("robots.txt").then((b) => new TextDecoder().decode(b))}`,
+            200,
+            {
+              "content-type": "text/plain",
+            },
+          )
+        : undefined,
+    );
+    assert.deepEqual(falhas(resultado), []);
+  });
+
+  it("robots.txt com o bloco gerenciado, mas com o resto alterado, falha", async () => {
+    const resultado = await conferir(async (url) =>
+      url.pathname === "/robots.txt"
+        ? resposta(
+            `${BLOCO_GERENCIADO}
+User-agent: *
+Disallow: /
+`,
+            200,
+            {
+              "content-type": "text/plain",
+            },
+          )
+        : undefined,
+    );
+    assert.deepEqual(falhas(resultado), ["robots.txt e sitemap.xml"]);
+  });
+
+  it("nenhuma conexão abre: o http:// também falha, porque a recusa não prova nada", async () => {
+    const resultado = await conferir(async () => new Error("getaddrinfo ENOTFOUND"));
+    assert.deepEqual(falhas(resultado), [
+      "Página inicial",
+      "Página 404",
+      "JavaScript e CSS",
+      "Fonte",
+      "robots.txt e sitemap.xml",
+      "_headers não é público",
+      "http:// não é servido",
+    ]);
   });
 
   it("endereço que não abre falha em vez de passar (conexão, certificado, tempo)", async () => {
