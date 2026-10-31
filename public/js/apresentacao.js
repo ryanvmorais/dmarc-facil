@@ -78,7 +78,7 @@ export const MAXIMO_DETALHE = 120;
 const MAXIMO_RECUSADO = 40;
 // Caracteres de controle e de inversão de sentido de escrita (U+202A a 202E, U+2066 a 2069)
 // disfarçam texto: viram um marcador visível em vez de mudar a leitura do que está em volta.
-const PADRAO_CONTROLE = /[\p{Cc}‪-‮⁦-⁩]/gu;
+const PADRAO_CONTROLE = /[\p{Cc}\u202A-\u202E\u2066-\u2069]/gu;
 const MARCADOR = "�";
 const RETICENCIAS = "…";
 
