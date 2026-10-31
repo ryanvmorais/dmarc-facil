@@ -62,6 +62,7 @@ public/                  # o site: é o que vai para a hospedagem, sem build
   index.html, 404.html   # as duas páginas (CSP por <meta>, sem style= nem script inline; caminhos absolutos; canonical só no index)
   _headers               # cabeçalhos de segurança (/*) e cache longo das fontes (/fonts/*); a plataforma o consome, não o publica
   robots.txt, sitemap.xml # descoberta; citam o endereço da rota do wrangler.json
+  favicon.svg            # ícone da aba, referenciado pelas duas páginas
   css/pagina.css         # a folha das duas páginas (tokens, cartões, escada); fontes em fonts/ (OFL ao lado)
   js/                    # módulos ES carregados direto pelo navegador
     dominio.js           # valida e normaliza o domínio digitado (módulo puro: sem DOM, sem rede)
