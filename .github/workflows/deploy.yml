@@ -1,0 +1,120 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+# Deploy do site (spec 007, ADR-5 e ADR-6): publica `public/` como Workers Static Assets em
+# dmarcfacil.ryanmorais.com.br, confere o que ficou no ar e mede o endereço real com o
+# Lighthouse. Roda depois do CI verde na `main` e, à mão, por `workflow_dispatch` (o primeiro
+# deploy e a republicação de uma versão antiga são do Ryan). Guia do passo a passo e de como
+# desfazer: docs/hospedagem.md.
+#
+# Por que `workflow_run` e não `push` com um job que repete o portão: o deploy encadeia no `CI`
+# sem duplicá-lo; se `qualidade` ou `seguranca` falham, ele nem começa. A condição do job (run
+# com sucesso, vindo de `push`, do próprio repositório) impede que PR ou fork dispare o deploy
+# ou toque o segredo. `workflow_run` roda o arquivo da branch padrão: mexer neste workflow só
+# vale depois do merge.
+#
+# Por que o `wrangler` não é dependência do package.json: a árvore dele engordaria o
+# `pnpm audit` obrigatório (o mesmo caso do `@lhci/cli`). Entra por `npx` numa variável, e o
+# Dependabot não o vê: a revisão das duas versões é manual, uma vez por mês.
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+# Somente leitura: o código do repositório é lido; a escrita é na Cloudflare, pelo token.
+permissions:
+  contents: read
+
+# Dois merges seguidos não se atropelam: o segundo espera o primeiro terminar, sem cancelá-lo
+# no meio do upload.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+env:
+  # 4.152.0 saiu em 2026-10-22, mais de 7 dias antes de entrar aqui (o `minimumReleaseAge` do
+  # projeto). O Dependabot não vê `npx`: a revisão desta versão é manual.
+  WRANGLER_VERSION: "4.152.0"
+  # A mesma do lighthouse.yml (um teste confere).
+  LHCI_VERSION: "0.15.1"
+
+jobs:
+  publicar:
+    name: publicar
+    # Disparo à mão só na `main`; depois do CI, só run bem-sucedido de `push` do próprio
+    # repositório (nunca de PR nem de fork).
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    # Ambiente com os segredos CLOUDFLARE_API_TOKEN e CLOUDFLARE_ACCOUNT_ID, restrito à `main`.
+    environment: producao
+    steps:
+      - name: Baixar o commit que passou no CI
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          # Nenhum passo seguinte precisa do token do GitHub; ele não fica no disco.
+          persist-credentials: false
+
+      - name: Conferir que o commit ainda é a ponta da main
+        id: ponta
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ponta=$(gh api "repos/${{ github.repository }}/commits/main" --jq .sha)
+          atual=$(git rev-parse HEAD)
+          if [ "$ponta" = "$atual" ]; then
+            echo "atual=true" >> "$GITHUB_OUTPUT"
+            echo "Publicando $atual"
+          else
+            echo "atual=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Deploy pulado::$atual não é mais a ponta da main ($ponta); o run dela publica."
+          fi
+
+      - name: Instalar o Node
+        if: steps.ponta.outputs.atual == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 26
+
+      - name: Publicar na Cloudflare
+        id: deploy
+        if: steps.ponta.outputs.atual == 'true'
+        # Os segredos ficam só neste passo, o único que fala com a Cloudflare.
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WRANGLER_SEND_METRICS: "false"
+        run: npx --yes wrangler@${{ env.WRANGLER_VERSION }} deploy --message "$(git rev-parse HEAD)"
+
+      # Os dois passos seguintes rodam mesmo que o anterior falhe, para o resumo mostrar tudo de
+      # uma vez. O deploy ruim não é desfeito sozinho (ADR-6): o caminho de volta é o do
+      # docs/hospedagem.md.
+      - name: Conferir o que está no ar
+        if: ${{ !cancelled() && steps.deploy.outcome == 'success' }}
+        run: node scripts/conferir-hospedagem.mjs
+
+      - name: Medir o endereço real no celular
+        if: ${{ !cancelled() && steps.deploy.outcome == 'success' }}
+        run: npx --yes @lhci/cli@${{ env.LHCI_VERSION }} autorun --config=.github/lighthouse/producao-mobile.json
+
+      - name: Medir o endereço real no desktop
+        if: ${{ !cancelled() && steps.deploy.outcome == 'success' }}
+        run: npx --yes @lhci/cli@${{ env.LHCI_VERSION }} autorun --config=.github/lighthouse/producao-desktop.json
+
+      - name: Guardar os relatórios
+        if: ${{ !cancelled() && steps.deploy.outcome == 'success' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lighthouse-producao
+          path: |
+            .lighthouseci/producao-mobile
+            .lighthouseci/producao-desktop
+          retention-days: 14
