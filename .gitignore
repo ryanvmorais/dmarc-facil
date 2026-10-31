@@ -1,0 +1,29 @@
+# --- 1. DEPENDÊNCIAS ---
+# Recriável com `pnpm install`; o pnpm-lock.yaml É commitado (instalação reprodutível).
+node_modules/
+
+# --- 2. CACHES DE FERRAMENTA ---
+# Efêmeros por design: cada ferramenta os recria na próxima execução.
+.eslintcache
+*.tsbuildinfo
+
+# --- 3. SAÍDA DE TESTE ---
+# Relatório de cobertura, recriável com `pnpm test:coverage`.
+coverage/
+
+# --- 4. SEGREDOS E AMBIENTE ---
+# O projeto não usa variável de ambiente nem segredo; a proteção existe para o dia em que
+# alguém criar um `.env` por reflexo.
+.env
+.env.*
+
+# --- 5. DEPLOY ---
+# Estado local do Wrangler (Cloudflare): porta de dev, cache e variáveis locais.
+.wrangler/
+.dev.vars
+
+# --- 6. EDITOR E SISTEMA OPERACIONAL ---
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

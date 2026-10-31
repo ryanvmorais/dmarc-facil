@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "compilerOptions": {
+    // --- Linguagem e módulos ---
+    // ES modules nativos: o navegador carrega `public/js/*.js` sem build, e o Node (ESM, por
+    // causa do "type": "module") roda os mesmos arquivos nos testes.
+    "target": "ES2024",
+    "lib": ["ES2024", "DOM"],
+    "module": "NodeNext",
+    "types": ["node"],
+
+    // --- Só checar, nunca emitir ---
+    // O TypeScript aqui é um verificador de JSDoc: nada é compilado, o que vai para o
+    // navegador é o próprio .js.
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+
+    // --- Rigor ---
+    "strict": true,
+    // Índice fora do limite devolve `undefined`: o tipo precisa dizer isso.
+    "noUncheckedIndexedAccess": true,
+    "skipLibCheck": true
+  },
+  "include": ["public/js", "test", "eslint.config.mjs"]
+}

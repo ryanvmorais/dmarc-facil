@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://json.schemastore.org/pnpm-workspace.json
+# Configuração do pnpm 12 — lida pelo pnpm, não por CI nem por deploy. O pnpm 12 lê as
+# configurações daqui (o campo "pnpm" do package.json é ignorado).
+
+# Espera uma semana (em minutos) antes de resolver uma release nova, o mesmo cooldown do
+# Dependabot: uma versão recém-publicada pode estar quebrada ou comprometida no dia em que sai.
+minimumReleaseAge: 10080
+
+# Aviso aceito de propósito no `pnpm audit`: o `minimatch` 10.x (negação de serviço por
+# amplificação de globs) vem do ESLint 10, que exige `^10.2`, e a correção só existe na 11.
+# É dependência de desenvolvimento e só lê os padrões da nossa config, nunca texto do visitante.
+# Sai daqui quando o ESLint passar a aceitar o `minimatch` 11.
+auditConfig:
+  ignoreGhsas:
+    - GHSA-g3hv-75wg-m249
