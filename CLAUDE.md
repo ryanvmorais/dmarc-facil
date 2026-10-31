@@ -55,6 +55,8 @@ pnpm format
 
 ```text
 public/                  # o site: é o que vai para a hospedagem, sem build
+  index.html, 404.html   # as duas páginas (CSP por <meta>, sem style= nem script inline; caminhos absolutos)
+  css/pagina.css         # a folha das duas páginas (tokens, cartões, escada); fontes em fonts/ (OFL ao lado)
   js/                    # módulos ES carregados direto pelo navegador
     dominio.js           # valida e normaliza o domínio digitado (módulo puro: sem DOM, sem rede)
     nome-dns.js          # valida o nome DNS montado pela ferramenta antes de virar URL (puro)
@@ -68,20 +70,30 @@ public/                  # o site: é o que vai para a hospedagem, sem build
     chave-rsa.js         # lerChaveRsa: mede o módulo da chave pública RSA do p= (leitor ASN.1 mínimo, puro)
     dkim.js              # lerDkim: escolhe o registro de um seletor, lê as tags e aponta os achados (puro)
     dkim-busca.js        # buscarDkim: tenta os seletores com concorrência limitada (consulta injetada, sem fetch)
-test/                    # testes com o runner nativo do Node (node:test); ajudas/ monta chaves DKIM sintéticas
-scripts/                 # scripts de manutenção em Node (conferir-links-dkim.mjs: link e seletor de cada provedor)
+    tipos.js             # só typedef: o estado de cada parte (verificando, pronto, falha) e da verificação
+    selo.js              # calcularSelo: a regra única do selo dos três cartões (puro)
+    escada.js            # montarEscada: degraus none/quarantine/reject, próximo passo e ressalvas (puro)
+    textos-achados.js    # dados: o português de cada código de achado; textoDoAchado (provisorio marca o não final)
+    textos-interface.js  # dados: selos, degraus, falhas, anúncios e demais frases montadas por script
+    apresentacao.js      # cartões de DMARC, SPF e DKIM prontos para desenhar, seletores digitados, anúncios (puro)
+    endereco.js          # ?dominio= do endereço compartilhável (puro: preenche o campo, não verifica)
+    verificador.js       # criarVerificador: as três partes em paralelo, descarta a verificação anterior (consulta injetada)
+    dom.js               # criar, urlHttps: o único jeito de um texto virar nó (lista fixa de tags e atributos)
+    pagina.js            # o único módulo com document/history: liga o formulário e desenha o resultado
+test/                    # testes com o runner nativo do Node (node:test); ajudas/ monta chaves, estados e um documento falso
+scripts/                 # scripts em Node (conferir-links-dkim.mjs: links dos provedores; listar-textos-provisorios.mjs)
 docs/                    # documentação do projeto
   stack.md               # mapa de cada tecnologia: o que faz, por que, o que estudar
   images/                # logo oficial (SVG)
 specs/                   # specs de cada marco (requirements, design, tasks)
 .githooks/pre-commit     # portão de qualidade local, o mesmo do CI
 .claude/                 # hooks do Claude Code (scripts em hooks/, ligados por settings.json)
-.github/                 # workflows (ci, codeql, dependency-review, links-dkim), Dependabot, templates
+.github/                 # workflows (ci, codeql, dependency-review, links-dkim, lighthouse), Dependabot, templates; lighthouse/ tem os limites
 ```
 
 Camadas: a lógica de parsing (DMARC, SPF, DKIM) e de validação mora em módulos puros de `public/js/`, sem DOM nem rede, para rodar igual no navegador e nos testes. O que toca o DOM e a rede fica em módulos separados, finos. Detalhe da stack em [docs/stack.md](docs/stack.md); o porquê de cada decisão, nas specs de [specs/](specs/).
 
-> ⚠️ **Não regredir: conteúdo de registro TXT é dado de terceiros.** Todo texto vindo de DNS entra na página só com `textContent`, nunca `innerHTML`. Um registro TXT pode conter `<script>`.
+> ⚠️ **Não regredir: conteúdo de registro TXT é dado de terceiros.** Todo texto vindo de DNS entra na página só com `textContent`, nunca `innerHTML`. Um registro TXT pode conter `<script>`. Duas camadas: a regra de lint de `public/**` (`innerHTML`, `outerHTML`, `insertAdjacentHTML`, `document.write`, `eval`, `new Function`; `test/lint-dom.test.js`) e `criar` de `dom.js`, que recusa tag, atributo e `href` fora da lista (`test/dom.test.js`).
 
 > ⚠️ **Não regredir: o domínio vai dentro de uma URL.** Tudo o que o visitante digita passa por `normalizarDominio` antes de virar consulta DoH. Nenhum módulo monta URL de consulta com texto cru.
 
@@ -99,6 +111,7 @@ Camadas: a lógica de parsing (DMARC, SPF, DKIM) e de validação mora em módul
 
 - **CI** (`.github/workflows/ci.yml`): job `qualidade` (Prettier, ESLint, `tsc`, testes) e job `seguranca` (`pnpm audit`). Mais CodeQL e `dependency-review`. Toda `uses:` fixada por SHA, `runs-on: ubuntu-26.04`.
 - **Links DKIM** (`.github/workflows/links-dkim.yml`, `pnpm links:dkim`): toda segunda abre cada `documentacao` de `public/js/seletores-dkim.js`; run vermelho = link quebrado (404/410/rede) ou página que não cita mais o seletor; 403 e site fora do ar são só aviso. Não é check obrigatório. Ao mexer na lista, atualize o `conferido` do item.
+- **Lighthouse CI** (`.github/workflows/lighthouse.yml`, limites em `.github/lighthouse/{mobile,desktop}.json`): mede `index.html` e `404.html` sobre `public/`; acessibilidade = 1 e as outras notas ≥ 0,95, peso abaixo de 150 KB. Não é check obrigatório. O `@lhci/cli` entra por `npx` numa variável do workflow, nunca como dependência (a árvore dele derruba o `pnpm audit`). `pnpm textos:provisorios` lista os textos que o Ryan ainda revisa antes da `1.0.0`.
 - **Ruleset `proteger-main`:** PR obrigatório, só squash, histórico linear, `qualidade` e `seguranca` exigidos. Nada de commit direto na `main`.
 - **Pre-commit** (`.githooks/pre-commit`): o mesmo portão do CI em modo verificação.
 - **Hooks do Claude** em `.claude/` (scripts `.mjs` em `.claude/hooks/`, ligados por `.claude/settings.json`): `proteger-gerados` (PreToolUse, bloqueia edição manual do `pnpm-lock.yaml`), `formatar` (PostToolUse, Prettier no arquivo editado) e `validar` (Stop, ESLint + `tsc` se há `.js`/`.mjs` alterado; testes ficam no pre-commit); `ferramentas.mjs` guarda os utilitários que os três usam.

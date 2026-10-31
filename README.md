@@ -17,7 +17,7 @@ Quem pesquisa "verificar DMARC" ou "meu e-mail cai no spam" encontra, quase semp
 
 Ele é feito para donos de site, desenvolvedores e agências pequenas no Brasil. É JavaScript puro, sem build e sem dependência de runtime, e não tem servidor: a página consulta o DNS público direto do seu navegador.
 
-> **Status:** em construção. Ainda não lançado: o primeiro lançamento será a `1.0.0`, e a página ainda não está no ar. O que existe hoje são os módulos que consultam o DNS e leem DMARC, SPF e DKIM, com testes e CI; a página ainda não existe.
+> **Status:** em construção. Ainda não lançado: o primeiro lançamento será a `1.0.0`, e a página ainda não está no ar. O que existe hoje é a página (formulário, escada do DMARC, cartões de DMARC, SPF e DKIM, e a 404) sobre os módulos que consultam o DNS e leem os três registros, com testes e CI.
 
 ## Privacidade e uso
 
@@ -30,13 +30,14 @@ Ele é feito para donos de site, desenvolvedores e agências pequenas no Brasil.
 
 O DMARC Fácil é construído marco a marco, cada um desenhado antes como uma spec, em [`specs/`](specs/). Os marcos são o histórico da construção, não versões publicadas: a `1.0.0` é o primeiro lançamento e vai conter todos eles.
 
-| Marco  | Foco                                                                                                                                       | Status   |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------ | -------- |
-| `v0.1` | Fundação: validação e normalização do domínio digitado, esqueleto sem build, testes, CI e portão de qualidade                              | entregue |
-| `v0.2` | Consulta DoH: registros TXT de um nome por DNS-over-HTTPS, com fallback entre resolvedores                                                 | entregue |
-| `v0.3` | Parser DMARC: escolhe o registro entre os TXT, lê as tags e aponta os achados e o estágio na escada                                        | entregue |
-| `v0.4` | Parser SPF: lê o registro, segue os `include` e o `redirect`, conta as consultas DNS e aponta os achados                                   | entregue |
-| `v0.5` | DKIM: procura a chave em seletores comuns e digitados com consultas simultâneas limitadas, lê o registro, mede a chave e aponta os achados | entregue |
+| Marco  | Foco                                                                                                                                            | Status   |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| `v0.1` | Fundação: validação e normalização do domínio digitado, esqueleto sem build, testes, CI e portão de qualidade                                   | entregue |
+| `v0.2` | Consulta DoH: registros TXT de um nome por DNS-over-HTTPS, com fallback entre resolvedores                                                      | entregue |
+| `v0.3` | Parser DMARC: escolhe o registro entre os TXT, lê as tags e aponta os achados e o estágio na escada                                             | entregue |
+| `v0.4` | Parser SPF: lê o registro, segue os `include` e o `redirect`, conta as consultas DNS e aponta os achados                                        | entregue |
+| `v0.5` | DKIM: procura a chave em seletores comuns e digitados com consultas simultâneas limitadas, lê o registro, mede a chave e aponta os achados      | entregue |
+| `v0.6` | Página: formulário, escada do DMARC, cartões de DMARC, SPF e DKIM com selo, textos dos achados, privacidade na tela, página 404 e Lighthouse CI | entregue |
 
 ## Desenvolvimento
 

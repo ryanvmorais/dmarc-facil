@@ -46,7 +46,7 @@ A entrega é o marco da construção (`v0.x`), como no README. Nenhum marco foi 
 | [`003-parser-dmarc`](003-parser-dmarc/) | escolha do registro DMARC entre os TXT, leitura das tags, política, destinos de relatório, estágio e achados com código estável                     | `v0.3`  | concluído |
 | [`004-parser-spf`](004-parser-spf/)     | leitura do registro SPF, gramática de cada termo, caminhada pelos include e redirect com a contagem das consultas DNS e achados com código estável  | `v0.4`  | concluído |
 | [`005-dkim`](005-dkim/)                 | busca da chave DKIM em seletores comuns e digitados com concorrência limitada, leitura do registro, tamanho da chave e achados com código estável   | `v0.5`  | concluído |
-| [`006-pagina`](006-pagina/)             | formulário, escada do DMARC, cartões de DMARC, SPF e DKIM com selo, catálogo de textos dos achados, privacidade na tela, página 404 e Lighthouse CI | `v0.6`  | aprovado  |
+| [`006-pagina`](006-pagina/)             | formulário, escada do DMARC, cartões de DMARC, SPF e DKIM com selo, catálogo de textos dos achados, privacidade na tela, página 404 e Lighthouse CI | `v0.6`  | concluído |
 
 ## Spec-ouro
 

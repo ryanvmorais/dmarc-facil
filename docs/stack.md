@@ -2,7 +2,7 @@
 
 Cada tecnologia que sustenta o DMARC Fácil: o que faz, por que foi escolhida no lugar da alternativa e os poucos conceitos que valem estudar primeiro.
 
-Este mapa não é exaustivo: o grafo completo de versões está no `pnpm-lock.yaml` e as decisões de cada marco vão nos blocos `### ADR-N` de `specs/*/design.md`. Aqui está a forma do projeto e o raciocínio por trás de cada peça. Hoje ele cobre os marcos até o `v0.5`; nenhum marco depois do `v0.2` trouxe tecnologia nova.
+Este mapa não é exaustivo: o grafo completo de versões está no `pnpm-lock.yaml` e as decisões de cada marco vão nos blocos `### ADR-N` de `specs/*/design.md`. Aqui está a forma do projeto e o raciocínio por trás de cada peça. Hoje ele cobre os marcos até o `v0.6`; depois do `v0.2`, só o `v0.6` trouxe tecnologia nova (a página: fontes locais, CSP por `<meta>`, History API e Lighthouse CI).
 
 O projeto é um site estático e um conjunto de ferramentas que só existem na máquina de quem desenvolve:
 
@@ -53,6 +53,63 @@ O navegador não fala DNS direto, então a página pergunta a um resolvedor púb
 **Estudar:** `fetch` e `AbortSignal.timeout`, CORS (por que `Accept` não dispara preflight), os códigos de `Status` do DNS (0 sem erro, 2 SERVFAIL, 3 NXDOMAIN), tipo de registro TXT e como um TXT longo vira vários pedaços de 255 bytes.
 
 **Docs:** [Cloudflare: DNS sobre HTTPS em JSON](https://developers.cloudflare.com/1.1.1.1/encryption/dns-over-https/make-api-requests/dns-json/) · [Google: DNS-over-HTTPS (JSON)](https://developers.google.com/speed/public-dns/docs/doh/json).
+
+---
+
+## Página
+
+### Fontes locais (Sora 800 e JetBrains Mono 400)
+
+O corpo do texto usa a fonte do sistema (`system-ui`); só dois arquivos `woff2` do subconjunto latino vêm de `public/fonts/`: a Sora 800 (títulos e o nome) e a JetBrains Mono 400 (registros e trechos de código). O CSS os declara em `@font-face` com `font-display: swap` e URL relativa à própria folha.
+
+**Origem e conferência (baixados em 2026-10-31):** o endereço que o CSS do Google Fonts devolve para o subconjunto latino, em `fonts.gstatic.com`, com o cabeçalho `wOF2` conferido.
+
+| Arquivo                         | Bytes  | SHA-256                                                            | Licença                                                                                                     |
+| ------------------------------- | ------ | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `Sora-800-latin.woff2`          | 14 864 | `b3058cd014993defb5c446d9ccdeba7f994c4b7f0ff2b50b2b213944af0f176e` | OFL 1.1, `OFL-Sora.txt` (de [sora-xor/sora-font](https://github.com/sora-xor/sora-font))                    |
+| `JetBrainsMono-400-latin.woff2` | 21 168 | `14425ba9c695763c1547f48a206b7aa60350a33ae23de09f0407877f3fcd89eb` | OFL 1.1, `OFL-JetBrainsMono.txt` (de [JetBrains/JetBrainsMono](https://github.com/JetBrains/JetBrainsMono)) |
+
+**Por que esta:** zero requisição ao Google Fonts (privacidade e `font-src 'self'` da CSP) e só 36 KB de fonte, o que ajuda o orçamento de 150 KB da página. Alternativa descartada: uma fonte do corpo local (Inter somaria uns 100 KB).
+
+**Estudar:** `@font-face` e `font-display`, subconjunto `unicode-range`, a licença OFL (o que ela exige ao redistribuir).
+
+**Docs:** [MDN: @font-face](https://developer.mozilla.org/pt-BR/docs/Web/CSS/@font-face).
+
+### Content-Security-Policy por `<meta>`
+
+Cada página declara no `<head>`, logo depois do `charset`, uma política que só deixa carregar script, estilo, imagem e fonte do próprio site e só deixa o JavaScript falar com os dois resolvedores DoH (`connect-src https://cloudflare-dns.com https://dns.google`). Sem `unsafe-inline` nem `unsafe-eval`: por isso a página não usa `style=` nem script inline, e a largura dos esqueletos de "verificando" é classe do CSS. `test/pagina-estatica.test.js` compara o `connect-src` com os hosts de `RESOLVEDORES` em `doh.js`.
+
+**Por que esta:** defesa em profundidade contra o que a regra de lint e o `criar` do `dom.js` não previrem (um registro TXT pode conter `<script>`). Alternativa descartada: cabeçalho HTTP, que depende da hospedagem (ela pode reforçar). Limite: o `<meta>` não aceita `frame-ancestors` nem `report-uri`, e só vale para o que vem depois dele.
+
+**Estudar:** `default-src`, `script-src`, `connect-src`, por que `style=` conta como estilo inline, `base-uri` e `form-action`.
+
+**Docs:** [MDN: Content-Security-Policy](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Reference/Headers/Content-Security-Policy).
+
+### DOM sem `innerHTML` (`dom.js` e a regra de lint)
+
+Todo nó da página nasce de `criar(documento, tag, atributos, filhos)`: tag e atributo de uma lista fixa, texto sempre como nó de texto, `href` só `https`. O ESLint proíbe em `public/**` `innerHTML`, `outerHTML`, `insertAdjacentHTML`, `document.write`, `eval` e `new Function`. O teste usa um documento falso (`test/ajudas/documento-falso.js`) que lança se alguém atribuir `innerHTML`, e alimenta registros TXT hostis.
+
+**Por que esta:** o ⚠️ do `CLAUDE.md` pede duas camadas, proibir a forma e testar o ataque. Alternativa descartada: `jsdom` como dependência, só para testar uma função de 60 linhas.
+
+**Estudar:** `textContent` contra `innerHTML`, XSS refletido e armazenado, por que `javascript:` num `href` executa.
+
+**Docs:** [MDN: Node.textContent](https://developer.mozilla.org/pt-BR/docs/Web/API/Node/textContent).
+
+### History API (`history.replaceState`)
+
+Ao verificar, a página troca o endereço para `?dominio=exemplo.com.br` sem criar entrada no histórico, para o resultado poder ser compartilhado. Abrir o link só preenche o campo; quem decide quando o domínio sai do navegador é o visitante, apertando o botão.
+
+**Por que esta:** `replaceState` em vez de `pushState`, para o botão Voltar não andar por verificações. Alternativa descartada: verificar ao abrir o link, que dispararia uma consulta ao resolvedor sem o visitante pedir.
+
+**Estudar:** `history.replaceState` contra `pushState`, `URLSearchParams`, `location.search`.
+
+**Docs:** [MDN: History.replaceState()](https://developer.mozilla.org/pt-BR/docs/Web/API/History/replaceState).
+
+### `pnpm textos:provisorios`
+
+Lista os textos da interface ainda não finais: o campo `provisorio: true` nos catálogos (`public/js/textos-achados.js`, `public/js/textos-interface.js`) e o atributo `data-provisorio` nos HTML. O visitante não vê a marca; é a lista de revisão do Ryan antes da `1.0.0`.
+
+**Estudar:** como `import()` dinâmico lê um módulo ES dentro de um script Node.
 
 ---
 
@@ -129,6 +186,16 @@ Abre um PR por semana (domingo, 09:00, horário de Brasília) com as atualizaç�
 **Estudar:** `groups`, `cooldown`, a diferença entre atualização de versão e de segurança.
 
 **Docs:** [Dependabot](https://docs.github.com/pt/code-security/dependabot).
+
+### Lighthouse CI
+
+Roda o Lighthouse sobre a pasta `public/` (`lhci autorun`, servidor estático embutido) nas duas páginas, em celular e em desktop, três medições e a mediana. Limites em `.github/lighthouse/{mobile,desktop}.json`: acessibilidade = 1 e desempenho, boas práticas e SEO a partir de 0,95, além de contraste, console, CLS e peso (150 KB). Não é check obrigatório: a nota varia em runner compartilhado. O `@lhci/cli` entra por `npx` numa variável do workflow, e não no `package.json`, porque a árvore dele traz vulnerabilidades altas que derrubariam o `pnpm audit` do job `seguranca`. A auditoria `robots-txt` fica de fora: a CSP sem `connect-src 'self'` impede o Lighthouse de baixar o arquivo.
+
+**Por que esta:** pega regressão de carga, de acessibilidade e de estrutura antes do deploy. Não exercita a consulta DoH real.
+
+**Estudar:** as quatro categorias do Lighthouse, `median-run`, o que mede o CLS.
+
+**Docs:** [Lighthouse CI](https://googlechrome.github.io/lighthouse-ci/).
 
 ---
 

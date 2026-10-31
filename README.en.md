@@ -17,7 +17,7 @@ Anyone searching for "verificar DMARC" or "meu e-mail cai no spam" mostly lands 
 
 It is built for site owners, developers and small agencies in Brazil. It is plain JavaScript, with no build step and no runtime dependency, and has no server: the page queries public DNS straight from your browser. The interface is in Portuguese.
 
-> **Status:** under construction. Not released yet: the first release will be `1.0.0`, and the page is not online yet. What exists today are the modules that query the DNS and read DMARC, SPF and DKIM, with tests and CI; the page does not exist yet.
+> **Status:** under construction. Not released yet: the first release will be `1.0.0`, and the page is not online yet. What exists today is the page (form, DMARC ladder, DMARC, SPF and DKIM cards, and the 404 page) on top of the modules that query the DNS and read the three records, with tests and CI.
 
 ## Privacy and use
 
@@ -37,6 +37,7 @@ DMARC Fácil is built milestone by milestone, each one designed first as a spec,
 | `v0.3`    | DMARC parser: picks the record among the TXT strings, reads the tags and reports the findings and the stage on the ladder                                    | shipped |
 | `v0.4`    | SPF parser: reads the record, follows `include` and `redirect`, counts the DNS lookups and reports the findings                                              | shipped |
 | `v0.5`    | DKIM: looks for the key in common and typed selectors with a bounded number of parallel lookups, reads the record, measures the key and reports the findings | shipped |
+| `v0.6`    | Page: form, DMARC ladder, DMARC, SPF and DKIM cards with a badge, finding texts, privacy on screen, 404 page and Lighthouse CI                               | shipped |
 
 ## Development
 
