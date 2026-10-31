@@ -57,6 +57,7 @@ public/                  # o site: é o que vai para a hospedagem, sem build
     nome-dns.js          # valida o nome DNS montado pela ferramenta antes de virar URL (puro)
     resposta-doh.js      # lê o JSON do resolvedor: situação e textos TXT, igual nos dois (puro)
     doh.js               # consultarTxt: fetch com tempo limite, privacidade e fallback Cloudflare → Google
+    dmarc.js             # lerDmarc: escolhe o registro entre os TXT, lê as tags e aponta os achados (puro)
 test/                    # testes com o runner nativo do Node (node:test)
 docs/                    # documentação do projeto
   stack.md               # mapa de cada tecnologia: o que faz, por que, o que estudar
