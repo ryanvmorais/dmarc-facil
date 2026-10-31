@@ -35,6 +35,7 @@ DMARC Fácil is built milestone by milestone, each one designed first as a spec,
 | `v0.1`    | Foundation: validation and normalization of the typed domain, skeleton with no build step, tests, CI and quality gate     | shipped |
 | `v0.2`    | DoH query: TXT records of a name over DNS-over-HTTPS, with fallback between resolvers                                     | shipped |
 | `v0.3`    | DMARC parser: picks the record among the TXT strings, reads the tags and reports the findings and the stage on the ladder | shipped |
+| `v0.4`    | SPF parser: reads the record, follows `include` and `redirect`, counts the DNS lookups and reports the findings           | shipped |
 
 ## Development
 
