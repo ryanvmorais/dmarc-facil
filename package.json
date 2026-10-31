@@ -18,6 +18,7 @@
     "test": "node --test",
     "test:coverage": "node --test --experimental-test-coverage",
     "links:dkim": "node scripts/conferir-links-dkim.mjs",
+    "hospedagem:conferir": "node scripts/conferir-hospedagem.mjs",
     "textos:provisorios": "node scripts/listar-textos-provisorios.mjs"
   },
   "devDependencies": {
