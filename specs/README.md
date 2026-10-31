@@ -39,9 +39,10 @@ Nenhuma fase começa sem a aprovação explícita da anterior.
 
 A entrega é o marco da construção (`v0.x`), como no README. Nenhum marco foi publicado: o primeiro lançamento é a `1.0.0` e contém todos os marcos.
 
-| Spec                            | Escopo                                                                                                         | Entrega | Status    |
-| ------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------- | --------- |
-| [`001-fundacao`](001-fundacao/) | esqueleto sem build, validação do domínio digitado, portão de qualidade local, CI, cadeia de suprimentos, logo | `v0.1`  | concluído |
+| Spec                                    | Escopo                                                                                                                           | Entrega | Status    |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------- | --------- |
+| [`001-fundacao`](001-fundacao/)         | esqueleto sem build, validação do domínio digitado, portão de qualidade local, CI, cadeia de suprimentos, logo                   | `v0.1`  | concluído |
+| [`002-consulta-doh`](002-consulta-doh/) | consulta de registros TXT por DNS-over-HTTPS, com fallback entre resolvedores, leitura defensiva da resposta e validação do nome | `v0.2`  | concluído |
 
 ## Spec-ouro
 

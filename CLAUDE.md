@@ -54,6 +54,9 @@ pnpm format
 public/                  # o site: é o que vai para a hospedagem, sem build
   js/                    # módulos ES carregados direto pelo navegador
     dominio.js           # valida e normaliza o domínio digitado (módulo puro: sem DOM, sem rede)
+    nome-dns.js          # valida o nome DNS montado pela ferramenta antes de virar URL (puro)
+    resposta-doh.js      # lê o JSON do resolvedor: situação e textos TXT, igual nos dois (puro)
+    doh.js               # consultarTxt: fetch com tempo limite, privacidade e fallback Cloudflare → Google
 test/                    # testes com o runner nativo do Node (node:test)
 docs/                    # documentação do projeto
   stack.md               # mapa de cada tecnologia: o que faz, por que, o que estudar

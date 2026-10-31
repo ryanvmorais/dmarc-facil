@@ -2,7 +2,7 @@
 
 Cada tecnologia que sustenta o DMARC Fácil: o que faz, por que foi escolhida no lugar da alternativa e os poucos conceitos que valem estudar primeiro.
 
-Este mapa não é exaustivo: o grafo completo de versões está no `pnpm-lock.yaml` e as decisões de cada marco vão nos blocos `### ADR-N` de `specs/*/design.md`. Aqui está a forma do projeto e o raciocínio por trás de cada peça. Hoje ele descreve a fundação (`v0.1`).
+Este mapa não é exaustivo: o grafo completo de versões está no `pnpm-lock.yaml` e as decisões de cada marco vão nos blocos `### ADR-N` de `specs/*/design.md`. Aqui está a forma do projeto e o raciocínio por trás de cada peça. Hoje ele descreve a fundação e a consulta DoH (`v0.1` e `v0.2`).
 
 O projeto é um site estático e um conjunto de ferramentas que só existem na máquina de quem desenvolve:
 
@@ -39,6 +39,20 @@ Os tipos vivem em comentários JSDoc (`@param {string}`, `@returns`, `@typedef`)
 **Estudar:** `@typedef` e `@param` com tipos de união, `// @ts-check`, `strict` e `noUncheckedIndexedAccess`.
 
 **Docs:** [TypeScript: JSDoc em arquivos JS](https://www.typescriptlang.org/docs/handbook/jsdoc-supported-types.html).
+
+---
+
+## Rede
+
+### DNS-over-HTTPS (DoH) com `fetch`
+
+O navegador não fala DNS direto, então a página pergunta a um resolvedor público por HTTPS: `fetch` de uma URL com `name` e `type=TXT`, e o resolvedor devolve JSON. A Cloudflare (`cloudflare-dns.com/dns-query`) é a primeira; o Google (`dns.google/resolve`) é o fallback. A consulta vai sem cookie nem `Referer`, com tempo limite (`AbortSignal.timeout`) e sem seguir redirecionamento.
+
+**Por que esta:** não há servidor nosso no meio, então nenhum servidor nosso vê o domínio consultado. Os dois resolvedores liberam CORS para qualquer origem, o que foi medido no navegador. Alternativa descartada: um backend que fizesse a consulta, que passaria a ver (e a poder registrar) cada domínio. O resolvedor vê o domínio e o IP do visitante, e a página diz isso.
+
+**Estudar:** `fetch` e `AbortSignal.timeout`, CORS (por que `Accept` não dispara preflight), os códigos de `Status` do DNS (0 sem erro, 2 SERVFAIL, 3 NXDOMAIN), tipo de registro TXT e como um TXT longo vira vários pedaços de 255 bytes.
+
+**Docs:** [Cloudflare: DNS sobre HTTPS em JSON](https://developers.cloudflare.com/1.1.1.1/encryption/dns-over-https/make-api-requests/dns-json/) · [Google: DNS-over-HTTPS (JSON)](https://developers.google.com/speed/public-dns/docs/doh/json).
 
 ---
 

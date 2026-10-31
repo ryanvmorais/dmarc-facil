@@ -33,6 +33,7 @@ DMARC Fácil is built milestone by milestone, each one designed first as a spec,
 | Milestone | Focus                                                                                                                 | Status  |
 | --------- | --------------------------------------------------------------------------------------------------------------------- | ------- |
 | `v0.1`    | Foundation: validation and normalization of the typed domain, skeleton with no build step, tests, CI and quality gate | shipped |
+| `v0.2`    | DoH query: TXT records of a name over DNS-over-HTTPS, with fallback between resolvers                                 | shipped |
 
 ## Development
 
