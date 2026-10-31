@@ -1,0 +1,61 @@
+<!doctype html>
+<!--
+  Página 404 do DMARC Fácil (spec 006, RF-14 e ADR-14). A hospedagem serve este mesmo arquivo
+  em qualquer caminho (/a/b/c), por isso o CSS, as fontes, o ícone e o link de volta são
+  caminhos absolutos a partir da raiz. Não tem script: a CSP abaixo nem o permite, e a página
+  não precisa de nenhum. O <path> do logo é o mesmo do index.html e de docs/images/ (um teste
+  compara os três).
+-->
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; style-src 'self'; img-src 'self'; font-src 'self'; base-uri 'none'; form-action 'none'"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Página não encontrada | DMARC Fácil</title>
+    <meta
+      name="description"
+      content="O endereço não existe no DMARC Fácil. Volte para a página inicial e verifique o DMARC, o SPF e o DKIM do seu domínio."
+    />
+    <meta name="color-scheme" content="light" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/css/pagina.css" />
+  </head>
+  <body>
+    <!-- ============================================================
+         SEÇÃO: TOPO
+         O mesmo logo do index.html, com o link de volta para a raiz.
+         ============================================================ -->
+    <header class="topo">
+      <div class="topo-interno">
+        <a class="marca" href="/">
+          <svg viewBox="2 1 40 50" width="29" height="36" aria-hidden="true" focusable="false">
+            <path
+              fill="#2563eb"
+              fill-rule="evenodd"
+              d="M22 1Q32 8 42 9V26C42 39 33 46.5 22 51C11 46.5 2 39 2 26V9Q12 8 22 1ZM9 27Q22 18 35 27Q22 36 9 27ZM18.5 27a3.5 3.5 0 1 0 7 0a3.5 3.5 0 1 0-7 0Z"
+            />
+          </svg>
+          <span class="titulo marca-nome">DMARC Fácil</span>
+        </a>
+      </div>
+    </header>
+    <!-- fim: TOPO -->
+
+    <!-- ============================================================
+         SEÇÃO: ERRO 404
+         Frase curta e o caminho de volta (RF-14).
+         ============================================================ -->
+    <main class="coluna pagina-erro">
+      <p class="titulo pagina-erro-codigo">Erro 404</p>
+      <h1 class="titulo">Não achei essa página</h1>
+      <p data-provisorio>
+        O endereço não existe aqui. Volte para a página inicial e verifique o seu domínio.
+      </p>
+      <a class="botao" href="/">Voltar para a página inicial</a>
+    </main>
+    <!-- fim: ERRO 404 -->
+  </body>
+</html>

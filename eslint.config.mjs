@@ -26,6 +26,22 @@ const configuracao = [
   {
     files: ["public/**/*.js"],
     languageOptions: { globals: globals.browser },
+    rules: {
+      // Conteúdo de registro TXT é dado de terceiros e pode conter `<script>`: nada de public/
+      // transforma texto em HTML nem em código. Todo nó nasce de `criar` (dom.js), com
+      // `textContent`. Ver o ⚠️ do CLAUDE.md e o ADR-9 da spec 006.
+      "no-restricted-properties": [
+        "error",
+        { property: "innerHTML", message: "Use textContent: TXT é dado de terceiros." },
+        { property: "outerHTML", message: "Use textContent: TXT é dado de terceiros." },
+        { property: "insertAdjacentHTML", message: "Use criar() de dom.js." },
+        { object: "document", property: "write", message: "Use criar() de dom.js." },
+        { object: "document", property: "writeln", message: "Use criar() de dom.js." },
+      ],
+      "no-eval": "error",
+      "no-new-func": "error",
+      "no-implied-eval": "error",
+    },
   },
   {
     files: ["test/**/*.js", "*.mjs", ".claude/**/*.mjs", "scripts/**/*.mjs"],

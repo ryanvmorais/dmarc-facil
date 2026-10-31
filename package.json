@@ -17,7 +17,8 @@
     "typecheck": "tsc --noEmit",
     "test": "node --test",
     "test:coverage": "node --test --experimental-test-coverage",
-    "links:dkim": "node scripts/conferir-links-dkim.mjs"
+    "links:dkim": "node scripts/conferir-links-dkim.mjs",
+    "textos:provisorios": "node scripts/listar-textos-provisorios.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
