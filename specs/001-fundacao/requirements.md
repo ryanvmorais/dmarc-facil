@@ -1,6 +1,6 @@
 ---
 feature: Fundação — esqueleto sem build, validação do domínio, portão de qualidade, CI e marca
-status: aprovado
+status: concluído
 date: 2026-10-31
 related: []
 origin: conception
