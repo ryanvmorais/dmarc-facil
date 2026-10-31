@@ -17,10 +17,11 @@
 // RFC 1035: 63 caracteres por rótulo e 253 no nome inteiro em texto.
 // ---------------------------------------------------------------------------
 
-// Rótulo é cada trecho entre pontos (`exemplo` em `exemplo.com.br`).
-const TAMANHO_MAXIMO_ROTULO = 63;
+// Rótulo é cada trecho entre pontos (`exemplo` em `exemplo.com.br`). Exportado porque
+// `nome-dns.js` valida o mesmo limite.
+export const TAMANHO_MAXIMO_ROTULO = 63;
 // Nome inteiro em texto, sem contar o ponto final.
-const TAMANHO_MAXIMO_DOMINIO = 253;
+export const TAMANHO_MAXIMO_DOMINIO = 253;
 
 // Letras, dígitos e hífen, sem hífen nas pontas. Sublinhado fica de fora de propósito: ele
 // só existe em nomes de serviço (`_dmarc`), que a ferramenta monta sozinha.
