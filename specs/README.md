@@ -43,6 +43,7 @@ A entrega é o marco da construção (`v0.x`), como no README. Nenhum marco foi 
 | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | ------- | --------- |
 | [`001-fundacao`](001-fundacao/)         | esqueleto sem build, validação do domínio digitado, portão de qualidade local, CI, cadeia de suprimentos, logo                   | `v0.1`  | concluído |
 | [`002-consulta-doh`](002-consulta-doh/) | consulta de registros TXT por DNS-over-HTTPS, com fallback entre resolvedores, leitura defensiva da resposta e validação do nome | `v0.2`  | concluído |
+| [`003-parser-dmarc`](003-parser-dmarc/) | escolha do registro DMARC entre os TXT, leitura das tags, política, destinos de relatório, estágio e achados com código estável  | `v0.3`  | concluído |
 
 ## Spec-ouro
 

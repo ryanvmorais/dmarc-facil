@@ -1,6 +1,6 @@
 ---
 feature: Parser DMARC — escolher o registro DMARC entre os TXT de `_dmarc.<domínio>`, lê-lo e apontar os achados
-status: aprovado
+status: concluído
 date: 2026-10-31
 related: [001-fundacao, 002-consulta-doh]
 origin: conception

@@ -34,6 +34,7 @@ O DMARC Fácil é construído marco a marco, cada um desenhado antes como uma sp
 | ------ | ------------------------------------------------------------------------------------------------------------- | -------- |
 | `v0.1` | Fundação: validação e normalização do domínio digitado, esqueleto sem build, testes, CI e portão de qualidade | entregue |
 | `v0.2` | Consulta DoH: registros TXT de um nome por DNS-over-HTTPS, com fallback entre resolvedores                    | entregue |
+| `v0.3` | Parser DMARC: escolhe o registro entre os TXT, lê as tags e aponta os achados e o estágio na escada           | entregue |
 
 ## Desenvolvimento
 
