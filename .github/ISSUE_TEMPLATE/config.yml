@@ -1,0 +1,8 @@
+# Configuração dos formulários de issue — lida pelo GitHub.
+# Sem issue em branco: os dois formulários cobrem bug e ideia. Vulnerabilidade vai em privado, pelo
+# link abaixo (o Private Vulnerability Reporting está ligado).
+blank_issues_enabled: false
+contact_links:
+  - name: "Relatar uma vulnerabilidade no DMARC Fácil"
+    url: "https://github.com/ryanvmorais/dmarc-facil/security/advisories/new"
+    about: "Relato privado pelos avisos de segurança do GitHub. Veja o SECURITY.md."

@@ -1,0 +1,49 @@
+# Formulário de bug — lido pelo GitHub ao abrir uma issue nova.
+# O PR que corrige fecha a issue com "Closes #N".
+name: "Relatar um bug"
+description: "Algo no DMARC Fácil não funciona como deveria"
+labels:
+  - "bug"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Obrigado por relatar. Uma vulnerabilidade no próprio DMARC Fácil (por exemplo, um registro
+        TXT que injeta marcação na página) **não** é issue pública: relate em privado pelo
+        relato de vulnerabilidades do GitHub, na aba Security. Uma explicação errada ou um próximo
+        passo mal indicado é um bug normal.
+
+        **Use só domínios seus ou de exemplo** (`exemplo.com.br`). Não cole registros DNS de
+        domínios de outras pessoas.
+
+  - type: textarea
+    id: o-que-acontece
+    attributes:
+      label: "O que acontece"
+      description: "O comportamento errado que você viu."
+    validations:
+      required: true
+
+  - type: textarea
+    id: o-que-deveria
+    attributes:
+      label: "O que deveria acontecer"
+    validations:
+      required: true
+
+  - type: textarea
+    id: como-reproduzir
+    attributes:
+      label: "Como reproduzir"
+      description: "O que você digitou na página e um registro de exemplo que mostra o problema."
+      placeholder: |
+        1. Digitei `exemplo.com.br`
+        2. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: ambiente
+    attributes:
+      label: "Ambiente"
+      description: "Opcional. Navegador e versão, sistema operacional."
