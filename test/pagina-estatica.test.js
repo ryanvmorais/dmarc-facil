@@ -30,19 +30,36 @@ const PUBLIC = fileURLToPath(new URL("../public/", import.meta.url));
 const ler = (caminho) => readFile(new URL(`../public/${caminho}`, import.meta.url), "utf8");
 
 /**
+ * Tira de um texto tudo o que está entre `abre` e `fecha`, sem regex: o comentário que não fecha
+ * leva o resto do texto junto, como o navegador faz.
+ *
+ * @param {string} texto - O texto.
+ * @param {string} abre - Como o trecho começa.
+ * @param {string} fecha - Como o trecho termina.
+ * @returns {string} O texto sem os trechos.
+ */
+const tirarTrechos = (texto, abre, fecha) => {
+  let saida = "";
+  let posicao = 0;
+  for (;;) {
+    const inicio = texto.indexOf(abre, posicao);
+    if (inicio === -1) {
+      return saida + texto.slice(posicao);
+    }
+    saida += texto.slice(posicao, inicio);
+    const fim = texto.indexOf(fecha, inicio + abre.length);
+    if (fim === -1) {
+      return saida;
+    }
+    posicao = fim + fecha.length;
+  }
+};
+
+/**
  * @param {string} texto - Conteúdo de um HTML ou de um CSS.
  * @returns {string} O mesmo sem os comentários, que podem citar `style=`, `<script>` ou `@import`.
  */
-const semComentarios = (texto) => {
-  // Repete até estabilizar: tirar um comentário pode juntar o que sobrou em outro (`<!<!---->--`).
-  let atual = texto;
-  let anterior;
-  do {
-    anterior = atual;
-    atual = atual.replace(/<!--[\s\S]*?--!?>/g, "").replace(/\/\*[\s\S]*?\*\//g, "");
-  } while (atual !== anterior);
-  return atual;
-};
+const semComentarios = (texto) => tirarTrechos(tirarTrechos(texto, "<!--", "-->"), "/*", "*/");
 
 /**
  * @param {string} pasta - Pasta a percorrer.
@@ -141,7 +158,7 @@ describe("Content-Security-Policy", () => {
   it("vem logo depois do charset, antes de qualquer outra tag do head", async () => {
     for (const arquivo of ["index.html", "404.html"]) {
       const cabeca = semComentarios(await ler(arquivo)).split("<head>")[1] ?? "";
-      const tags = cabeca.match(/<(meta|link|script|title)\b[^>]*>/g) ?? [];
+      const tags = cabeca.match(/<\/?(?:meta|link|script|title)\b[^>]*>/gi) ?? [];
 
       assert.match(tags[0] ?? "", /charset/, arquivo);
       assert.match(tags[1] ?? "", /Content-Security-Policy/, arquivo);
@@ -193,7 +210,7 @@ describe("public/: nada de fora e nada inline", () => {
 
       assert.doesNotMatch(html, /<[^>]*\sstyle\s*=/i, `${arquivo} tem style=`);
       assert.doesNotMatch(html, /<style\b/i, `${arquivo} tem <style>`);
-      for (const script of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
+      for (const script of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script[^>]*>/gi)) {
         assert.match(script[1] ?? "", /\bsrc="\/[^"/]/, `${arquivo}: script sem caminho local`);
         assert.equal((script[2] ?? "").trim(), "", `${arquivo}: script inline`);
       }
