@@ -1,0 +1,8 @@
+# --- 1. GERADOS E DE TERCEIROS ---
+# Não são nossos para formatar: dependências e o lockfile (escrito pelo pnpm).
+node_modules
+pnpm-lock.yaml
+
+# --- 2. SAÍDA DE TESTE ---
+# Relatório de cobertura, recriável com `pnpm test:coverage`.
+coverage

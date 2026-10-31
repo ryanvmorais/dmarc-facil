@@ -1,0 +1,59 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+# Varredura de código do CodeQL (GitHub Actions), como workflow no repositório e não como o
+# "default setup" do GitHub: o default roda num rótulo de runner que o repositório não controla
+# e seus runs não podem ser re-executados (no WebVigil um job ficou na fila para sempre). Aqui o
+# runner é fixo, como nos outros workflows, e um job travado pode ser re-executado.
+#
+# Um job por linguagem, cada um com a sua categoria, para os alertas ficarem separados:
+#   actions                  os próprios arquivos de workflow
+#   javascript-typescript    o código do navegador (public/js), os testes e as configs
+# Nenhuma precisa de build (`build-mode: none`): o CodeQL lê o código-fonte.
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  # Semanal, domingo 12:00 UTC (09:00 em São Paulo, quando o Dependabot roda): consultas novas
+  # entram no pacote do CodeQL sem mudança neste repositório.
+  schedule:
+    - cron: "0 12 * * 0"
+
+# Somente leitura por padrão; o job de análise pede o único escopo extra de que precisa.
+permissions:
+  contents: read
+
+# Um push novo no mesmo PR torna a análise anterior inútil; na `main` e no agendamento todo
+# run é mantido, para nenhum resultado se perder para um posterior.
+concurrency:
+  group: codeql-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      # Envia os resultados SARIF para a aba Security.
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [actions, javascript-typescript]
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Iniciar o CodeQL
+        uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+
+      - name: Analisar
+        uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          category: "/language:${{ matrix.language }}"

@@ -1,0 +1,54 @@
+# yaml-language-server: $schema=https://json.schemastore.org/dependabot-2.0.json
+# Atualizações de versão do Dependabot — lido pelo GitHub, sem CI próprio.
+# Abre PRs de rotina nas dependências, em agenda. É separado das atualizações de segurança do
+# Dependabot (guiadas por alertas, ligadas no repositório e sem arquivo de configuração); essas
+# seguem rodando independentemente deste arquivo.
+# Agenda: domingo, 09:00 (America/Sao_Paulo). Cada ecossistema abre um PR só, agrupando as
+# atualizações minor e patch; um major fica em PR separado.
+# Cooldown: uma release nova espera 7 dias antes de o Dependabot propô-la (o pnpm tem o mesmo
+# prazo em `minimumReleaseAge`). As atualizações de segurança ignoram o cooldown.
+version: 2
+updates:
+  # Ferramentas de desenvolvimento (ESLint, Prettier, TypeScript) — lockfile pnpm-lock.yaml.
+  # O Dependabot trata o pnpm pelo ecossistema "npm". Não há dependência de runtime.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+      time: "09:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+    labels:
+      - "dependencies"
+    cooldown:
+      default-days: 7
+    groups:
+      npm-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Actions fixadas por SHA em .github/workflows/. Sem este bloco os SHAs envelhecem em silêncio.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+      time: "09:00"
+      timezone: "America/Sao_Paulo"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(ci)"
+    labels:
+      - "dependencies"
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
