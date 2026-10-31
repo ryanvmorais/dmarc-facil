@@ -2,7 +2,7 @@
 
 Cada tecnologia que sustenta o DMARC Fácil: o que faz, por que foi escolhida no lugar da alternativa e os poucos conceitos que valem estudar primeiro.
 
-Este mapa não é exaustivo: o grafo completo de versões está no `pnpm-lock.yaml` e as decisões de cada marco vão nos blocos `### ADR-N` de `specs/*/design.md`. Aqui está a forma do projeto e o raciocínio por trás de cada peça. Hoje ele descreve a fundação e a consulta DoH (`v0.1` e `v0.2`).
+Este mapa não é exaustivo: o grafo completo de versões está no `pnpm-lock.yaml` e as decisões de cada marco vão nos blocos `### ADR-N` de `specs/*/design.md`. Aqui está a forma do projeto e o raciocínio por trás de cada peça. Hoje ele cobre os marcos até o `v0.5`; nenhum marco depois do `v0.2` trouxe tecnologia nova.
 
 O projeto é um site estático e um conjunto de ferramentas que só existem na máquina de quem desenvolve:
 
@@ -80,7 +80,7 @@ O gerenciador de pacotes das ferramentas de desenvolvimento. A versão fica no c
 
 ### ESLint 10
 
-Encontra erro de lógica no código (variável não definida, `==` no lugar de `===`, `var`). A configuração em `eslint.config.mjs` separa os globais do navegador (`public/`) dos do Node (`test/`), para o `no-undef` não reclamar do que cada ambiente tem.
+Encontra erro de lógica no código (variável não definida, `==` no lugar de `===`, `var`). A configuração em `eslint.config.mjs` separa os globais do navegador (`public/`) dos do Node (`test/` e `scripts/`), para o `no-undef` não reclamar do que cada ambiente tem.
 
 **Por que esta:** é o linter padrão do ecossistema. O estilo fica com o Prettier, então não há regra de formatação no ESLint. As regras extras são `eqeqeq`, `no-var` e `prefer-const`.
 
@@ -104,7 +104,7 @@ Formata JavaScript, JSON, YAML e Markdown. O `pnpm format:check` falha se algum 
 
 ### GitHub Actions
 
-O CI tem o job `qualidade` (Prettier, ESLint, `tsc`, testes: o mesmo do pre-commit) e o job `seguranca` (`pnpm audit`). Toda `uses:` é fixada por SHA de commit, com a versão no comentário, e o runner é `ubuntu-26.04`, nunca `ubuntu-latest`.
+O CI tem o job `qualidade` (Prettier, ESLint, `tsc`, testes: o mesmo do pre-commit) e o job `seguranca` (`pnpm audit`). Toda `uses:` é fixada por SHA de commit, com a versão no comentário, e o runner é `ubuntu-26.04`, nunca `ubuntu-latest`. Um terceiro workflow, semanal (`links-dkim.yml`), abre os links de documentação da lista de seletores DKIM e acusa o que quebrou ou deixou de citar o seletor; não é check obrigatório, porque depende de sites de terceiros.
 
 **Por que esta:** é grátis em repositório público e fica ao lado do código. Fixar por SHA impede que uma tag movida troque o código que roda no CI sem ninguém ver.
 
