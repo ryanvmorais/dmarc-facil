@@ -22,5 +22,5 @@
     "noUncheckedIndexedAccess": true,
     "skipLibCheck": true
   },
-  "include": ["public/js", "test", "eslint.config.mjs", ".claude/hooks"]
+  "include": ["public/js", "test", "scripts", "eslint.config.mjs", ".claude/hooks"]
 }

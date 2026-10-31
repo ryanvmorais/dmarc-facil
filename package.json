@@ -16,7 +16,8 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "test": "node --test",
-    "test:coverage": "node --test --experimental-test-coverage"
+    "test:coverage": "node --test --experimental-test-coverage",
+    "links:dkim": "node scripts/conferir-links-dkim.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
