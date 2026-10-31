@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+# Revisão de dependências em PR (repositório público): compara o lockfile do PR com o da base e
+# reprova se entrar dependência com vulnerabilidade conhecida de severidade alta ou crítica.
+# Não é check obrigatório na `main`, de propósito: um check instável ensina a ignorar os checks.
+name: Revisão de dependências
+
+on:
+  pull_request:
+
+# Somente leitura: o resultado aparece no check, sem comentar no PR.
+permissions:
+  contents: read
+
+# Um push novo no mesmo PR torna a revisão anterior inútil.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dependency-review:
+    name: dependency-review
+    runs-on: ubuntu-26.04
+    timeout-minutes: 10
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Revisar as dependências
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          fail-on-severity: high
