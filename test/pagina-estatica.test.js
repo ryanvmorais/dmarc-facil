@@ -33,8 +33,16 @@ const ler = (caminho) => readFile(new URL(`../public/${caminho}`, import.meta.ur
  * @param {string} texto - Conteúdo de um HTML ou de um CSS.
  * @returns {string} O mesmo sem os comentários, que podem citar `style=`, `<script>` ou `@import`.
  */
-const semComentarios = (texto) =>
-  texto.replace(/<!--[\s\S]*?-->/g, "").replace(/\/\*[\s\S]*?\*\//g, "");
+const semComentarios = (texto) => {
+  // Repete até estabilizar: tirar um comentário pode juntar o que sobrou em outro (`<!<!---->--`).
+  let atual = texto;
+  let anterior;
+  do {
+    anterior = atual;
+    atual = atual.replace(/<!--[\s\S]*?--!?>/g, "").replace(/\/\*[\s\S]*?\*\//g, "");
+  } while (atual !== anterior);
+  return atual;
+};
 
 /**
  * @param {string} pasta - Pasta a percorrer.

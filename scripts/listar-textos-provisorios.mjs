@@ -59,6 +59,23 @@ export const coletarProvisorios = (valor, caminho) => {
 // ---------------------------------------------------------------------------
 
 /**
+ * Tira as marcas de um trecho de HTML. Repete até estabilizar, porque tirar uma marca pode
+ * juntar o que sobrou em outra (`<<b>b>`).
+ *
+ * @param {string} trecho - O HTML de dentro de um elemento.
+ * @returns {string} O texto sem marcas.
+ */
+const tirarMarcas = (trecho) => {
+  let atual = trecho;
+  let anterior;
+  do {
+    anterior = atual;
+    atual = atual.replace(/<[^>]*>/g, "");
+  } while (atual !== anterior);
+  return atual;
+};
+
+/**
  * Acha os elementos com `data-provisorio` num HTML e devolve o texto de cada um.
  *
  * É uma leitura textual, boa para o HTML simples desta página: pega o elemento do atributo
@@ -72,8 +89,7 @@ export const coletarProvisoriosDoHtml = (html, arquivo) => {
   const padrao = /<([a-z][a-z0-9]*)\b[^>]*\bdata-provisorio\b[^>]*>([\s\S]*?)<\/\1>/gi;
   return [...html.matchAll(padrao)].map((achado) => ({
     onde: arquivo,
-    texto: (achado[2] ?? "")
-      .replace(/<[^>]*>/g, "")
+    texto: tirarMarcas(achado[2] ?? "")
       .replace(/\s+/g, " ")
       .trim(),
   }));
