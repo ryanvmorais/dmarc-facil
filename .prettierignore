@@ -6,3 +6,7 @@ pnpm-lock.yaml
 # --- 2. SAÍDA DE TESTE ---
 # Relatório de cobertura, recriável com `pnpm test:coverage`.
 coverage
+
+# --- 3. RELATÓRIOS DO LIGHTHOUSE ---
+# Saída local do `lhci autorun`, recriável.
+.lighthouseci

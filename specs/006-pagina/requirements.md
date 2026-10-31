@@ -1,6 +1,6 @@
 ---
 feature: Página — o visitante digita o domínio e vê DMARC, SPF e DKIM explicados em português, com o próximo passo
-status: aprovado
+status: concluído
 date: 2026-10-31
 related: [001-fundacao, 002-consulta-doh, 003-parser-dmarc, 004-parser-spf, 005-dkim]
 origin: conception

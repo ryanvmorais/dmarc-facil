@@ -27,3 +27,7 @@ coverage/
 .idea/
 .DS_Store
 Thumbs.db
+
+# --- 7. RELATÓRIOS DO LIGHTHOUSE ---
+# Saída local do `lhci autorun`; no CI vira artefato do run.
+.lighthouseci/

@@ -1,0 +1,823 @@
+/*
+ * Folha de estilo do DMARC Fácil (spec 006): serve index.html e 404.html.
+ *
+ * Folha comum, escrita à mão, sem build. Duas regras de segurança moldam o arquivo: a
+ * Content-Security-Policy das páginas tem `style-src 'self'`, então nada aqui depende de
+ * `style=` no HTML (largura de esqueleto, cor de selo e o resto são classes); e a página
+ * não pede nada fora do próprio domínio, então as fontes são locais e não há `@import`.
+ * Nome de classe diz o papel, não a aparência; estado é classe modificadora (`.selo-ok`).
+ *
+ * Estrutura do arquivo:
+ *   1. Fontes locais (Sora 800 e JetBrains Mono 400)
+ *   2. Tokens (custom properties)
+ *   3. Base
+ *   4. Cabeçalho, apresentação e formulário
+ *   5. Cartões, selos e achados
+ *   6. Escada do DMARC
+ *   7. DKIM: seletores tentados e campo livre
+ *   8. Rodapé, 404 e utilitários
+ *   9. Telas largas e movimento reduzido
+ */
+
+/* 1. Fontes locais
+ * Self-hosting: nenhuma requisição ao Google Fonts (privacidade e CSP `font-src 'self'`).
+ * `font-display: swap` mostra o texto na fonte do sistema até a nossa chegar (sem FOIT).
+ * Só o subconjunto latino, 15 KB e 21 KB. A licença OFL de cada uma está ao lado. */
+@font-face {
+  font-family: "Sora";
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url("../fonts/Sora-800-latin.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/JetBrainsMono-400-latin.woff2") format("woff2");
+}
+
+/* 2. Tokens
+ * Vêm do mockup aprovado (spec 006, ADR-3). Texto contra o fundo do cartão: 4,5:1 ou mais
+ * (RF-07); o azul da marca contra o branco passa em 5,1:1. */
+:root {
+  color-scheme: light;
+
+  --cor-fundo: #f8fafc;
+  --cor-cartao: #ffffff;
+  --cor-borda: #e2e8f0;
+  --cor-texto: #0f172a;
+  --cor-texto-2: #334155;
+  --cor-texto-3: #475569;
+  --cor-marca: #2563eb;
+  --cor-marca-escura: #1d4ed8;
+  --cor-marca-fundo: #eff6ff;
+  --cor-codigo-fundo: #f1f5f9;
+  --cor-campo-borda: #64748b;
+  --cor-foco: #1d4ed8;
+
+  /* Selos e gravidades: texto e fundo de cada estado (ícone e palavra o distinguem). */
+  --selo-ok-texto: #166534;
+  --selo-ok-fundo: #dcfce7;
+  --selo-atencao-texto: #92400e;
+  --selo-atencao-fundo: #fef3c7;
+  --selo-problema-texto: #991b1b;
+  --selo-problema-fundo: #fee2e2;
+  --selo-neutro-texto: #334155;
+  --selo-neutro-fundo: #e2e8f0;
+
+  --raio-cartao: 12px;
+  --raio-controle: 10px;
+  --alvo-minimo: 48px;
+
+  --fonte-corpo: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --fonte-titulo: "Sora", system-ui, sans-serif;
+  --fonte-codigo: "JetBrains Mono", Consolas, monospace;
+}
+
+/* 3. Base
+ * `[hidden]` precisa vencer o `display` das classes abaixo. */
+* {
+  box-sizing: border-box;
+}
+
+/* O `!important` existe para o atributo vencer o `display` das classes de cartão, escada e
+ * mensagem de erro, que vêm depois e teriam a mesma especificidade. */
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  font-family: var(--fonte-corpo);
+  line-height: 1.5;
+  color: var(--cor-texto);
+  background: var(--cor-fundo);
+}
+
+h1,
+h2,
+h3,
+p,
+ol,
+ul {
+  margin: 0;
+}
+
+ol,
+ul {
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: var(--cor-marca-escura);
+}
+
+/* Foco visível em todo controle (RF-13). */
+:focus-visible {
+  outline: 3px solid var(--cor-foco);
+  outline-offset: 2px;
+}
+
+.titulo {
+  font-family: var(--fonte-titulo);
+  font-weight: 800;
+}
+
+.codigo {
+  font-family: var(--fonte-codigo);
+  font-size: 0.85em;
+  padding: 1px 5px;
+  border-radius: 6px;
+  background: var(--cor-codigo-fundo);
+  overflow-wrap: anywhere;
+}
+
+.coluna {
+  width: 100%;
+  max-width: 720px;
+  margin-inline: auto;
+  padding-inline: 16px;
+}
+
+/* 4. Cabeçalho, apresentação e formulário */
+.topo {
+  padding-block: 20px 0;
+}
+
+.topo-interno {
+  max-width: 1120px;
+  margin-inline: auto;
+  padding-inline: 16px;
+}
+
+.marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.marca-nome {
+  font-size: 22px;
+}
+
+.principal {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-block: 20px 32px;
+}
+
+.apresentacao {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.apresentacao h1 {
+  font-size: 28px;
+  line-height: 1.15;
+}
+
+.apresentacao p {
+  font-size: 16px;
+  color: var(--cor-texto-2);
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rotulo {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.campo {
+  width: 100%;
+  min-height: var(--alvo-minimo);
+  padding: 0 14px;
+  border: 1px solid var(--cor-campo-borda);
+  border-radius: var(--raio-controle);
+  font: inherit;
+  color: var(--cor-texto);
+  background: var(--cor-cartao);
+}
+
+.campo[aria-invalid="true"] {
+  border: 2px solid var(--selo-problema-texto);
+}
+
+/* O motivo da recusa fica junto do campo, ligado a ele por aria-describedby (RF-01). */
+.erro-campo {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--selo-problema-texto);
+}
+
+.erro-campo svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.nota {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--cor-texto-3);
+}
+
+.botao,
+.botao-secundario {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--alvo-minimo);
+  padding: 0 24px;
+  border-radius: var(--raio-controle);
+  font: inherit;
+  font-weight: 700;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.botao {
+  color: #ffffff;
+  background: var(--cor-marca);
+  border: 0;
+}
+
+.botao-secundario {
+  color: var(--cor-marca-escura);
+  background: var(--cor-cartao);
+  border: 2px solid var(--cor-marca);
+}
+
+/* Enviando: o botão avisa e não dispara uma segunda consulta (RF-02). */
+.botao:disabled {
+  color: var(--cor-texto);
+  background: #94a3b8;
+  cursor: progress;
+}
+
+.botao-cheio {
+  width: 100%;
+  margin-top: 4px;
+}
+
+/* 5. Cartões, selos e achados */
+.resultado {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.resultado-titulo {
+  font-size: 20px;
+}
+
+.cartao {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: var(--cor-cartao);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-cartao);
+}
+
+.cartao h3 {
+  font-size: 17px;
+}
+
+.cartao-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.resumo {
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.resumo-suave {
+  color: var(--cor-texto-2);
+}
+
+/* O registro TXT cru: quebra linha em qualquer ponto e nunca estoura a tela (RF-13). */
+.registro {
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-family: var(--fonte-codigo);
+  font-size: 13px;
+  color: var(--cor-texto);
+  background: var(--cor-codigo-fundo);
+  overflow-wrap: anywhere;
+}
+
+.selo {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.selo svg {
+  flex: none;
+}
+
+.selo-ok {
+  color: var(--selo-ok-texto);
+  background: var(--selo-ok-fundo);
+}
+
+.selo-atencao {
+  color: var(--selo-atencao-texto);
+  background: var(--selo-atencao-fundo);
+}
+
+.selo-problema {
+  color: var(--selo-problema-texto);
+  background: var(--selo-problema-fundo);
+}
+
+.selo-nao-verificado {
+  color: var(--selo-neutro-texto);
+  background: var(--selo-neutro-fundo);
+}
+
+/* Esqueleto do cartão em "verificando". A largura é classe, não `style=` (CSP). */
+.esqueleto {
+  height: 12px;
+  border-radius: 6px;
+  background: var(--cor-borda);
+}
+
+.esqueleto-80 {
+  width: 80%;
+}
+
+.esqueleto-60 {
+  width: 60%;
+}
+
+.achados {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.achado {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--cor-borda);
+}
+
+.achado-linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.achado-titulo {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.achado-explicacao {
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--cor-texto-2);
+}
+
+.achado-acao {
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.achado-detalhe {
+  font-size: 13px;
+  color: var(--cor-texto-3);
+  overflow-wrap: anywhere;
+}
+
+/* Gravidade em texto, para a cor nunca ser a única diferença (RF-08). */
+.gravidade {
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.gravidade-erro {
+  color: var(--selo-problema-texto);
+  background: var(--selo-problema-fundo);
+}
+
+.gravidade-aviso {
+  color: var(--selo-atencao-texto);
+  background: var(--selo-atencao-fundo);
+}
+
+.gravidade-info {
+  color: var(--selo-neutro-texto);
+  background: var(--selo-neutro-fundo);
+}
+
+/* 6. Escada do DMARC (interface C)
+ * O degrau atual tem borda cheia e o próximo, tracejada: a forma, e não só a cor, marca
+ * "você está aqui" e "Próximo passo" (RF-03). */
+.escada {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.degrau {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  background: var(--cor-cartao);
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio-controle);
+}
+
+.degrau-atual {
+  background: var(--cor-marca-fundo);
+  border: 2px solid var(--cor-marca);
+}
+
+.degrau-proximo {
+  border: 1px dashed var(--cor-marca);
+}
+
+.degrau-numero {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--cor-texto-2);
+  background: var(--cor-borda);
+}
+
+.degrau-atual .degrau-numero {
+  color: #ffffff;
+  background: var(--cor-marca);
+}
+
+.degrau-corpo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.degrau-linha {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.degrau-titulo {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.degrau-resumo {
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--cor-texto-2);
+}
+
+.degrau-acao {
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.etiqueta {
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+  background: var(--cor-marca);
+}
+
+.ressalvas {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+  line-height: 1.45;
+  color: var(--selo-atencao-texto);
+}
+
+/* 7. DKIM: seletores tentados e campo livre */
+.tentados summary {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--cor-marca-escura);
+  cursor: pointer;
+}
+
+.lista-seletores {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+}
+
+.lista-seletores li {
+  overflow-wrap: anywhere;
+}
+
+.titulo-orientacoes {
+  margin: 8px 0 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.link-doc {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-inline: 4px;
+}
+
+.rodape .link-doc {
+  padding-inline: 0;
+}
+
+.recusados {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+  color: var(--selo-problema-texto);
+}
+
+.seletores-extras {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid var(--cor-borda);
+}
+
+/* 8. Rodapé, 404 e utilitários */
+.rodape {
+  padding-block: 8px 40px;
+}
+
+.rodape-interno {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.aviso-noscript {
+  padding: 12px 14px;
+  border: 1px solid var(--selo-atencao-texto);
+  border-radius: var(--raio-controle);
+  font-size: 15px;
+  color: var(--selo-atencao-texto);
+  background: var(--selo-atencao-fundo);
+}
+
+.pagina-erro {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-block: 64px 32px;
+}
+
+.pagina-erro-codigo {
+  font-size: 16px;
+  color: var(--cor-marca-escura);
+}
+
+.pagina-erro h1 {
+  font-size: 28px;
+  line-height: 1.15;
+}
+
+.pagina-erro p {
+  font-size: 16px;
+  color: var(--cor-texto-2);
+}
+
+.pagina-erro .botao {
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* Texto só para leitor de tela: a região `aria-live` que anuncia o resultado (ADR-12). */
+.so-leitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* 9. Telas largas e movimento reduzido
+ * Coluna única de 720 px, a mesma ordem do celular (ADR-3). */
+@media (min-width: 720px) {
+  .topo-interno {
+    padding-inline: 24px;
+  }
+
+  .coluna {
+    padding-inline: 24px;
+  }
+
+  .principal {
+    gap: 28px;
+    padding-block: 48px 40px;
+  }
+
+  .apresentacao {
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+  }
+
+  .apresentacao h1 {
+    font-size: 44px;
+    line-height: 1.1;
+  }
+
+  .apresentacao p {
+    max-width: 560px;
+    font-size: 18px;
+    line-height: 1.5;
+  }
+
+  /* Campo e botão lado a lado; o rótulo, o erro e a nota ocupam a linha toda. A ordem do
+   * HTML (e do Tab) não muda: só a posição na grade. */
+  .formulario {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    column-gap: 12px;
+    row-gap: 8px;
+    align-items: start;
+    text-align: left;
+  }
+
+  .formulario > .rotulo {
+    grid-column: 1 / -1;
+    grid-row: 1;
+  }
+
+  .formulario > .campo {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .formulario > .botao-cheio {
+    grid-column: 2;
+    grid-row: 2;
+    width: auto;
+    min-width: 160px;
+    margin-top: 0;
+  }
+
+  .formulario > .erro-campo {
+    grid-column: 1 / -1;
+    grid-row: 3;
+  }
+
+  .formulario > .nota {
+    grid-column: 1 / -1;
+    grid-row: 4;
+  }
+
+  .resultado {
+    gap: 14px;
+  }
+
+  .resultado-titulo {
+    font-size: 24px;
+  }
+
+  .cartao {
+    padding: 20px;
+  }
+
+  .cartao h3 {
+    font-size: 18px;
+  }
+
+  .degrau {
+    gap: 14px;
+    padding: 14px 16px;
+  }
+
+  .degrau-titulo {
+    font-size: 16px;
+  }
+
+  .degrau-resumo,
+  .degrau-acao {
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .resumo {
+    font-size: 16px;
+  }
+
+  .cartao-mailvigil {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .cartao-mailvigil .botao {
+    flex: none;
+  }
+
+  /* Botão de cartão: no celular ocupa a largura (alvo de toque); em tela larga, o do texto. */
+  .cartao .botao-secundario {
+    align-self: flex-start;
+  }
+
+  .seletores-extras .botao-secundario {
+    align-self: flex-start;
+  }
+
+  .pagina-erro {
+    align-items: center;
+    padding-block: 120px 32px;
+    text-align: center;
+  }
+
+  .pagina-erro-codigo {
+    font-size: 18px;
+  }
+
+  .pagina-erro h1 {
+    font-size: 44px;
+    line-height: 1.1;
+  }
+
+  .pagina-erro p {
+    max-width: 520px;
+    font-size: 18px;
+  }
+
+  .pagina-erro .botao {
+    width: auto;
+    min-width: 160px;
+    margin-top: 12px;
+  }
+}
+
+/* Só a troca de estado: sem animação nenhuma além do que o navegador faz sozinho. A
+ * transição do botão existe apenas para quem não pediu movimento reduzido. */
+@media (prefers-reduced-motion: no-preference) {
+  .botao,
+  .botao-secundario {
+    transition: background-color 120ms ease-out;
+  }
+
+  .botao:hover:not(:disabled) {
+    background: var(--cor-marca-escura);
+  }
+}

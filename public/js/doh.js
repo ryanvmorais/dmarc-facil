@@ -35,7 +35,7 @@ import { lerResposta } from "./resposta-doh.js";
 // A ordem é a do fallback: Cloudflare primeiro, Google se ela falhar. Consultar os dois em
 // paralelo dobraria quem vê cada domínio, contra a promessa de privacidade da página.
 /** @type {ReadonlyArray<{ id: Resolvedor, url: string }>} */
-const RESOLVEDORES = [
+export const RESOLVEDORES = [
   { id: "cloudflare", url: "https://cloudflare-dns.com/dns-query" },
   { id: "google", url: "https://dns.google/resolve" },
 ];

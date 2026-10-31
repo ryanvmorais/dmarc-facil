@@ -1,0 +1,65 @@
+# yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
+# Lighthouse CI sobre a pasta estática `public/` (spec 006, ADR-13): mede desempenho,
+# acessibilidade, boas práticas e SEO das duas páginas (index.html e 404.html), em celular e em
+# desktop, com 3 medições e a mediana. Limites em .github/lighthouse/{mobile,desktop}.json.
+# NÃO é check obrigatório: a nota varia em runner compartilhado. O que ele pega é regressão de
+# carga, de acessibilidade e de estrutura antes do deploy; a consulta DoH real fica de fora.
+# O `@lhci/cli` vem por `npx` numa variável, e não como dependência do package.json: a árvore dele
+# traz vulnerabilidades altas (uuid, tmp e outras) que derrubariam o `pnpm audit` do CI.
+name: Lighthouse CI
+
+on:
+  pull_request:
+    paths:
+      - "public/**"
+      - ".github/lighthouse/**"
+      - ".github/workflows/lighthouse.yml"
+  push:
+    branches: [main]
+    paths:
+      - "public/**"
+      - ".github/lighthouse/**"
+      - ".github/workflows/lighthouse.yml"
+  workflow_dispatch:
+
+# Somente leitura: o job só mede arquivos do repositório.
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # Mais de 7 dias de publicada (0.15.1 saiu em 2025-06-25). O Dependabot não vê `npx`: a
+  # revisão desta versão é manual.
+  LHCI_VERSION: "0.15.1"
+
+jobs:
+  lighthouse:
+    name: lighthouse (${{ matrix.modo }})
+    runs-on: ubuntu-26.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        modo: [mobile, desktop]
+    steps:
+      - name: Baixar o repositório
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Instalar o Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 26
+
+      - name: Medir e conferir os limites
+        run: npx --yes @lhci/cli@${{ env.LHCI_VERSION }} autorun --config=.github/lighthouse/${{ matrix.modo }}.json
+
+      - name: Guardar os relatórios
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lighthouse-${{ matrix.modo }}
+          path: .lighthouseci/${{ matrix.modo }}
+          retention-days: 14

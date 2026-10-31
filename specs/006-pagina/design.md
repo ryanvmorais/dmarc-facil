@@ -1,6 +1,6 @@
 ---
 feature: Página — o visitante digita o domínio e vê DMARC, SPF e DKIM explicados em português, com o próximo passo
-status: aprovado
+status: concluído
 date: 2026-10-31
 related: [001-fundacao, 002-consulta-doh, 003-parser-dmarc, 004-parser-spf, 005-dkim]
 origin: conception
@@ -286,3 +286,15 @@ urlHttps(texto) → string | null                       // só https vira href
 - `test/pagina-estatica.test.js`: `lang="pt-BR"`, um `h1`, `label` ligado ao campo, CSP com os hosts de `RESOLVEDORES`, sem `style=` e sem script externo em `public/`, sem `localStorage`/`sessionStorage`/`document.cookie`/`IndexedDB` em `public/js/`, `404.html` com caminhos absolutos e sem `<script>`, `<path>` do logo igual ao de `docs/images/`.
 - `scripts/listar-textos-provisorios.mjs` tem teste que o executa sobre um catálogo sintético.
 - O Lighthouse CI roda no PR (ADR-13). O portão de qualidade completo roda em todo PR.
+
+## Ajustes feitos na implementação
+
+O que a implementação mudou em relação ao texto acima, com o motivo:
+
+- **ADR-7, padrões da varredura.** Além dos três padrões, entraram um quarto (`"x", "gravidade"` sem o parêntese, para os códigos `all-*` que o `spf.js` guarda numa tabela) e um quinto para os códigos montados por `` `${tipo}-...` `` (seis de `include` e `redirect` em `spf-consultas.js`). São 54 códigos, e o teste falha nos dois sentidos.
+- **`verificar` devolve `{ ok, dominio | motivo }`** em vez de `void`, para a página mostrar o motivo da recusa sem normalizar duas vezes. Quem chama `normalizarDominio` antes continua certo.
+- **A lista comum entra como texto** (`seletoresComuns: string[]`) e a busca DKIM recebe comuns e digitados juntos: `buscarDkim` já normaliza, tira repetidos e corta no teto (`juntarSeletores` não é chamado de novo).
+- **Arquivos a mais:** `public/js/tipos.js` (só `typedef` dos estados) e `public/favicon.svg` (o logo, que o `<link rel="icon">` do ADR-13 pede). `textos-interface.js` nasceu na etapa 2, porque `selo.js` e `escada.js` o importam.
+- **Achados iguais de seletores diferentes viram um só** na tela (`seletores` lista todos). Um domínio com `*._domainkey` revogado repetia o mesmo achado em cada seletor tentado.
+- **A contagem do SPF diz "no pior caso"**, porque `spf-consultas.js` conta sem tentar casar um IP.
+- **ADR-13, Lighthouse CI.** Os limites ficaram em `.github/lighthouse/{mobile,desktop}.json` (um por modo) e o `@lhci/cli` entra por `npx` numa variável do workflow, e não como dependência: a árvore dele traz vulnerabilidades altas que derrubariam o `pnpm audit` do job obrigatório `seguranca`. A auditoria `robots-txt` é ignorada, porque a CSP sem `connect-src 'self'` impede o Lighthouse de baixar o arquivo.

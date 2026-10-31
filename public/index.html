@@ -1,0 +1,138 @@
+<!doctype html>
+<!--
+  Página única do DMARC Fácil (spec 006). O que existe antes do JavaScript está aqui:
+  cabeçalho, formulário, aviso de privacidade e o <noscript>. O resultado é desenhado por
+  /js/pagina.js dentro de #resultado, só com textContent (TXT é dado de terceiros).
+  Sem style= e sem script inline: a Content-Security-Policy abaixo não os aceita.
+  Texto que ainda não é final leva data-provisorio (pnpm textos:provisorios lista).
+-->
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <!--
+      CSP logo depois do charset: a política só vale para o que vem depois dela. O connect-src
+      lista exatamente os dois resolvedores DoH de public/js/doh.js (test/pagina-estatica.test.js
+      confere). RNF-03 e ADR-10.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src https://cloudflare-dns.com https://dns.google; base-uri 'none'; form-action 'none'"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DMARC Fácil: verifique o DMARC, o SPF e o DKIM do seu domínio</title>
+    <meta
+      name="description"
+      content="Digite o seu domínio e veja, em português, o que o DMARC, o SPF e o DKIM dizem e qual é o próximo passo. A consulta sai do seu navegador."
+    />
+    <meta name="color-scheme" content="light" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="stylesheet" href="/css/pagina.css" />
+    <script type="module" src="/js/pagina.js"></script>
+  </head>
+  <body>
+    <!-- ============================================================
+         SEÇÃO: TOPO
+         Logo A (escudo com olho) e o nome. O <path> é o mesmo de docs/images/ (um teste
+         compara); fill-rule é atributo porque style= não passa na CSP.
+         ============================================================ -->
+    <header class="topo">
+      <div class="topo-interno">
+        <a class="marca" href="/">
+          <svg viewBox="2 1 40 50" width="29" height="36" aria-hidden="true" focusable="false">
+            <path
+              fill="#2563eb"
+              fill-rule="evenodd"
+              d="M22 1Q32 8 42 9V26C42 39 33 46.5 22 51C11 46.5 2 39 2 26V9Q12 8 22 1ZM9 27Q22 18 35 27Q22 36 9 27ZM18.5 27a3.5 3.5 0 1 0 7 0a3.5 3.5 0 1 0-7 0Z"
+            />
+          </svg>
+          <span class="titulo marca-nome">DMARC Fácil</span>
+        </a>
+      </div>
+    </header>
+    <!-- fim: TOPO -->
+
+    <main class="coluna principal">
+      <!-- ============================================================
+           SEÇÃO: APRESENTAÇÃO E FORMULÁRIO
+           O aviso de privacidade fica junto do botão: é onde o visitante decide digitar
+           (RF-10). Enter envia, porque é um <form>. O erro do domínio (#erro-dominio) é
+           mostrado por pagina.js, anunciado por role="alert" (o foco já está no campo, e re-focar
+           não é anunciado por todo leitor) e ligado ao campo por aria-describedby (RF-01).
+           ============================================================ -->
+      <section class="apresentacao" aria-labelledby="titulo-pagina">
+        <h1 class="titulo" id="titulo-pagina">Seu e-mail pode ser falsificado?</h1>
+        <p data-provisorio>
+          Digite o domínio e veja, em português, o que DMARC, SPF e DKIM dizem e o que fazer agora.
+        </p>
+      </section>
+
+      <noscript>
+        <p class="aviso-noscript" data-provisorio>
+          A verificação precisa de JavaScript, porque a consulta sai do seu navegador. Ative o
+          JavaScript e recarregue a página.
+        </p>
+      </noscript>
+
+      <form class="formulario" id="formulario" novalidate>
+        <label class="rotulo" for="dominio">Domínio</label>
+        <input
+          class="campo"
+          id="dominio"
+          name="dominio"
+          type="text"
+          autocomplete="off"
+          autocapitalize="none"
+          spellcheck="false"
+          placeholder="exemplo.com.br"
+          aria-describedby="erro-dominio privacidade"
+        />
+        <p class="erro-campo" id="erro-dominio" role="alert" hidden>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 14 14"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path d="M7 1.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 1 0 0-11ZM7 4v3.5M7 10v.01" />
+          </svg>
+          <span id="erro-dominio-texto"></span>
+        </p>
+        <button class="botao botao-cheio" id="botao-verificar" type="submit">Verificar</button>
+        <p class="nota" id="privacidade" data-provisorio>
+          A consulta sai do seu navegador direto para o DNS público da Cloudflare (ou do Google, se
+          a Cloudflare não responder). Quem responde vê o domínio, os seletores DKIM que tentamos e
+          o seu IP. O DMARC Fácil não guarda nada.
+        </p>
+      </form>
+      <!-- fim: APRESENTAÇÃO E FORMULÁRIO -->
+
+      <!-- ============================================================
+           SEÇÃO: RESULTADO
+           #anuncio é a região aria-live que lê o início e o fim da verificação; o cartão que
+           muda de estado não é aria-live (seriam três anúncios juntos). #resultado nasce
+           vazio e oculto: pagina.js o preenche (ADR-12).
+           ============================================================ -->
+      <p class="so-leitor" id="anuncio" role="status" aria-live="polite"></p>
+      <div class="resultado" id="resultado" hidden></div>
+      <!-- fim: RESULTADO -->
+    </main>
+
+    <!-- ============================================================
+         SEÇÃO: RODAPÉ
+         ============================================================ -->
+    <footer class="coluna rodape">
+      <div class="rodape-interno">
+        <p class="nota" data-provisorio>
+          O DMARC Fácil é código aberto (Apache-2.0). Nenhum domínio consultado é guardado.
+        </p>
+        <a class="link-doc" href="https://github.com/ryanvmorais/dmarc-facil">Código no GitHub</a>
+      </div>
+    </footer>
+    <!-- fim: RODAPÉ -->
+  </body>
+</html>
