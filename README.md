@@ -47,6 +47,18 @@ A **escada** mostra em que degrau o seu DMARC está (`p=none`, `p=quarantine` ou
 - **Sem rastreador.** A página não carrega script, fonte nem imagem de terceiros. Ela é servida pela Cloudflare, que mede o acesso apenas de forma agregada.
 - **DKIM:** o seletor é escolha de quem envia o e-mail e o DNS não permite listá-los. Por isso a página procura em seletores comuns e diz "não encontrei nesses seletores", nunca "você não tem DKIM". Você também pode informar o seu seletor.
 
+## DMARC Fácil e outras ferramentas
+
+|                         | DMARC Fácil                                                                        | [MXToolbox](https://mxtoolbox.com/SuperTool.aspx)       | [EasyDMARC](https://easydmarc.com/tools/domain-scanner)                      |
+| ----------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Registros por consulta  | DMARC, SPF e DKIM numa página só                                                   | Uma consulta por registro                               | O Domain Scanner junta os três; as ferramentas avulsas são separadas         |
+| DKIM                    | Procura em 15 seletores comuns e aceita o seu                                      | Exige que você informe o seletor                        | Campo de seletor e "detectar seletores", que depende de relatórios já vistos |
+| Próximo passo do DMARC  | Escada `none` → `quarantine` → `reject`, com o degrau atual marcado                | Confere se a política está ativa, sem orientar a subida | Aconselha subir para `reject`, com botão para a plataforma deles             |
+| Para onde vai o domínio | A um resolvedor DNS público (Cloudflare ou Google); nenhum servidor nosso o recebe | Ao servidor do serviço                                  | Ao servidor do serviço                                                       |
+| Cadastro                | Nenhum                                                                             | Não pede                                                | O básico não pede; o relatório completo pede nome e e-mail                   |
+
+Use o DMARC Fácil para ver o DMARC, o SPF e o DKIM de um domínio de uma vez, saber qual é o próximo passo e não precisar conhecer o seletor do DKIM. Para monitorar o domínio de forma contínua ou diagnosticar DNS e e-mail em geral, use um serviço de monitoramento; o que o DMARC Fácil não faz está em [Escopo e limitações](#escopo-e-limitações).
+
 ## Escopo e limitações
 
 O DMARC Fácil é pequeno de propósito: lê o DNS e explica o que encontra. Para cada limite, o que usar no lugar.

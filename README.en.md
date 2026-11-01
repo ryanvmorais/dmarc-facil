@@ -47,6 +47,18 @@ The **ladder** shows which step your DMARC is on (`p=none`, `p=quarantine` or `p
 - **No trackers.** The page loads no third-party script, font or image. It is served by Cloudflare, which measures access only in aggregate.
 - **DKIM:** the selector is chosen by whoever sends the email, and DNS does not allow listing them. So the page looks at common selectors and says "I did not find it in these selectors", never "you have no DKIM". You can also enter your own selector.
 
+## DMARC Fácil and other tools
+
+|                       | DMARC Fácil                                                                | [MXToolbox](https://mxtoolbox.com/SuperTool.aspx)       | [EasyDMARC](https://easydmarc.com/tools/domain-scanner)                         |
+| --------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Records per lookup    | DMARC, SPF and DKIM on a single page                                       | One lookup per record                                   | The Domain Scanner combines the three; the standalone tools are separate        |
+| DKIM                  | Looks at 15 common selectors and accepts your own                          | You must enter the selector                             | Selector field and "detect all selectors", which relies on reports already seen |
+| DMARC next step       | A `none` → `quarantine` → `reject` ladder with the current step marked     | Checks that the policy is on, without guiding the climb | Advises moving to `reject`, with a button to their platform                     |
+| Where the domain goes | To a public DNS resolver (Cloudflare or Google); no server of ours gets it | To the service's server                                 | To the service's server                                                         |
+| Sign-up               | None                                                                       | Not asked                                               | The basic result needs none; the full report asks for name and email            |
+
+Use DMARC Fácil to see the DMARC, SPF and DKIM of a domain at once, learn the next step and not have to know the DKIM selector. To monitor a domain continuously or to diagnose DNS and email in general, use a monitoring service; what DMARC Fácil does not do is in [Scope and limitations](#scope-and-limitations).
+
 ## Scope and limitations
 
 DMARC Fácil is small on purpose: it reads the DNS and explains what it finds. For each limit, what to use instead.
