@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 # Varredura de código do CodeQL (GitHub Actions), como workflow no repositório e não como o
 # "default setup" do GitHub: o default roda num rótulo de runner que o repositório não controla
-# e seus runs não podem ser re-executados (no WebVigil um job ficou na fila para sempre). Aqui o
+# e seus runs não podem ser re-executados (um job pode ficar na fila para sempre). Aqui o
 # runner é fixo, como nos outros workflows, e um job travado pode ser re-executado.
 #
 # Um job por linguagem, cada um com a sua categoria, para os alertas ficarem separados:
