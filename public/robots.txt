@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://dmarcfacil.ryanmorais.com.br/sitemap.xml
+Sitemap: https://dmarc-facil.ryanmorais.com.br/sitemap.xml

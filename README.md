@@ -17,9 +17,9 @@ Quem pesquisa "verificar DMARC" ou "meu e-mail cai no spam" encontra, quase semp
 
 Ele é feito para donos de site, desenvolvedores e agências pequenas, no Brasil ou fora dele, e qualquer pessoa pode usá-lo de qualquer lugar: a ferramenta só consulta o DNS público. É JavaScript puro, sem build e sem dependência de runtime, e não tem servidor: a página consulta o DNS direto do seu navegador.
 
-> **Status:** no ar em [dmarcfacil.ryanmorais.com.br](https://dmarcfacil.ryanmorais.com.br). Verifica o DMARC, o SPF e o DKIM de um domínio, e a verificação roda inteira no navegador de quem usa.
+> **Status:** no ar em [dmarc-facil.ryanmorais.com.br](https://dmarc-facil.ryanmorais.com.br). Verifica o DMARC, o SPF e o DKIM de um domínio, e a verificação roda inteira no navegador de quem usa.
 
-**Use agora:** [dmarcfacil.ryanmorais.com.br](https://dmarcfacil.ryanmorais.com.br). Não precisa instalar nada nem criar conta.
+**Use agora:** [dmarc-facil.ryanmorais.com.br](https://dmarc-facil.ryanmorais.com.br). Não precisa instalar nada nem criar conta.
 
 ![DMARC Fácil: página com o resultado para ryanmorais.com.br, a escada do DMARC (domínio em p=quarantine, próximo passo em p=reject) e os cartões de DMARC (OK), SPF (Atenção) e DKIM (Atenção)](docs/images/dmarc-facil-dmarc-checker-result.png)
 

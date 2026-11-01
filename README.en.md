@@ -17,9 +17,9 @@ Anyone searching for "verificar DMARC" or "meu e-mail cai no spam" mostly lands 
 
 It is built for site owners, developers and small agencies who work in Portuguese, in Brazil or elsewhere, and anyone can use it from anywhere: the tool only queries public DNS. It is plain JavaScript, with no build step and no runtime dependency, and has no server: the page queries DNS straight from your browser. The interface is in Portuguese.
 
-> **Status:** live at [dmarcfacil.ryanmorais.com.br](https://dmarcfacil.ryanmorais.com.br). It checks the DMARC, SPF and DKIM of a domain, and the check runs entirely in the browser of whoever uses it.
+> **Status:** live at [dmarc-facil.ryanmorais.com.br](https://dmarc-facil.ryanmorais.com.br). It checks the DMARC, SPF and DKIM of a domain, and the check runs entirely in the browser of whoever uses it.
 
-**Use it now:** [dmarcfacil.ryanmorais.com.br](https://dmarcfacil.ryanmorais.com.br). No install and no account needed.
+**Use it now:** [dmarc-facil.ryanmorais.com.br](https://dmarc-facil.ryanmorais.com.br). No install and no account needed.
 
 ![DMARC Fácil: page with the result for ryanmorais.com.br, the DMARC ladder (domain at p=quarantine, next step at p=reject) and the DMARC (OK), SPF (Atenção) and DKIM (Atenção) cards](docs/images/dmarc-facil-dmarc-checker-result.png)
 

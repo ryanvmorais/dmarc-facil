@@ -1,5 +1,5 @@
 ---
-feature: Hospedagem — a pasta public/ no ar em dmarcfacil.ryanmorais.com.br, com cabeçalhos de segurança e a 404 certa
+feature: Hospedagem — a pasta public/ no ar em dmarc-facil.ryanmorais.com.br, com cabeçalhos de segurança e a 404 certa
 status: concluído
 date: 2026-10-31
 related: [001-fundacao, 006-pagina]
@@ -10,7 +10,7 @@ origin: conception
 
 ## Contexto e problema
 
-A spec 006 entrega `public/` pronto: duas páginas estáticas, sem build, que funcionam em qualquer hospedagem (`index.html`, `404.html`, CSS, módulos ES e fontes). Falta pô-las no ar. O endereço decidido é `dmarcfacil.ryanmorais.com.br` (subdomínio, grátis), e a zona `ryanmorais.com.br` já está na Cloudflare (conferido pelos servidores de nome em 2026-10-31).
+A spec 006 entrega `public/` pronto: duas páginas estáticas, sem build, que funcionam em qualquer hospedagem (`index.html`, `404.html`, CSS, módulos ES e fontes). Falta pô-las no ar. O endereço decidido é `dmarc-facil.ryanmorais.com.br` (subdomínio, grátis), e a zona `ryanmorais.com.br` já está na Cloudflare (conferido pelos servidores de nome em 2026-10-31).
 
 A doc oficial da Cloudflare foi lida em 2026-10-31: a página do Pages diz "Start new projects with Workers" (sem aviso de descontinuação), e o **Workers Static Assets** serve arquivos estáticos sem código, com requisição a asset grátis e ilimitada, `_headers` e `_redirects` na pasta de assets, e `assets.not_found_handling = "404-page"` para servir a `404.html` mais próxima com status 404. A configuração mínima não tem `main`: `name`, `compatibility_date` e `assets.directory`.
 
@@ -24,7 +24,7 @@ Três regras do projeto pesam aqui (`CLAUDE.md`):
 
 ## Objetivos
 
-- **Site no ar** em `dmarcfacil.ryanmorais.com.br`, em HTTPS, servindo o conteúdo de `public/` exatamente como está na `main`.
+- **Site no ar** em `dmarc-facil.ryanmorais.com.br`, em HTTPS, servindo o conteúdo de `public/` exatamente como está na `main`.
 - **Cabeçalhos de segurança** do servidor, que a `<meta>` não consegue dar, sem enfraquecer a CSP que já existe.
 - **404 com status 404**, servindo a `404.html`, inclusive em caminho aninhado.
 - **Um endereço só**: o `*.workers.dev` e qualquer pré-visualização pública desligados ou fora do ar.
@@ -44,7 +44,7 @@ Três regras do projeto pesam aqui (`CLAUDE.md`):
 
 ## Personas
 
-- Como **visitante**, quero abrir `https://dmarcfacil.ryanmorais.com.br`, ver a página carregar rápido e confiar que nada além dos dois resolvedores DoH recebe o domínio que digitei.
+- Como **visitante**, quero abrir `https://dmarc-facil.ryanmorais.com.br`, ver a página carregar rápido e confiar que nada além dos dois resolvedores DoH recebe o domínio que digitei.
 - Como **visitante que errou o endereço**, quero ver a 404 do site com o link de volta, e não a página de erro da hospedagem.
 - Como **autor e mantenedor**, quero que o merge na `main` publique sozinho, que eu consiga desfazer um deploy ruim em minutos, e que um segredo vazado tenha o menor alcance possível.
 - Como **dev que lê o repositório**, quero ver em um lugar só quais cabeçalhos o site manda e por quê.
@@ -54,14 +54,14 @@ Três regras do projeto pesam aqui (`CLAUDE.md`):
 ### RF-01 — O site no endereço decidido
 
 - **Given** o deploy feito
-  **When** o visitante abre `https://dmarcfacil.ryanmorais.com.br/`
+  **When** o visitante abre `https://dmarc-facil.ryanmorais.com.br/`
   **Then** recebe o `index.html` de `public/`, com HTTPS válido e status 200.
 - **Given** uma requisição `http://`
   **When** chega ao domínio
   **Then** é redirecionada para `https://` ou recusada, nunca servida em texto claro.
 - **Given** o endereço `*.workers.dev` do projeto (ou equivalente da plataforma)
   **When** alguém o abre
-  **Then** não serve o site: o `dmarcfacil.ryanmorais.com.br` é o único endereço.
+  **Then** não serve o site: o `dmarc-facil.ryanmorais.com.br` é o único endereço.
 - **Given** a configuração do projeto de hospedagem
   **When** é lida
   **Then** aponta para `./public` e não envia nada fora dela (`node_modules`, `specs/`, `.git`).
@@ -160,7 +160,7 @@ Três regras do projeto pesam aqui (`CLAUDE.md`):
 
 - **Given** o `index.html`
   **When** é examinado
-  **Then** tem `<link rel="canonical">` apontando para `https://dmarcfacil.ryanmorais.com.br/` (sem `?dominio=`), de modo que o endereço compartilhável de um resultado conta como a página inicial.
+  **Then** tem `<link rel="canonical">` apontando para `https://dmarc-facil.ryanmorais.com.br/` (sem `?dominio=`), de modo que o endereço compartilhável de um resultado conta como a página inicial.
 - **Given** a requisição a `/robots.txt`
   **When** o site responde
   **Then** devolve 200 com `User-agent: *`, `Allow: /` e a linha `Sitemap:` com o endereço absoluto do sitemap.
@@ -202,7 +202,7 @@ Nenhuma.
 
 ## Decisões resolvidas
 
-1. Endereço `dmarcfacil.ryanmorais.com.br`, subdomínio grátis (decisão do mantenedor, 2026-10-31).
+1. Endereço `dmarc-facil.ryanmorais.com.br`, subdomínio grátis (decisão do mantenedor, 2026-10-31; renomeado em 2026-11-01 de `dmarcfacil` para o nome do repositório, `dmarc-facil`).
 2. A zona `ryanmorais.com.br` está na Cloudflare, conferido pelos servidores de nome (2026-10-31).
 3. A 404 é conferida na doc oficial da hospedagem escolhida, e a 5xx não se personaliza (spec 006, decisão do mantenedor, 2026-10-31).
 4. Publicar, criar token e conectar domínio são atos do mantenedor.
