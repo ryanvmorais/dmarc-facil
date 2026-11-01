@@ -56,19 +56,14 @@ O DMARC Fácil é pequeno de propósito: lê o DNS e explica o que encontra. Par
 - **O DKIM depende do seletor.** A página só acha a chave nos seletores comuns e no que você digitar. _Em vez disso:_ veja o seletor no cabeçalho de um e-mail seu (`DKIM-Signature`, campo `s=`) e informe-o na página.
 - **Ele mostra o que o resolvedor público devolveu agora.** Uma mudança recente no DNS pode demorar a aparecer por causa do cache. _Em vez disso:_ espere o TTL do registro e verifique de novo.
 
-## O que ele faz
+## O que ele verifica
 
-O DMARC Fácil é construído marco a marco, cada um desenhado antes como uma spec, em [`specs/`](specs/). Os marcos são o histórico da construção, não versões publicadas.
+- **DMARC:** acha o registro, lê as tags e diz em que degrau da escada o domínio está (`p=none`, `p=quarantine` ou `p=reject`) e o que fazer para subir.
+- **SPF:** lê o registro, segue os `include` e o `redirect`, conta as consultas DNS (o limite é 10) e aponta o que está errado.
+- **DKIM:** procura a chave em 15 seletores comuns e nos que você digitar, e mede o tamanho da chave.
+- **Cada achado** vem com uma frase dizendo o que significa e o que fazer.
 
-| Marco  | Foco                                                                                                                                            | Status   |
-| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
-| `v0.1` | Fundação: validação e normalização do domínio digitado, esqueleto sem build, testes, CI e portão de qualidade                                   | entregue |
-| `v0.2` | Consulta DoH: registros TXT de um nome por DNS-over-HTTPS, com fallback entre resolvedores                                                      | entregue |
-| `v0.3` | Parser DMARC: escolhe o registro entre os TXT, lê as tags e aponta os achados e o estágio na escada                                             | entregue |
-| `v0.4` | Parser SPF: lê o registro, segue os `include` e o `redirect`, conta as consultas DNS e aponta os achados                                        | entregue |
-| `v0.5` | DKIM: procura a chave em seletores comuns e digitados com consultas simultâneas limitadas, lê o registro, mede a chave e aponta os achados      | entregue |
-| `v0.6` | Página: formulário, escada do DMARC, cartões de DMARC, SPF e DKIM com selo, textos dos achados, privacidade na tela, página 404 e Lighthouse CI | entregue |
-| `v0.7` | Hospedagem: Workers Static Assets, cabeçalhos de segurança, 404 com status 404, deploy pelo GitHub Actions e conferência do que está no ar      | entregue |
+Como a ferramenta foi construída, uma etapa por vez, está em [`specs/`](specs/).
 
 ## Desenvolvimento
 

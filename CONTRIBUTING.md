@@ -2,7 +2,7 @@
 
 Obrigado pelo interesse em melhorar o DMARC Fácil. Ao participar, você concorda em seguir o [Código de Conduta](CODE_OF_CONDUCT.md).
 
-O projeto segue o [Versionamento Semântico](https://semver.org/lang/pt-BR/) a partir da `1.0.0`. Abra uma issue antes de começar qualquer coisa grande.
+Contribuições são bem-vindas: correções de erros, textos que podem ficar mais claros e ideias novas. Se for algo grande, abra uma issue antes de escrever código, para combinarmos o caminho.
 
 ## Desenvolvimento
 

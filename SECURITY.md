@@ -1,19 +1,19 @@
 # Política de segurança
 
-## Versões suportadas
+## O que recebe correção
 
-Só a última versão recebe correção de segurança, e a correção sai como uma versão de patch.
+Só o site no ar recebe correção de segurança. Ele reflete a branch `main`, e a correção vai ao ar no deploy seguinte.
 
-| Versão                              | Suportada |
-| ----------------------------------- | --------- |
-| última versão (a partir da `1.0.0`) | sim       |
-| versões anteriores                  | não       |
+| O quê                   | Suportado |
+| ----------------------- | --------- |
+| o site no ar (a `main`) | sim       |
+| cópias antigas e forks  | não       |
 
 ## Como relatar uma vulnerabilidade
 
 Relate problemas de segurança no próprio DMARC Fácil **em privado**, pelos avisos de segurança do GitHub: abra a aba **Security** do repositório e escolha **Report a vulnerability**. Não abra issue nem pull request público para isso.
 
-Inclua o necessário para reproduzir: a versão ou o commit, o que você digitou na página, o que esperava e o que aconteceu, e o impacto que você enxerga. Monte você mesmo qualquer registro DNS de exemplo e use só domínios seus ou de documentação (`exemplo.com.br`, `example.com`).
+Inclua o necessário para reproduzir: o commit ou o endereço da página, o que você digitou na página, o que esperava e o que aconteceu, e o impacto que você enxerga. Monte você mesmo qualquer registro DNS de exemplo e use só domínios seus ou de documentação (`exemplo.com.br`, `example.com`).
 
 Nós nos comprometemos a **confirmar o recebimento em até 7 dias** e a enviar uma primeira avaliação em até 14.
 
