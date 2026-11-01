@@ -29,16 +29,16 @@ _A página inteira numa verificação real de `ryanmorais.com.br`, o domínio do
 
 ## Como ler o resultado
 
-A página mostra a escada do DMARC e um cartão para cada registro (DMARC, SPF e DKIM). Cada cartão leva um selo com uma palavra, para que a cor não seja a única pista:
+A página mostra três cartões, um para cada registro (DMARC, SPF e DKIM), e a escada do DMARC. Cada cartão leva um selo com uma palavra, para que a cor não seja a única pista:
 
-| Selo               | Quando aparece                                                                                                                         |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
-| **OK**             | O registro existe e não tem aviso nem erro.                                                                                            |
-| **Atenção**        | O registro funciona, mas tem um aviso. Também aparece quando a leitura ficou incompleta e, no DKIM, quando a chave não foi encontrada. |
-| **Problema**       | O registro tem um erro, não existe, está inválido ou há mais de um.                                                                    |
-| **Não verificado** | A consulta não terminou ou o resolvedor não respondeu.                                                                                 |
+<img alt="DMARC Fácil: os quatro selos de um cartão, OK, Atenção, Problema e Não verificado, cada um com um ícone, uma palavra e uma cor" src="docs/images/dmarc-facil-dmarc-checker-badges.png" width="409">
 
-A **escada** mostra em que degrau o seu DMARC está (`p=none`, `p=quarantine` ou `p=reject`) e marca o seguinte com a etiqueta "Próximo passo", com o que fazer para chegar nele. Cada achado vem com uma frase em português dizendo o que significa e o que fazer.
+- **OK:** o registro existe e não tem nada a corrigir.
+- **Atenção:** o registro funciona, mas pode ficar mais seguro ou mais claro. No DKIM, também aparece quando a chave não foi encontrada nos seletores tentados.
+- **Problema:** o registro tem um erro que impede a proteção de funcionar, ou não existe.
+- **Não verificado:** a consulta não terminou ou o resolvedor não respondeu.
+
+A **escada** mostra em que degrau o seu DMARC está (`p=none`, `p=quarantine` ou `p=reject`) e marca o seguinte com a etiqueta "Próximo passo". Cada achado vem com uma frase dizendo o que significa e o que fazer.
 
 ## Privacidade e uso
 
