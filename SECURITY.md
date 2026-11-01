@@ -1,6 +1,6 @@
 # Política de segurança
 
-## Versões suportadas
+## O que recebe correção
 
 Só o site no ar recebe correção de segurança. Ele reflete a branch `main`, e a correção vai ao ar no deploy seguinte.
 
