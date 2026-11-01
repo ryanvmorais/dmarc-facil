@@ -50,7 +50,7 @@ export const TEXTOS_DEGRAUS = {
   reject: {
     titulo: "p=reject",
     resumo: "Falsificação é recusada. Proteção completa.",
-    provisorio: true,
+    provisorio: false,
   },
 };
 
@@ -77,33 +77,33 @@ export const ACOES_PROXIMO = {
   reject: {
     texto:
       "Continue lendo os relatórios por mais 2 a 4 semanas e confira se nenhum remetente seu está indo para o spam. Estando tudo certo, troque o `p=quarantine` por `p=reject`.",
-    provisorio: true,
+    provisorio: false,
   },
   publicar: {
     ausente: {
       texto:
         "Crie um registro TXT no nome `_dmarc` do seu domínio, com `v=DMARC1; p=none; rua=mailto:dmarc@seudominio.com.br`. Com `p=none` nada muda na entrega dos seus e-mails: você só passa a receber os relatórios.",
-      provisorio: true,
+      provisorio: false,
     },
     invalido: {
       texto:
         "O registro existe, mas está escrito de um jeito que quem recebe ignora. Corrija o registro do nome `_dmarc` (os achados abaixo dizem o quê) e comece por `p=none`.",
-      provisorio: true,
+      provisorio: false,
     },
     multiplos: {
       texto:
         "Há mais de um registro DMARC no nome `_dmarc`, e quem recebe ignora todos. Apague os extras e deixe um só, que comece por `v=DMARC1; p=none`.",
-      provisorio: true,
+      provisorio: false,
     },
   },
 };
 
 /** @type {{ final: TextoFixo, semAtual: TextoFixo }} */
 export const TEXTOS_ESCADA = {
-  final: { texto: "Você já está no degrau final.", provisorio: true },
+  final: { texto: "Você já está no degrau final.", provisorio: false },
   semAtual: {
     texto: "Nenhum degrau vale ainda: não há um registro DMARC em uso.",
-    provisorio: true,
+    provisorio: false,
   },
 };
 
@@ -113,11 +113,11 @@ export const TEXTOS_ESCADA = {
 export const RESSALVAS_ESCADA = {
   "subdominios-mais-fracos": {
     texto: "Os subdomínios seguem uma regra mais fraca (`sp=`) do que a do domínio.",
-    provisorio: true,
+    provisorio: false,
   },
   "aplicacao-parcial": {
     texto: "A política vale só para parte das mensagens (`pct=` abaixo de 100).",
-    provisorio: true,
+    provisorio: false,
   },
 };
 
@@ -129,17 +129,17 @@ export const RESSALVAS_ESCADA = {
 // mostra ao lado do seletor recusado.
 /** @type {Record<string, TextoFixo>} */
 export const MOTIVOS_SELETOR = {
-  vazio: { texto: "está vazio", provisorio: true },
+  vazio: { texto: "está vazio", provisorio: false },
   "parece-nome-completo": {
     texto: "parece o nome completo; digite só o seletor, que eu monto o resto",
-    provisorio: true,
+    provisorio: false,
   },
-  "grande-demais": { texto: "é grande demais", provisorio: true },
-  "componente-vazio": { texto: "tem um ponto sobrando", provisorio: true },
-  "componente-grande-demais": { texto: "tem uma parte grande demais", provisorio: true },
+  "grande-demais": { texto: "é grande demais", provisorio: false },
+  "componente-vazio": { texto: "tem um ponto sobrando", provisorio: false },
+  "componente-grande-demais": { texto: "tem uma parte grande demais", provisorio: false },
   "caractere-invalido": {
     texto: "tem caractere que um seletor não aceita (use letras, números, hífen e sublinhado)",
-    provisorio: true,
+    provisorio: false,
   },
 };
 
@@ -158,15 +158,15 @@ export const TITULOS_CARTAO = {
 
 /** @type {Record<"dmarc" | "spf" | "dkim", TextoFixo>} */
 export const TEXTOS_VERIFICANDO = {
-  dmarc: { texto: "Consultando o registro DMARC…", provisorio: true },
+  dmarc: { texto: "Consultando o registro DMARC…", provisorio: false },
   spf: { texto: "Seguindo os `include` e contando as consultas…", provisorio: false },
-  dkim: { texto: "Procurando em {total} seletores comuns…", provisorio: true },
+  dkim: { texto: "Procurando em {total} seletores comuns…", provisorio: false },
 };
 
 /** @type {{ semMotivo: TextoFixo, naoDiz: TextoFixo }} */
 export const TEXTOS_FALHA = {
-  semMotivo: { texto: "Não consegui consultar o DNS agora.", provisorio: true },
-  naoDiz: { texto: "Isso não diz nada sobre o seu {parte}.", provisorio: true },
+  semMotivo: { texto: "Não consegui consultar o DNS agora.", provisorio: false },
+  naoDiz: { texto: "Isso não diz nada sobre o seu {parte}.", provisorio: false },
 };
 
 /** @type {Record<"ausente" | "invalido" | "multiplos", TextoFixo>} */
@@ -174,16 +174,16 @@ export const TEXTOS_DMARC = {
   ausente: {
     texto:
       "Este domínio não publica DMARC. Quem recebe não tem instrução do dono do domínio sobre mensagens falsificadas, e cada um decide por conta própria.",
-    provisorio: true,
+    provisorio: false,
   },
   invalido: {
     texto: "Há um registro DMARC, mas ele tem erro e quem recebe o ignora.",
-    provisorio: true,
+    provisorio: false,
   },
   multiplos: {
     texto:
       "Há {quantidade} registros DMARC no mesmo nome. Quem recebe ignora todos, e é como se não houvesse nenhum.",
-    provisorio: true,
+    provisorio: false,
   },
 };
 
@@ -198,33 +198,33 @@ export const TEXTOS_SPF = {
   ausente: {
     texto:
       "Este domínio não publica SPF. Quem recebe não sabe quais servidores podem enviar e-mail em nome dele.",
-    provisorio: true,
+    provisorio: false,
   },
   invalido: {
-    texto: "Há um registro SPF, mas ele tem erro e quem recebe o trata como erro.",
-    provisorio: true,
+    texto: "Há um registro SPF, mas ele tem erro e, por isso, o SPF deixa de valer.",
+    provisorio: false,
   },
   multiplos: {
     texto:
       "Há {quantidade} registros SPF no mesmo nome. Isso é erro: quem recebe devolve `permerror` e o SPF deixa de valer.",
-    provisorio: true,
+    provisorio: false,
   },
   consultas: {
     texto: "{total} de {limite} consultas DNS, no pior caso.",
-    provisorio: true,
+    provisorio: false,
   },
   consultasPeloMenos: {
     texto:
       "Pelo menos {total} de {limite} consultas DNS. Não consegui seguir tudo, então o número pode ser maior.",
-    provisorio: true,
+    provisorio: false,
   },
   passouDoLimite: {
     texto: "O SPF vai falhar por passar do limite de consultas, e não por erro de sintaxe.",
-    provisorio: true,
+    provisorio: false,
   },
   terminaEm: { texto: "Termina em `{all}`.", provisorio: false },
-  semAll: { texto: "Não termina em `all`.", provisorio: true },
-  redirecionado: { texto: "Segue o `redirect` para outro domínio.", provisorio: true },
+  semAll: { texto: "Não termina em `all`.", provisorio: false },
+  redirecionado: { texto: "Segue o `redirect` para outro domínio.", provisorio: false },
 };
 
 /**
@@ -239,41 +239,41 @@ export const TEXTOS_SPF = {
 export const TEXTOS_DKIM = {
   encontrado: {
     texto: "Encontrei a chave no seletor `{seletor}` ({chave}). Procurei em {total} seletores.",
-    provisorio: true,
+    provisorio: false,
   },
   encontradoVarios: {
     texto:
       "Encontrei chaves em {quantidade} seletores: {seletores}. Procurei em {total} seletores.",
-    provisorio: true,
+    provisorio: false,
   },
   naoEncontrado: {
     texto:
       "Não encontrei chave DKIM nesses {total} seletores. Isso não quer dizer que o domínio não tenha: quem envia o e-mail escolhe o nome do seletor.",
-    provisorio: true,
+    provisorio: false,
   },
   parcial: {
     texto:
       "Parte das consultas falhou e a lista não foi toda verificada: consegui olhar {verificados} de {total} seletores.",
-    provisorio: true,
+    provisorio: false,
   },
-  chaveRsa: { texto: "RSA de {bits} bits", provisorio: true },
-  chaveRsaSemTamanho: { texto: "RSA, tamanho não lido", provisorio: true },
-  chaveEd25519: { texto: "Ed25519", provisorio: true },
-  chaveOutra: { texto: "tipo de chave que não conheço", provisorio: true },
+  chaveRsa: { texto: "RSA de {bits} bits", provisorio: false },
+  chaveRsaSemTamanho: { texto: "RSA, tamanho não lido", provisorio: false },
+  chaveEd25519: { texto: "Ed25519", provisorio: false },
+  chaveOutra: { texto: "tipo de chave que não conheço", provisorio: false },
   verTentados: { texto: "Ver os {total} seletores tentados", provisorio: false },
   documentacao: { texto: "documentação", provisorio: false },
   // Nome acessível do link: o leitor de tela lista os links fora do contexto da linha.
   documentacaoDe: { texto: "documentação de {provedor}", provisorio: false },
-  seletorDigitado: { texto: "digitado por você", provisorio: true },
+  seletorDigitado: { texto: "digitado por você", provisorio: false },
   orientacaoTitulo: {
     texto: "Provedores em que o seletor depende da sua conta",
-    provisorio: true,
+    provisorio: false,
   },
   orientacao: {
     texto: "{provedor}: digite o seletor que o painel do provedor mostra.",
-    provisorio: true,
+    provisorio: false,
   },
-  recusado: { texto: "Não aceitei `{texto}`: {motivo}.", provisorio: true },
+  recusado: { texto: "Não aceitei `{texto}`: {motivo}.", provisorio: false },
 };
 
 // ---------------------------------------------------------------------------
@@ -309,17 +309,17 @@ export const TEXTOS_RESULTADO = {
   inexistenteTitulo: { texto: "Não encontrei esse domínio", provisorio: false },
   inexistenteTexto: {
     texto: "O DNS não conhece `{dominio}`. Confira se digitou certo e tente de novo.",
-    provisorio: true,
+    provisorio: false,
   },
   resolvedores: {
     texto: "Quem viu o domínio nesta verificação: DNS público {quem}.",
-    provisorio: true,
+    provisorio: false,
   },
-  resolvedorCloudflare: { texto: "da Cloudflare", provisorio: true },
-  resolvedorGoogle: { texto: "do Google", provisorio: true },
-  resolvedorAmbos: { texto: "da Cloudflare e do Google", provisorio: true },
+  resolvedorCloudflare: { texto: "da Cloudflare", provisorio: false },
+  resolvedorGoogle: { texto: "do Google", provisorio: false },
+  resolvedorAmbos: { texto: "da Cloudflare e do Google", provisorio: false },
   mailvigilTitulo: { texto: "Quer ler esses relatórios sem abrir XML?", provisorio: false },
-  mailvigilTexto: { texto: "O MailVigil lê os relatórios por você.", provisorio: true },
+  mailvigilTexto: { texto: "O MailVigil lê os relatórios por você.", provisorio: false },
   mailvigilBotao: { texto: "Conhecer o MailVigil", provisorio: false },
 };
 
@@ -333,7 +333,7 @@ export const TEXTOS_FORMULARIO = {
   seletoresAjuda: {
     texto:
       "Seu provedor de e-mail mostra o nome do seletor no painel dele. Mailgun, Mailchimp e HubSpot usam nomes por conta.",
-    provisorio: true,
+    provisorio: false,
   },
   seletoresBotao: { texto: "Procurar nesses seletores", provisorio: false },
 };
@@ -346,10 +346,10 @@ export const TEXTOS_FORMULARIO = {
 // não afirmar mais do que ele.
 /** @type {Record<"inicio" | "fim" | "inexistente", TextoFixo>} */
 export const TEXTOS_ANUNCIO = {
-  inicio: { texto: "Verificando {dominio}.", provisorio: true },
+  inicio: { texto: "Verificando {dominio}.", provisorio: false },
   fim: {
     texto: "Resultado pronto para {dominio}. DMARC: {dmarc}. SPF: {spf}. DKIM: {dkim}.",
-    provisorio: true,
+    provisorio: false,
   },
-  inexistente: { texto: "Não encontrei o domínio {dominio}.", provisorio: true },
+  inexistente: { texto: "Não encontrei o domínio {dominio}.", provisorio: false },
 };
