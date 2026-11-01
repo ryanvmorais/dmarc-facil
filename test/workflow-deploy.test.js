@@ -138,15 +138,6 @@ describe("deploy.yml: ferramentas e concorrência", () => {
     assert.match(deploy, /npx --yes wrangler@\$\{\{ env\.WRANGLER_VERSION \}\} deploy/);
   });
 
-  it("os comandos de docs/hospedagem.md usam a mesma versão do wrangler (ADR-9)", async () => {
-    const versao = deploy.match(/WRANGLER_VERSION: "([^"]+)"/)?.[1];
-    const usos = [...(await ler("docs/hospedagem.md")).matchAll(/wrangler@([\d.]+)/g)];
-    assert.ok(usos.length >= 2);
-    for (const uso of usos) {
-      assert.equal(uso[1], versao);
-    }
-  });
-
   it("usa a mesma versão do Lighthouse CI que o lighthouse.yml", async () => {
     const lighthouse = semComentarios(await ler(".github/workflows/lighthouse.yml"));
     const doDeploy = deploy.match(/LHCI_VERSION: "([^"]+)"/)?.[1];

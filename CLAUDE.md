@@ -6,7 +6,7 @@ Este arquivo orienta o Claude Code (claude.ai/code) ao trabalhar neste repositó
 
 **DMARC Fácil** é um site estático que consulta o DMARC, o SPF e o DKIM de um domínio, explica cada registro em português e diz o próximo passo (de `p=none` para `quarantine` e `reject`). Tudo roda no navegador do visitante, por DNS-over-HTTPS: nenhum servidor nosso vê o domínio. É o funil do MailVigil e material de conteúdo do canal.
 
-Stack: JavaScript puro (módulos ES, sem build), HTML e CSS, Node 26 e pnpm 12 só para as ferramentas de desenvolvimento. Público, Apache-2.0. Ainda não lançado: o primeiro lançamento será a `1.0.0`; hospedado como Workers Static Assets da Cloudflare em `dmarcfacil.ryanmorais.com.br` (spec 007; publicar e desfazer um deploy: [docs/hospedagem.md](docs/hospedagem.md)).
+Stack: JavaScript puro (módulos ES, sem build), HTML e CSS, Node 26 e pnpm 12 só para as ferramentas de desenvolvimento. Público, Apache-2.0. Não tem versão numerada: é uma página que se atualiza sozinha, e cada merge na `main` com o CI verde publica a nova (spec 007). Hospedado como Workers Static Assets da Cloudflare em `dmarcfacil.ryanmorais.com.br`.
 
 ## Comandos comuns
 
@@ -90,7 +90,6 @@ public/                  # o site: é o que vai para a hospedagem, sem build
 test/                    # testes com o runner nativo do Node (node:test); ajudas/ monta chaves, estados e um documento falso
 scripts/                 # scripts em Node (conferir-links-dkim.mjs: links dos provedores; conferir-hospedagem.mjs: o que está no ar; listar-textos-provisorios.mjs)
 docs/                    # documentação do projeto
-  hospedagem.md          # passo a passo do Ryan: token, ambiente producao, painel, primeiro deploy, rollback
   stack.md               # mapa de cada tecnologia: o que faz, por que, o que estudar
   images/                # logo oficial (SVG) e a captura da página usada no README
 specs/                   # specs de cada marco (requirements, design, tasks)
@@ -122,7 +121,7 @@ Camadas: a lógica de parsing (DMARC, SPF, DKIM) e de validação mora em módul
 - **CI** (`.github/workflows/ci.yml`): job `qualidade` (Prettier, ESLint, `tsc`, testes) e job `seguranca` (`pnpm audit`). Mais CodeQL e `dependency-review`. Toda `uses:` fixada por SHA, `runs-on: ubuntu-26.04`.
 - **Links DKIM** (`.github/workflows/links-dkim.yml`, `pnpm links:dkim`): toda segunda abre cada `documentacao` de `public/js/seletores-dkim.js`; run vermelho = link quebrado (404/410/rede) ou página que não cita mais o seletor; 403 e site fora do ar são só aviso. Não é check obrigatório. Ao mexer na lista, atualize o `conferido` do item.
 - **Lighthouse CI** (`.github/workflows/lighthouse.yml`, limites em `.github/lighthouse/{mobile,desktop}.json`): mede `index.html` e `404.html` sobre `public/`; acessibilidade = 1 e as outras notas ≥ 0,95, peso abaixo de 150 KB. Não é check obrigatório. O `@lhci/cli` entra por `npx` numa variável do workflow, nunca como dependência (a árvore dele derruba o `pnpm audit`). `pnpm textos:provisorios` lista os textos novos que o Ryan ainda não revisou.
-- **Deploy** (`.github/workflows/deploy.yml`, spec 007): roda depois do `CI` verde na `main` (`workflow_run`, só `push` do próprio repositório) e por `workflow_dispatch`; ambiente `producao` com os segredos da Cloudflare; publica com `npx wrangler@<WRANGLER_VERSION>` (não é dependência: a árvore derrubaria o `pnpm audit`), confere o que ficou no ar (`scripts/conferir-hospedagem.mjs`: cabeçalhos, 404, HTML byte a byte) e mede o endereço real com o Lighthouse (`producao-{mobile,desktop}.json`). As versões do `wrangler` e do `@lhci/cli` são revistas à mão todo mês (o Dependabot não vê `npx`). **Publicar, o token e rollback são do Ryan** (`docs/hospedagem.md`).
+- **Deploy** (`.github/workflows/deploy.yml`, spec 007): roda depois do `CI` verde na `main` (`workflow_run`, só `push` do próprio repositório) e por `workflow_dispatch`; ambiente `producao` com os segredos da Cloudflare; publica com `npx wrangler@<WRANGLER_VERSION>` (não é dependência: a árvore derrubaria o `pnpm audit`), confere o que ficou no ar (`scripts/conferir-hospedagem.mjs`: cabeçalhos, 404, HTML byte a byte) e mede o endereço real com o Lighthouse (`producao-{mobile,desktop}.json`). As versões do `wrangler` e do `@lhci/cli` são revistas à mão todo mês (o Dependabot não vê `npx`). Para desfazer um deploy ruim, reverta o commit na `main` (o `wrangler rollback`, com credencial da conta, é só o caminho de emergência).
 - **Ruleset `proteger-main`:** PR obrigatório, só squash, histórico linear, `qualidade` e `seguranca` exigidos. Nada de commit direto na `main`.
 - **Pre-commit** (`.githooks/pre-commit`): o mesmo portão do CI em modo verificação.
 - **Hooks do Claude** em `.claude/` (scripts `.mjs` em `.claude/hooks/`, ligados por `.claude/settings.json`): `proteger-gerados` (PreToolUse, bloqueia edição manual do `pnpm-lock.yaml`), `formatar` (PostToolUse, Prettier no arquivo editado) e `validar` (Stop, ESLint + `tsc` se há `.js`/`.mjs` alterado; testes ficam no pre-commit); `ferramentas.mjs` guarda os utilitários que os três usam.

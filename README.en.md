@@ -126,7 +126,7 @@ pnpm links:dkim
 pnpm hospedagem:conferir
 ```
 
-The code, the commits and the technical documentation of the repository are in Portuguese; this README is the English version of [README.md](README.md). Contributions are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md). The stack is in [docs/stack.md](docs/stack.md) (in Portuguese); how to publish the site and roll back a deploy, in [docs/hospedagem.md](docs/hospedagem.md) (in Portuguese); the guide for Claude Code users, in [CLAUDE.md](CLAUDE.md) (in Portuguese). To report a vulnerability, see [SECURITY.md](SECURITY.md), never a public issue.
+The code, the commits and the technical documentation of the repository are in Portuguese; this README is the English version of [README.md](README.md). Contributions are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md). The stack is in [docs/stack.md](docs/stack.md) (in Portuguese); the guide for Claude Code users, in [CLAUDE.md](CLAUDE.md) (in Portuguese). To report a vulnerability, see [SECURITY.md](SECURITY.md), never a public issue.
 
 ## License
 

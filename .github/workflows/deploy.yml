@@ -2,8 +2,8 @@
 # Deploy do site (spec 007, ADR-5 e ADR-6): publica `public/` como Workers Static Assets em
 # dmarcfacil.ryanmorais.com.br, confere o que ficou no ar e mede o endereço real com o
 # Lighthouse. Roda depois do CI verde na `main` e, à mão, por `workflow_dispatch` (o primeiro
-# deploy e a republicação de uma versão antiga são do Ryan). Guia do passo a passo e de como
-# desfazer: docs/hospedagem.md.
+# deploy e a republicação de uma versão antiga; quem dispara precisa de acesso ao ambiente
+# `producao`). Para desfazer um deploy ruim, reverta o commit na `main` (ADR-6).
 #
 # Por que `workflow_run` e não `push` com um job que repete o portão: o deploy encadeia no `CI`
 # sem duplicá-lo; se `qualidade` ou `seguranca` falham, ele nem começa. A condição do job (run
@@ -95,8 +95,8 @@ jobs:
         run: npx --yes wrangler@${{ env.WRANGLER_VERSION }} deploy --message "$(git rev-parse HEAD)"
 
       # Os dois passos seguintes rodam mesmo que o anterior falhe, para o resumo mostrar tudo de
-      # uma vez. O deploy ruim não é desfeito sozinho (ADR-6): o caminho de volta é o do
-      # docs/hospedagem.md.
+      # uma vez. O deploy ruim não é desfeito sozinho (ADR-6): o caminho de volta é reverter o
+      # commit na `main`, que republica o estado anterior.
       - name: Conferir o que está no ar
         if: ${{ !cancelled() && steps.deploy.outcome == 'success' }}
         run: node scripts/conferir-hospedagem.mjs
