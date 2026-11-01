@@ -29,16 +29,14 @@ _The whole page on a real check of `ryanmorais.com.br`, the maintainer's domain:
 
 ## How to read the result
 
-The page shows the DMARC ladder and one card for each record (DMARC, SPF and DKIM). Each card carries a badge with a word, so that color is not the only clue. The badge words are in Portuguese, as in the interface:
+The page shows three cards, one for each record (DMARC, SPF and DKIM), and the DMARC ladder. Each card carries a badge with a word, so that color is not the only clue. The words are in Portuguese, as in the interface:
 
-| Badge                            | When it shows up                                                                                                                |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| **OK**                           | The record exists and has no warning or error.                                                                                  |
-| **Atenção** (attention)          | The record works but has a warning. It also shows up when the reading was incomplete and, for DKIM, when the key was not found. |
-| **Problema** (problem)           | The record has an error, does not exist, is invalid or there is more than one.                                                  |
-| **Não verificado** (not checked) | The query did not finish or the resolver did not answer.                                                                        |
+- **OK:** the record exists and has nothing to fix.
+- **Atenção** (attention): the record works but could be safer or clearer. For DKIM, it also shows up when the key was not found in the selectors tried.
+- **Problema** (problem): the record has an error that stops the protection from working, or does not exist.
+- **Não verificado** (not checked): the query did not finish or the resolver did not answer.
 
-The **ladder** shows which step your DMARC is on (`p=none`, `p=quarantine` or `p=reject`) and marks the next one with the "Próximo passo" (next step) label, with what to do to get there. Each finding comes with a sentence in Portuguese saying what it means and what to do.
+The **ladder** shows which step your DMARC is on (`p=none`, `p=quarantine` or `p=reject`) and marks the next one with the "Próximo passo" (next step) label. Each finding comes with a sentence in Portuguese saying what it means and what to do.
 
 ## Privacy and use
 
