@@ -25,6 +25,15 @@ It is built for site owners, developers and small agencies who work in Portugues
 
 _The whole page on a real check of `ryanmorais.com.br`, the maintainer's domain: DMARC is at `p=quarantine` and the next step is `p=reject`; SPF and DKIM have one warning each. The interface is in Portuguese._
 
+## What it checks
+
+- **DMARC:** finds the record, reads the tags and tells you which step of the ladder the domain is on (`p=none`, `p=quarantine` or `p=reject`) and what to do to move up.
+- **SPF:** reads the record, follows `include` and `redirect`, counts the DNS lookups (the limit is 10) and points out what is wrong.
+- **DKIM:** looks for the key in 15 common selectors and in the ones you type, and measures the key size.
+- **Each finding** comes with a sentence saying what it means and what to do.
+
+How the tool was built, one step at a time, is in [`specs/`](specs/) (in Portuguese).
+
 ## How to read the result
 
 The page shows three cards, one for each record (DMARC, SPF and DKIM), and the DMARC ladder. Each card carries a badge with a word, so that color is not the only clue. The words are in Portuguese, as in the interface:
@@ -65,15 +74,6 @@ DMARC Fácil is small on purpose: it reads the DNS and explains what it finds. F
 - **It does not read DMARC reports.** Aggregate (RUA) reports tell you who sends email on behalf of the domain. _Instead:_ [MailVigil](https://github.com/ryanvmorais/mailvigil) reads those reports on your machine.
 - **DKIM depends on the selector.** The page only finds the key in common selectors and in the one you type. _Instead:_ find the selector in the header of an email of yours (`DKIM-Signature`, the `s=` field) and enter it on the page.
 - **It shows what the public resolver returned right now.** A recent DNS change may take a while to show up because of caching. _Instead:_ wait for the record's TTL and check again.
-
-## What it checks
-
-- **DMARC:** finds the record, reads the tags and tells you which step of the ladder the domain is on (`p=none`, `p=quarantine` or `p=reject`) and what to do to move up.
-- **SPF:** reads the record, follows `include` and `redirect`, counts the DNS lookups (the limit is 10) and points out what is wrong.
-- **DKIM:** looks for the key in 15 common selectors and in the ones you type, and measures the key size.
-- **Each finding** comes with a sentence saying what it means and what to do.
-
-How the tool was built, one step at a time, is in [`specs/`](specs/) (in Portuguese).
 
 ## Development
 

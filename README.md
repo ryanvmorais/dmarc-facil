@@ -25,6 +25,15 @@ Ele é feito para donos de site, desenvolvedores e agências pequenas, no Brasil
 
 _A página inteira numa verificação real de `ryanmorais.com.br`, o domínio do mantenedor: o DMARC está em `p=quarantine` e o próximo passo é `p=reject`; o SPF e o DKIM têm um aviso cada._
 
+## O que ele verifica
+
+- **DMARC:** acha o registro, lê as tags e diz em que degrau da escada o domínio está (`p=none`, `p=quarantine` ou `p=reject`) e o que fazer para subir.
+- **SPF:** lê o registro, segue os `include` e o `redirect`, conta as consultas DNS (o limite é 10) e aponta o que está errado.
+- **DKIM:** procura a chave em 15 seletores comuns e nos que você digitar, e mede o tamanho da chave.
+- **Cada achado** vem com uma frase dizendo o que significa e o que fazer.
+
+Como a ferramenta foi construída, uma etapa por vez, está em [`specs/`](specs/).
+
 ## Como ler o resultado
 
 A página mostra três cartões, um para cada registro (DMARC, SPF e DKIM), e a escada do DMARC. Cada cartão leva um selo com uma palavra, para que a cor não seja a única pista:
@@ -65,15 +74,6 @@ O DMARC Fácil é pequeno de propósito: lê o DNS e explica o que encontra. Par
 - **Ele não lê relatórios DMARC.** Os relatórios agregados (RUA) dizem quem envia e-mail em nome do domínio. _Em vez disso:_ o [MailVigil](https://github.com/ryanvmorais/mailvigil) lê esses relatórios na sua máquina.
 - **O DKIM depende do seletor.** A página só acha a chave nos seletores comuns e no que você digitar. _Em vez disso:_ veja o seletor no cabeçalho de um e-mail seu (`DKIM-Signature`, campo `s=`) e informe-o na página.
 - **Ele mostra o que o resolvedor público devolveu agora.** Uma mudança recente no DNS pode demorar a aparecer por causa do cache. _Em vez disso:_ espere o TTL do registro e verifique de novo.
-
-## O que ele verifica
-
-- **DMARC:** acha o registro, lê as tags e diz em que degrau da escada o domínio está (`p=none`, `p=quarantine` ou `p=reject`) e o que fazer para subir.
-- **SPF:** lê o registro, segue os `include` e o `redirect`, conta as consultas DNS (o limite é 10) e aponta o que está errado.
-- **DKIM:** procura a chave em 15 seletores comuns e nos que você digitar, e mede o tamanho da chave.
-- **Cada achado** vem com uma frase dizendo o que significa e o que fazer.
-
-Como a ferramenta foi construída, uma etapa por vez, está em [`specs/`](specs/).
 
 ## Desenvolvimento
 
