@@ -31,6 +31,8 @@ _The whole page on a real check of `ryanmorais.com.br`, the maintainer's domain:
 
 The page shows three cards, one for each record (DMARC, SPF and DKIM), and the DMARC ladder. Each card carries a badge with a word, so that color is not the only clue. The words are in Portuguese, as in the interface:
 
+<img alt="DMARC Fácil: the four badges of a card, OK, Atenção, Problema and Não verificado, each with an icon, a word and a color" src="docs/images/dmarc-facil-dmarc-checker-badges.png" width="409">
+
 - **OK:** the record exists and has nothing to fix.
 - **Atenção** (attention): the record works but could be safer or clearer. For DKIM, it also shows up when the key was not found in the selectors tried.
 - **Problema** (problem): the record has an error that stops the protection from working, or does not exist.

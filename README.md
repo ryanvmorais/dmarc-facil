@@ -31,6 +31,8 @@ _A página inteira numa verificação real de `ryanmorais.com.br`, o domínio do
 
 A página mostra três cartões, um para cada registro (DMARC, SPF e DKIM), e a escada do DMARC. Cada cartão leva um selo com uma palavra, para que a cor não seja a única pista:
 
+<img alt="DMARC Fácil: os quatro selos de um cartão, OK, Atenção, Problema e Não verificado, cada um com um ícone, uma palavra e uma cor" src="docs/images/dmarc-facil-dmarc-checker-badges.png" width="409">
+
 - **OK:** o registro existe e não tem nada a corrigir.
 - **Atenção:** o registro funciona, mas pode ficar mais seguro ou mais claro. No DKIM, também aparece quando a chave não foi encontrada nos seletores tentados.
 - **Problema:** o registro tem um erro que impede a proteção de funcionar, ou não existe.
