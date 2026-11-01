@@ -1,6 +1,5 @@
 {
   "name": "dmarc-facil",
-  "version": "1.0.0-dev.0",
   "private": true,
   "description": "Verificador de DMARC, SPF e DKIM que roda no navegador e explica cada registro em português.",
   "license": "Apache-2.0",
@@ -18,8 +17,7 @@
     "test": "node --test",
     "test:coverage": "node --test --experimental-test-coverage",
     "links:dkim": "node scripts/conferir-links-dkim.mjs",
-    "hospedagem:conferir": "node scripts/conferir-hospedagem.mjs",
-    "textos:provisorios": "node scripts/listar-textos-provisorios.mjs"
+    "hospedagem:conferir": "node scripts/conferir-hospedagem.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

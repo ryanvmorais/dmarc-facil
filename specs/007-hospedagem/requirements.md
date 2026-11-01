@@ -19,7 +19,7 @@ O que a spec 006 deixou para esta: a CSP da página vai por `<meta>`, que **não
 Três regras do projeto pesam aqui (`CLAUDE.md`):
 
 - **Sem log e sem rastreador.** Só a estatística agregada da hospedagem. Nenhum recurso da hospedagem pode injetar script na página (a Web Analytics da Cloudflare injeta um _beacon_ e, se ligada, quebra a regra e a CSP).
-- **Publicar é ato do Ryan.** Claude prepara a configuração, o workflow e o passo a passo; criar o projeto na Cloudflare, conectar o domínio, criar o token e o primeiro deploy são do Ryan.
+- **Publicar é ato do mantenedor.** A configuração e o workflow ficam no repositório e o passo a passo, fora dele; criar o projeto na Cloudflare, conectar o domínio, criar o token e o primeiro deploy são do mantenedor.
 - **Sem dependência de runtime.** O que vai ao navegador continua sendo código nosso. A ferramenta de deploy é só de desenvolvimento e não pode derrubar o `pnpm audit` obrigatório (o mesmo cuidado do `@lhci/cli`).
 
 ## Objetivos
@@ -34,7 +34,7 @@ Três regras do projeto pesam aqui (`CLAUDE.md`):
 
 ## Não-objetivos
 
-- **Imagem de pré-visualização social** e `og:image`: só com a página real, em spec própria quando o Ryan decidir.
+- **Imagem de pré-visualização social** e `og:image`: só com a página real, em spec própria, quando for decidida.
 - **Estatística própria**, Web Analytics da Cloudflare, ou qualquer rastreador.
 - **Função, API ou código de servidor** (`main` no `wrangler`): o site é só arquivo.
 - **E-mail do domínio**, outros subdomínios, redirecionamento do domínio raiz e qualquer outra coisa de `ryanmorais.com.br`.
@@ -64,7 +64,7 @@ Três regras do projeto pesam aqui (`CLAUDE.md`):
   **Then** não serve o site: o `dmarcfacil.ryanmorais.com.br` é o único endereço.
 - **Given** a configuração do projeto de hospedagem
   **When** é lida
-  **Then** aponta para `./public` e não envia nada fora dela (`node_modules`, `specs/`, `BRIEFING.md`, `.git`).
+  **Then** aponta para `./public` e não envia nada fora dela (`node_modules`, `specs/`, `.git`).
 
 ### RF-02 — Cabeçalhos de segurança
 
@@ -118,9 +118,9 @@ Três regras do projeto pesam aqui (`CLAUDE.md`):
   **Then** nenhum deploy de produção acontece e o segredo de deploy nunca é entregue ao código do PR.
 - **Given** o segredo de deploy (token da Cloudflare)
   **When** é criado
-  **Then** tem o menor escopo possível (só o deploy desse projeto, na conta do Ryan), vive só como segredo de ambiente do GitHub, e nunca aparece em log, no repositório ou em `.claude/`.
+  **Then** tem o menor escopo possível (só o deploy desse projeto, na conta do mantenedor), vive só como segredo de ambiente do GitHub, e nunca aparece em log, no repositório ou em `.claude/`.
 - **Given** um deploy com falha ou um site quebrado no ar
-  **When** o Ryan precisa desfazer
+  **When** o mantenedor precisa desfazer
   **Then** existe um caminho documentado para voltar à versão anterior em minutos (reverter o commit e redeployar, ou _rollback_ da plataforma), testado uma vez antes do lançamento.
 - **Given** as ações do workflow de deploy
   **When** o workflow é lido
@@ -132,7 +132,7 @@ Três regras do projeto pesam aqui (`CLAUDE.md`):
   **When** o HTML servido é comparado ao de `public/index.html`
   **Then** é idêntico byte a byte: a hospedagem não injetou script, _beacon_ nem reescreveu nada (inclusive nenhuma minificação ou "otimização" automática da Cloudflare que altere o HTML ou o JavaScript).
 - **Given** a configuração da conta e da zona
-  **When** o Ryan segue o passo a passo
+  **When** o mantenedor segue o passo a passo
   **Then** a Web Analytics e as otimizações automáticas que mexem no conteúdo estão desligadas para o subdomínio, e isso é conferido pela comparação acima.
 
 ### RF-07 — Conferência do que está no ar
@@ -145,13 +145,13 @@ Três regras do projeto pesam aqui (`CLAUDE.md`):
   **Then** mede também o endereço real (mobile e desktop), com os mesmos limites de `.github/lighthouse/`.
 - **Given** a falha dessa conferência
   **When** acontece depois do deploy
-  **Then** o run fica vermelho e avisa o Ryan; o deploy já feito não é desfeito sozinho.
+  **Then** o run fica vermelho e avisa o mantenedor; o deploy já feito não é desfeito sozinho.
 
 ### RF-08 — Documentação da operação
 
 - **Given** o repositório
-  **When** o Ryan precisa publicar pela primeira vez
-  **Then** `docs/` traz o passo a passo em ordem (criar o projeto, conectar o domínio, criar o token com o escopo certo, guardar o segredo, desligar o `workers.dev` e a Web Analytics, primeiro deploy, conferência), cada passo dizendo quem faz (Ryan) e o que conferir.
+  **When** o mantenedor precisa publicar pela primeira vez
+  **Then** o guia operacional do mantenedor (mantido fora do repositório) traz o passo a passo em ordem (criar o projeto, conectar o domínio, criar o token com o escopo certo, guardar o segredo, desligar o `workers.dev` e a Web Analytics, primeiro deploy, conferência), cada passo dizendo quem faz e o que conferir.
 - **Given** o `README.md`, o `README.en.md`, o `CLAUDE.md` e o `docs/stack.md`
   **When** a spec é concluída
   **Then** dizem onde o site está e qual tecnologia o serve, sem prometer data de lançamento.
@@ -194,7 +194,7 @@ Os testes que o portão roda (`pnpm test`) não acessam a rede nem a Cloudflare:
 
 ### RNF-05 — Reversibilidade
 
-Nenhuma etapa desta spec deixa o domínio num estado que o Ryan não consiga voltar: apagar o projeto de hospedagem e o registro DNS do subdomínio devolve a zona ao que era antes.
+Nenhuma etapa desta spec deixa o domínio num estado que o mantenedor não consiga voltar: apagar o projeto de hospedagem e o registro DNS do subdomínio devolve a zona ao que era antes.
 
 ## Perguntas em aberto
 
@@ -202,14 +202,14 @@ Nenhuma.
 
 ## Decisões resolvidas
 
-1. Endereço `dmarcfacil.ryanmorais.com.br`, subdomínio grátis (Ryan, 2026-10-31).
+1. Endereço `dmarcfacil.ryanmorais.com.br`, subdomínio grátis (decisão do mantenedor, 2026-10-31).
 2. A zona `ryanmorais.com.br` está na Cloudflare, conferido pelos servidores de nome (2026-10-31).
-3. A 404 é conferida na doc oficial da hospedagem escolhida, e a 5xx não se personaliza (spec 006, decisão do Ryan, 2026-10-31).
-4. Publicar, criar token e conectar domínio são atos do Ryan; Claude prepara (`CLAUDE.md` global).
-5. Plataforma: **Workers Static Assets** (Ryan, 2026-10-31).
-6. Deploy por workflow do GitHub Actions com `wrangler` por `npx` e token em segredo; o portão e a conferência do que está no ar ficam no mesmo lugar (Ryan, 2026-10-31).
-7. `canonical`, `robots.txt` e `sitemap.xml` entram nesta spec (RF-09) (Ryan, 2026-10-31).
-8. HSTS: só `max-age`, sem `includeSubDomains` e sem `preload` (Ryan, 2026-10-31).
+3. A 404 é conferida na doc oficial da hospedagem escolhida, e a 5xx não se personaliza (spec 006, decisão do mantenedor, 2026-10-31).
+4. Publicar, criar token e conectar domínio são atos do mantenedor.
+5. Plataforma: **Workers Static Assets** (decisão do mantenedor, 2026-10-31).
+6. Deploy por workflow do GitHub Actions com `wrangler` por `npx` e token em segredo; o portão e a conferência do que está no ar ficam no mesmo lugar (decisão do mantenedor, 2026-10-31).
+7. `canonical`, `robots.txt` e `sitemap.xml` entram nesta spec (RF-09) (decisão do mantenedor, 2026-10-31).
+8. HSTS: só `max-age`, sem `includeSubDomains` e sem `preload` (decisão do mantenedor, 2026-10-31).
 
 ## Testes
 

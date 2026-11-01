@@ -56,7 +56,7 @@ Tarefas pequenas, na ordem. Cada etapa fecha com o portão de qualidade (`pnpm f
 
 ## Etapa 6 — Data de conferência e workflow dos links
 
-Acrescentada depois do fechamento das etapas 1 a 5, a pedido do Ryan (os links dos provedores podem envelhecer).
+Acrescentada depois do fechamento das etapas 1 a 5, por decisão do mantenedor (os links dos provedores podem envelhecer).
 
 - [x] `public/js/seletores-dkim.js`: campo `conferido` (`AAAA-MM-DD`) em cada item de `SELETORES_COMUNS` e `ORIENTACOES`; `test/seletores-dkim-dados.test.js` confere formato, data que existe e não futura; `requirements.md` (RF-01) e `design.md` (tipos) atualizados. — RF-01
 - [x] `scripts/conferir-links-dkim.mjs`: abre cada `documentacao` uma vez só; 404, 410 e erro de rede são falha; página que abre mas não cita `seletor._domainkey` é falha; 401, 403, 429, 5xx e tempo esgotado são inconclusivos (aviso); `conferido` com mais de um ano é aviso; anotações `::error`/`::warning` e resumo do run. Primeira execução nas páginas reais: os 15 seletores e as 3 orientações ok. — RF-01

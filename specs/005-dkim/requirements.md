@@ -240,7 +240,7 @@ Só JavaScript da plataforma (`atob`, `Uint8Array`). O `package.json` continua s
 
 ### RNF-06 — Sem texto de interface
 
-Os módulos devolvem códigos e dados, nunca frases para o visitante. O português da explicação é da spec da página, onde o Ryan revisa os textos `[provisório]` antes do `1.0.0`. Os nomes de provedor e os links do arquivo de dados são dados, não texto de interface.
+Os módulos devolvem códigos e dados, nunca frases para o visitante. O português da explicação é da spec da página, onde ficam os textos da interface. Os nomes de provedor e os links do arquivo de dados são dados, não texto de interface.
 
 ## Perguntas em aberto
 
@@ -249,8 +249,8 @@ Nenhuma.
 ## Decisões resolvidas
 
 1. Fontes: RFC 6376 (3.1, 3.2, 3.6.1 e 3.6.2), RFC 8301 (3.1 e 3.2) e RFC 8463, conferidas em 2026-10-31. A parte da RFC 6376 depois do caractere 100000 do texto (assinatura, canonização, apêndices) não foi lida: a ferramenta não verifica assinatura.
-2. O resultado sem registro é "não encontrei nesses seletores", nunca "você não tem DKIM" (decisão do Ryan em 2026-10-31, no `CLAUDE.md`).
-3. Lista de 15 a 20 seletores em arquivo de dados com link da documentação de cada provedor, mais campo livre (decisão do Ryan em 2026-10-31). Quais seletores entram e a verificação de cada link são do design.
+2. O resultado sem registro é "não encontrei nesses seletores", nunca "você não tem DKIM" (decisão do mantenedor em 2026-10-31, no `CLAUDE.md`).
+3. Lista de 15 a 20 seletores em arquivo de dados com link da documentação de cada provedor, mais campo livre (decisão do mantenedor em 2026-10-31). Quais seletores entram e a verificação de cada link são do design.
 4. A caixa das tags segue a RFC (sensível), ao contrário das specs 003 e 004: lá a RFC define os literais em ABNF (insensível à caixa); aqui a RFC 6376 diz que nomes de tag são sensíveis, e um registro com `P=` não funciona de fato para o verificador.
 5. `h=sha1` é aviso, não erro: a RFC 8301 proíbe `rsa-sha1` na assinatura, mas não trata a tag do registro.
 6. O tamanho da chave RSA (RF-05) fica nesta spec, com o leitor ASN.1 isolado em `chave-rsa.js`. Aprovado em 2026-10-31.

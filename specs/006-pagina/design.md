@@ -25,7 +25,7 @@ A página é **uma tela só** (`public/index.html`) mais a `public/404.html`, co
 
 ### Mockup aprovado
 
-O Ryan aprovou em 2026-10-31 o mockup no [Artifact](https://claude.ai/artifact/VPDUjkidb1Fr6rGu3MpFSH), nestas artboards:
+O mockup foi aprovado em 2026-10-31 no [Artifact](https://claude.ai/artifact/VPDUjkidb1Fr6rGu3MpFSH), nestas artboards:
 
 | Artboard                         | Largura | Decisão                                                                                                                  |
 | -------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------ |
@@ -36,35 +36,34 @@ O Ryan aprovou em 2026-10-31 o mockup no [Artifact](https://claude.ai/artifact/V
 | `Erro-404-celular.dc.html`       | 390 px  | **Aprovado**                                                                                                             |
 | `Erro-404-desktop.dc.html`       | 1280 px | **Aprovado**                                                                                                             |
 
-O mockup desenha com Google Fonts e `style=""`; a página real não faz nenhuma das duas coisas (ADR-9 e ADR-10). Os tokens do mockup viram custom properties no CSS (azul `#2563eb`, fundo `#f8fafc`, cartão branco com borda `#e2e8f0` e raio 12 px, botão de 48 px com raio 10 px, selos com ícone). Texto `[provisório]` do mockup vira o atributo `data-provisorio` (ADR-7); o visitante não vê a marca.
+O mockup desenha com Google Fonts e `style=""`; a página real não faz nenhuma das duas coisas (ADR-9 e ADR-10). Os tokens do mockup viram custom properties no CSS (azul `#2563eb`, fundo `#f8fafc`, cartão branco com borda `#e2e8f0` e raio 12 px, botão de 48 px com raio 10 px, selos com ícone).
 
 ## Componentes
 
 ### Arquivos novos
 
-| Arquivo                                 | O que faz                                                                                                                 | Toca DOM/rede |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| `public/index.html`                     | Cabeçalho com logo, formulário, região de resultado vazia, rodapé, `<noscript>`, CSP por `<meta>`                         | —             |
-| `public/404.html`                       | Logo, frase, link de volta; sem script; caminhos absolutos                                                                | —             |
-| `public/css/pagina.css`                 | Tokens, layout, cartões, selos, escada, foco, `prefers-reduced-motion`; sem `@import` nem URL externa                     | —             |
-| `public/fonts/*.woff2`                  | Sora 800 e JetBrains Mono 400, subconjunto latino, com a licença OFL ao lado                                              | —             |
-| `public/js/selo.js`                     | `calcularSelo` (puro)                                                                                                     | não           |
-| `public/js/escada.js`                   | `montarEscada` (puro)                                                                                                     | não           |
-| `public/js/textos-achados.js`           | Dados: `TEXTOS_ACHADOS` e `textoDoAchado` (com texto genérico para código desconhecido)                                   | não           |
-| `public/js/textos-interface.js`         | Dados: textos fixos montados por script (degraus, mensagens de falha, rótulos de estado)                                  | não           |
-| `public/js/apresentacao.js`             | View models de cada cartão, `lerSeletoresDigitados`, `cortarTexto`, `resumoConsultas`, `mensagemDeFalha`                  | não           |
-| `public/js/endereco.js`                 | `lerDominioDoEndereco` e `montarEndereco` (puros, recebem e devolvem texto)                                               | não           |
-| `public/js/verificador.js`              | `criarVerificador({ consulta })`: dispara as três partes, cancela a verificação anterior, devolve o estado por parte      | rede injetada |
-| `public/js/dom.js`                      | `criar`, `urlHttps`: monta nós com `textContent`, lista de tags e atributos permitidos; recebe o `document` por parâmetro | DOM injetado  |
-| `public/js/pagina.js`                   | Liga formulário, `history.replaceState`, `aria-live`, foco; desenha os view models com `dom.js`                           | DOM, rede     |
-| `scripts/listar-textos-provisorios.mjs` | Lista os textos marcados (`pnpm textos:provisorios`)                                                                      | —             |
-| `lighthouserc.json`                     | Limites do Lighthouse CI                                                                                                  | —             |
+| Arquivo                         | O que faz                                                                                                                 | Toca DOM/rede |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| `public/index.html`             | Cabeçalho com logo, formulário, região de resultado vazia, rodapé, `<noscript>`, CSP por `<meta>`                         | —             |
+| `public/404.html`               | Logo, frase, link de volta; sem script; caminhos absolutos                                                                | —             |
+| `public/css/pagina.css`         | Tokens, layout, cartões, selos, escada, foco, `prefers-reduced-motion`; sem `@import` nem URL externa                     | —             |
+| `public/fonts/*.woff2`          | Sora 800 e JetBrains Mono 400, subconjunto latino, com a licença OFL ao lado                                              | —             |
+| `public/js/selo.js`             | `calcularSelo` (puro)                                                                                                     | não           |
+| `public/js/escada.js`           | `montarEscada` (puro)                                                                                                     | não           |
+| `public/js/textos-achados.js`   | Dados: `TEXTOS_ACHADOS` e `textoDoAchado` (com texto genérico para código desconhecido)                                   | não           |
+| `public/js/textos-interface.js` | Dados: textos fixos montados por script (degraus, mensagens de falha, rótulos de estado)                                  | não           |
+| `public/js/apresentacao.js`     | View models de cada cartão, `lerSeletoresDigitados`, `cortarTexto`, `resumoConsultas`, `mensagemDeFalha`                  | não           |
+| `public/js/endereco.js`         | `lerDominioDoEndereco` e `montarEndereco` (puros, recebem e devolvem texto)                                               | não           |
+| `public/js/verificador.js`      | `criarVerificador({ consulta })`: dispara as três partes, cancela a verificação anterior, devolve o estado por parte      | rede injetada |
+| `public/js/dom.js`              | `criar`, `urlHttps`: monta nós com `textContent`, lista de tags e atributos permitidos; recebe o `document` por parâmetro | DOM injetado  |
+| `public/js/pagina.js`           | Liga formulário, `history.replaceState`, `aria-live`, foco; desenha os view models com `dom.js`                           | DOM, rede     |
+| `lighthouserc.json`             | Limites do Lighthouse CI                                                                                                  | —             |
 
 ### Mudanças em arquivos existentes
 
 - `public/js/doh.js`: **só** exporta `RESOLVEDORES` (para o teste da CSP comparar os hosts). Nenhum comportamento muda.
 - `eslint.config.mjs`: regra de lint de RF-11 para `public/**`.
-- `package.json`: script `textos:provisorios` e, na etapa do Lighthouse CI, a ferramenta como dependência de desenvolvimento.
+- `package.json`: na etapa do Lighthouse CI, a ferramenta como dependência de desenvolvimento.
 - `.github/workflows/`: job de Lighthouse CI.
 - `specs/README.md`, `README.md`, `README.en.md`, `CLAUDE.md`, `docs/stack.md`: `v0.6`, arquitetura e a nova stack, na etapa de fechamento.
 
@@ -110,7 +109,7 @@ Cada uma das três partes (`dmarc`, `spf`, `dkim`) passa por `verificando` → `
 ### Entrada do catálogo
 
 ```js
-/** @typedef {{ titulo: string, explicacao: string, acao: string, provisorio: boolean }} TextoAchado */
+/** @typedef {{ titulo: string, explicacao: string, acao: string }} TextoAchado */
 export const TEXTOS_ACHADOS = { "monitoramento-apenas": {/* ... */} /* ... um por código */ };
 ```
 
@@ -170,7 +169,7 @@ urlHttps(texto) → string | null                       // só https vira href
 
 ### ADR-3 — Interface C em coluna única, 720 px
 
-**Decisão.** no desktop, a página é uma coluna centrada de 720 px (formulário, resultado), na mesma ordem do celular. O Ryan aprovou o "Desktop 1" em 2026-10-31.
+**Decisão.** no desktop, a página é uma coluna centrada de 720 px (formulário, resultado), na mesma ordem do celular. O "Desktop 1" foi aprovado em 2026-10-31.
 **Alternativas.** "Desktop 2", escada à esquerda e cartões à direita (usa melhor os 1280 px).
 **Porquê.** um único layout para testar nas duas larguras, a escada continua sendo o destaque (no Desktop 2 ela ficaria do mesmo peso visual dos cartões e o "Próximo passo" perderia força) e o texto longo dos achados lê melhor em 720 px.
 **Trade-off.** sobra espaço nas laterais em tela larga. Aceito: é o preço da leitura e da simplicidade.
@@ -203,7 +202,7 @@ urlHttps(texto) → string | null                       // só https vira href
 
 ### ADR-7 — Catálogo de textos em arquivo de dados, cobertura por varredura do código
 
-**Decisão.** `TEXTOS_ACHADOS` tem uma entrada por código de achado, com `titulo`, `explicacao`, `acao` e `provisorio`. O teste de cobertura lê as fontes de `dmarc.js`, `spf.js`, `spf-consultas.js`, `dkim.js` e `dkim-busca.js` e extrai os códigos pelos três padrões que o código usa (`codigo: "x"`, `achar("x"` e `("x", "gravidade"`); falha se faltar entrada ou sobrar entrada. Os textos fixos da interface ficam em `textos-interface.js` quando montados por script e no HTML quando estáticos; ambos usam `provisorio` (campo) ou `data-provisorio` (atributo HTML), e `pnpm textos:provisorios` lista os dois.
+**Decisão.** `TEXTOS_ACHADOS` tem uma entrada por código de achado, com `titulo`, `explicacao` e `acao`. O teste de cobertura lê as fontes de `dmarc.js`, `spf.js`, `spf-consultas.js`, `dkim.js` e `dkim-busca.js` e extrai os códigos pelos três padrões que o código usa (`codigo: "x"`, `achar("x"` e `("x", "gravidade"`); falha se faltar entrada ou sobrar entrada. Os textos fixos da interface ficam em `textos-interface.js` quando montados por script e no HTML quando estáticos.
 **Alternativas.** exportar `CODIGOS` de cada módulo (mexe em módulos concluídos e a lista pode divergir do que é emitido); rodar os parsers com fixtures e coletar os códigos (só pega o que a fixture provoca).
 **Porquê.** a varredura enxerga todo código escrito no fonte, inclusive os que nenhum teste provoca. Um quarto padrão no futuro faria o teste falhar por entrada que sobra, não calar.
 **Trade-off.** a varredura é textual e acopla o teste ao jeito de escrever achados. Mitigado por um teste que confere que cada um dos cinco arquivos rende pelo menos um código (se o padrão mudar, a varredura vazia falha alto).
@@ -212,7 +211,7 @@ urlHttps(texto) → string | null                       // só https vira href
 
 **Decisão.** ao abrir `?dominio=x`, `pagina.js` preenche o campo (via `.value`) e **não** consulta. Ao verificar, atualiza o endereço com `history.replaceState` (sem criar entrada no histórico). `lerDominioDoEndereco` devolve só texto; a normalização continua sendo do `normalizarDominio` no envio.
 **Alternativas.** verificar ao abrir (um link alheio dispararia consulta ao resolvedor sem o visitante pedir); `pushState` (o botão Voltar andaria por verificações).
-**Porquê.** decisão do Ryan (RF-01 e perguntas resolvidas) e coerente com a privacidade: o visitante decide quando o domínio sai do navegador.
+**Porquê.** decisão do mantenedor (RF-01 e perguntas resolvidas) e coerente com a privacidade: o visitante decide quando o domínio sai do navegador.
 **Trade-off.** o link compartilhado exige um clique a mais de quem recebe.
 
 ### ADR-9 — DOM sem `innerHTML`: `criar` com `textContent`, regra de lint e documento falso nos testes
@@ -231,7 +230,7 @@ urlHttps(texto) → string | null                       // só https vira href
 
 ### ADR-11 — Fontes: sistema no corpo, Sora 800 e JetBrains Mono locais
 
-**Decisão.** o corpo usa `system-ui` (decisão do Ryan). Sora 800 (títulos e nome) e JetBrains Mono 400 (registros) vêm de `public/fonts/` em `woff2`, subconjunto latino, com `font-display: swap`, mais o arquivo de licença OFL. O CSS declara `@font-face` com URL relativa à própria folha.
+**Decisão.** o corpo usa `system-ui` (decisão do mantenedor). Sora 800 (títulos e nome) e JetBrains Mono 400 (registros) vêm de `public/fonts/` em `woff2`, subconjunto latino, com `font-display: swap`, mais o arquivo de licença OFL. O CSS declara `@font-face` com URL relativa à própria folha.
 **Alternativas.** Inter local (+100 KB); Google Fonts por CDN (proibido).
 **Porquê.** zero byte de fonte no corpo e só dois arquivos pequenos, o que ajuda o orçamento de 150 KB (RNF-04).
 **Trade-off.** o texto do corpo muda de aparência por sistema operacional. Aceito.
@@ -247,7 +246,7 @@ urlHttps(texto) → string | null                       // só https vira href
 
 **Decisão.** `lighthouserc.json` com `staticDistDir: ./public`, as duas páginas, `assert`: acessibilidade = 1, desempenho, boas práticas e SEO ≥ 0.95 (erro abaixo), mobile e desktop. O job roda no CI, no mesmo padrão dos outros workflows (ações fixadas por SHA, `ubuntu-26.04`). `index.html` leva `<title>`, `<meta name="description">` e `<link rel="icon">` (o SVG do logo) para o SEO.
 **Alternativas.** medir só no deploy (a hospedagem ainda não existe); limites mais frouxos.
-**Porquê.** a regra do Ryan manda medir todo projeto que serve página; medir sobre a pasta pega regressão antes do deploy.
+**Porquê.** a regra do projeto manda medir todo projeto que serve página; medir sobre a pasta pega regressão antes do deploy.
 **Trade-off.** não exercita a consulta real (o DoH fica de fora); a medida vale para carga, acessibilidade e estrutura.
 
 ### ADR-14 — A 404 é estática, com caminhos absolutos
@@ -269,7 +268,6 @@ urlHttps(texto) → string | null                       // só https vira href
 
 - **Fonte `woff2` de origem externa.** Os dois arquivos precisam vir de uma fonte confiável (o repositório oficial de cada fonte) e ser conferidos por hash; a licença OFL vai junto. Mitigação: baixar uma vez, registrar a origem e o hash no `docs/stack.md`.
 - **Varredura textual do ADR-7 frágil.** Mitigada pelo teste que exige código em cada um dos cinco arquivos.
-- **Texto do catálogo com afirmação demais.** O teste de frases proibidas (RF-09) pega "você não tem DKIM" e "está protegido", mas não o resto; a revisão dos textos pelo Ryan antes da `1.0.0` é o portão final.
 - **Lighthouse CI instável.** Notas variam por execução. Mitigação: limites de 0.95 (não 1.0, exceto acessibilidade) e três execuções por página.
 - **`<meta>` de CSP não protege o `<head>` antes dele.** A política vem como a primeira tag depois de `charset`.
 
@@ -284,7 +282,6 @@ urlHttps(texto) → string | null                       // só https vira href
 - `test/dom.test.js`: `criar` recusa tag, atributo e `on*` fora da lista; `urlHttps` (`https` passa; `http`, `javascript:`, `data:`, relativa e malformada não); documento falso lança em `innerHTML`; TXT hostil vira texto.
 - `test/lint-dom.test.js`: a API do ESLint recusa cada forma proibida de RF-11 em trechos de `public/`.
 - `test/pagina-estatica.test.js`: `lang="pt-BR"`, um `h1`, `label` ligado ao campo, CSP com os hosts de `RESOLVEDORES`, sem `style=` e sem script externo em `public/`, sem `localStorage`/`sessionStorage`/`document.cookie`/`IndexedDB` em `public/js/`, `404.html` com caminhos absolutos e sem `<script>`, `<path>` do logo igual ao de `docs/images/`.
-- `scripts/listar-textos-provisorios.mjs` tem teste que o executa sobre um catálogo sintético.
 - O Lighthouse CI roda no PR (ADR-13). O portão de qualidade completo roda em todo PR.
 
 ## Ajustes feitos na implementação

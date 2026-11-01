@@ -8,7 +8,7 @@ origin: conception
 
 # 007 — Hospedagem — Tasks
 
-Tarefas pequenas, na ordem. Cada etapa de código fecha com o portão de qualidade (`pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test`) e o resultado real registrado na própria tarefa. Nenhuma tarefa publica nada: o token, o ambiente `producao`, o domínio e o primeiro deploy são do Ryan (etapa 5), e só a etapa 5 muda o que está no ar. Os testes não acessam a rede (RNF-04); endereço e registros em teste são sintéticos, menos o endereço público, que é o da rota do `wrangler.json`. Sem mockup: esta spec não muda tela.
+Tarefas pequenas, na ordem. Cada etapa de código fecha com o portão de qualidade (`pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test`) e o resultado real registrado na própria tarefa. Nenhuma tarefa publica nada: o token, o ambiente `producao`, o domínio e o primeiro deploy são do mantenedor (etapa 5), e só a etapa 5 muda o que está no ar. Os testes não acessam a rede (RNF-04); endereço e registros em teste são sintéticos, menos o endereço público, que é o da rota do `wrangler.json`. Sem mockup: esta spec não muda tela.
 
 ## Etapa 1 — Configuração, cabeçalhos e descoberta
 
@@ -38,18 +38,18 @@ Tarefas pequenas, na ordem. Cada etapa de código fecha com o portão de qualida
 
 ## Etapa 4 — Documentação
 
-- [x] `docs/hospedagem.md`: passo a passo do Ryan em ordem, cada passo dizendo quem faz e o que conferir — criar o token (modelo "Edit Cloudflare Workers", só a conta e a zona), criar o ambiente `producao` restrito à `main` com os dois segredos, desligar Web Analytics, Rocket Loader e ofuscação de e-mail e ligar "Always Use HTTPS", primeiro deploy por `workflow_dispatch`, ler o resumo da conferência, abrir a página no navegador e olhar a rede, conferir que `*.workers.dev` não serve o site; a regra das fontes (arquivo muda, nome muda); os dois caminhos de volta do ADR-9; revisão mensal da versão do `wrangler`. — RF-08, ADR-7, ADR-9
-- [x] `CLAUDE.md` (manter abaixo de ~20 KB): árvore de arquitetura com `wrangler.json`, `deploy.yml`, `producao-*.json`, `conferir-hospedagem.mjs` e `docs/hospedagem.md`; a linha de visão geral deixa de dizer "a decidir"; a seção de qualidade cita o deploy e a conferência. — Impacto, RF-08
+- [x] Guia operacional do mantenedor, mantido fora do repositório (movido em 2026-11-01): publicar, conferir o resumo, validar a página no navegador, as regras de manutenção e os dois caminhos de volta do ADR-9. — RF-08, ADR-7, ADR-9
+- [x] `CLAUDE.md` (manter abaixo de ~20 KB): árvore de arquitetura com `wrangler.json`, `deploy.yml`, `producao-*.json` e `conferir-hospedagem.mjs`; a linha de visão geral deixa de dizer "a decidir"; a seção de qualidade cita o deploy e a conferência. — Impacto, RF-08
 - [x] `docs/stack.md`: Workers Static Assets, `wrangler` por `npx`, `_headers`, HSTS, ambiente `producao`. — Impacto
 - [x] `README.md` e `README.en.md`: o endereço do site, sem data de lançamento, e a linha `v0.7` na tabela de marcos nos dois idiomas. — Impacto, RF-08
 - [x] `specs/README.md`: linha da 007 no roadmap (`v0.7`). — Impacto
 - [x] Portão de qualidade final, com a cobertura e o total de testes. — registrar o resultado (resultado: `format:check`, `lint` e `typecheck` limpos; 807 testes, 807 passam; cobertura geral 98,9% das linhas, 97,3% dos ramos, 97,7% das funções). A spec fica `em andamento` até a etapa 5.
 
-## Etapa 5 — Publicação (o Ryan; Claude acompanha e confere)
+## Etapa 5 — Publicação (o mantenedor)
 
 Etapa sem código, por isso sem portão de qualidade: o que ela entrega é o site no ar, conferido pelo `deploy.yml` (RF-07).
 
-- [x] Ryan segue `docs/hospedagem.md` até o primeiro deploy (2026-10-31: token, ambiente `producao`, domínio no ar; o Deploy #1, disparado pelo CI da `main`, publicou, e a conferência dele falhou só porque o domínio e o certificado ainda não estavam de pé). — RF-01, RF-05, RF-08
+- [x] O mantenedor segue o guia operacional até o primeiro deploy (2026-10-31: token, ambiente `producao`, domínio no ar; o Deploy #1, disparado pelo CI da `main`, publicou, e a conferência dele falhou só porque o domínio e o certificado ainda não estavam de pé). — RF-01, RF-05, RF-08
 - [x] Resumo da conferência lido (Deploy #2, run 41251796843: as sete verificações verdes; a única falha real do primeiro deploy foi o bloco gerenciado do `robots.txt`, tratado no PR #15 e registrado no design; o `_headers` valeu na 404 e o `Cache-Control` das fontes não se juntou ao padrão): todas as verificações verdes, ou cada falha tratada (cabeçalho na 404, `Cache-Control` das fontes, permissão do token, os riscos do design) com o desvio registrado em "Ajustes feitos na implementação" do `design.md`. — RF-02, RF-03, RF-04, RF-06, RF-07
 - [x] Lighthouse de produção verde nos dois modos, com as notas e o peso registrados aqui (Deploy #2: desempenho, acessibilidade, boas práticas e SEO com nota 1,0 em mobile e desktop; peso ~122 KB nos dois; CLS 0 no mobile e ~0,001 no desktop; conferida também a página aberta no Chrome, só com o próprio site e `cloudflare-dns.com` na rede, sem beacon e com a 404 certa). — RF-07, RNF-04
 - [x] Um rollback real feito e voltado, antes de divulgar o endereço (2026-10-31, pelo painel: Rollback para a `2c50f806` e Promote version de volta para a `6d756cff`; a conferência passou nas duas pontas). — RF-05, ADR-9

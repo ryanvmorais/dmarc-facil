@@ -93,12 +93,11 @@ describe("catálogo de textos: cobertura dos códigos", () => {
 // ---------------------------------------------------------------------------
 
 describe("catálogo de textos: conteúdo", () => {
-  it("nenhuma entrada tem campo vazio e todas dizem se são provisórias", () => {
+  it("nenhuma entrada tem campo vazio", () => {
     for (const [codigo, entrada] of Object.entries(TEXTOS_ACHADOS)) {
       for (const campo of /** @type {const} */ (["titulo", "explicacao", "acao"])) {
         assert.ok(entrada[campo].trim().length > 0, `${codigo}.${campo} está vazio`);
       }
-      assert.equal(typeof entrada.provisorio, "boolean", `${codigo}.provisorio`);
     }
   });
 

@@ -10,7 +10,7 @@ origin: conception
 
 ## Visão geral
 
-O site é a pasta `public/` servida como **Workers Static Assets**, um Worker só de arquivos (sem `main`, sem código de servidor) ligado ao domínio `dmarcfacil.ryanmorais.com.br` por uma rota de domínio personalizado. Tudo o que dá para versionar mora no repositório: `wrangler.json` (projeto, rota, pasta e tratamento da 404), `public/_headers` (cabeçalhos e cache), `public/robots.txt` e `public/sitemap.xml`, o workflow `deploy.yml` e o script de conferência. O que só existe no painel (criar o token, o ambiente `producao` e os segredos, desligar recursos da zona) fica em `docs/hospedagem.md`, passo a passo.
+O site é a pasta `public/` servida como **Workers Static Assets**, um Worker só de arquivos (sem `main`, sem código de servidor) ligado ao domínio `dmarcfacil.ryanmorais.com.br` por uma rota de domínio personalizado. Tudo o que dá para versionar mora no repositório: `wrangler.json` (projeto, rota, pasta e tratamento da 404), `public/_headers` (cabeçalhos e cache), `public/robots.txt` e `public/sitemap.xml`, o workflow `deploy.yml` e o script de conferência. O que só existe no painel (criar o token, o ambiente `producao` e os segredos, desligar recursos da zona) fica no guia operacional do mantenedor, mantido fora do repositório.
 
 ```text
  PR ─▶ ci.yml (qualidade + seguranca) ─┐
@@ -38,7 +38,6 @@ A conferência do que está no ar (RF-07) é um passo do workflow, não do port�
 | `.github/workflows/deploy.yml`                      | Deploy depois do CI verde na `main`, conferência e Lighthouse sobre o endereço real. Ambiente `producao`.                                      |
 | `.github/lighthouse/producao-{mobile,desktop}.json` | Os limites de `mobile.json` e `desktop.json`, mas medindo a URL real em vez de `staticDistDir`.                                                |
 | `scripts/conferir-hospedagem.mjs`                   | Lê `public/_headers` e `public/`, consulta o endereço real e diz o que difere. Lógica em funções puras exportadas; a rede entra por parâmetro. |
-| `docs/hospedagem.md`                                | Passo a passo do Ryan (token, ambiente, painel, primeiro deploy), conferência e como desfazer um deploy.                                       |
 
 ## Modelo de dados
 
@@ -60,7 +59,7 @@ A conferência do que está no ar (RF-07) é um passo do workflow, não do port�
 }
 ```
 
-Sem `main` (assets-only) e sem `$schema`: o `wrangler` não é dependência do projeto, e o schema oficial vem dentro do pacote. JSON estrito, sem comentário: o porquê de cada chave está nos ADRs e em `docs/hospedagem.md`.
+Sem `main` (assets-only) e sem `$schema`: o `wrangler` não é dependência do projeto, e o schema oficial vem dentro do pacote. JSON estrito, sem comentário: o porquê de cada chave está nos ADRs e no guia operacional do mantenedor.
 
 ### `public/_headers`
 
@@ -154,7 +153,7 @@ jobs:
 
 **Decisão.** O site é um Worker só de assets: `wrangler.json` sem `main`, `assets.directory` em `./public`. Nada de função, nada de roteamento por código.
 **Alternativas.** Cloudflare Pages (a doc da Cloudflare diz "Start new projects with Workers"); outra hospedagem estática (a zona já está na Cloudflare, e o custo é zero nos dois).
-**Porquê.** Requisição a asset é gratuita e ilimitada; `_headers` vale; a 404 é explícita (`not_found_handling = "404-page"` serve a `404.html` mais próxima com status 404); o domínio personalizado é uma linha na configuração. O Ryan decidiu em 2026-10-31.
+**Porquê.** Requisição a asset é gratuita e ilimitada; `_headers` vale; a 404 é explícita (`not_found_handling = "404-page"` serve a `404.html` mais próxima com status 404); o domínio personalizado é uma linha na configuração. Decidido em 2026-10-31.
 **Trade-off.** A plataforma é a da Cloudflare, e a doc dela muda; por isso o `wrangler` é fixado numa versão (ADR-5) e a conferência do que está no ar (ADR-6) falha alto se algo mudar. A doc não diz se `_headers` cobre a resposta da 404: a conferência testa e o risco está registrado.
 
 ### ADR-2 — O endereço tem uma fonte só: a rota do `wrangler.json`
@@ -166,7 +165,7 @@ jobs:
 
 ### ADR-3 — Cabeçalhos em `public/_headers`, CSP do cabeçalho = a da `index.html` + `frame-ancestors`
 
-**Decisão.** A CSP do cabeçalho repete as diretivas da `<meta>` do `index.html` e acrescenta `frame-ancestors 'none'` (a `<meta>` não suporta essa diretiva). Vale para `/*`, inclusive a 404, cuja `<meta>` é mais estrita (sem `script-src`): o navegador aplica as duas, e vale a interseção. HSTS só com `max-age=31536000` (Ryan, 2026-10-31). `Referrer-Policy: no-referrer`, `Permissions-Policy` desligando os recursos de hardware que a página não usa, e `Cross-Origin-Opener-Policy`/`Cross-Origin-Resource-Policy: same-origin`.
+**Decisão.** A CSP do cabeçalho repete as diretivas da `<meta>` do `index.html` e acrescenta `frame-ancestors 'none'` (a `<meta>` não suporta essa diretiva). Vale para `/*`, inclusive a 404, cuja `<meta>` é mais estrita (sem `script-src`): o navegador aplica as duas, e vale a interseção. HSTS só com `max-age=31536000` (decisão do mantenedor, 2026-10-31). `Referrer-Policy: no-referrer`, `Permissions-Policy` desligando os recursos de hardware que a página não usa, e `Cross-Origin-Opener-Policy`/`Cross-Origin-Resource-Policy: same-origin`.
 **Alternativas.** Uma regra por página (duas CSPs para manter); só a `<meta>` (sem `frame-ancestors`, sem os outros cabeçalhos); `includeSubDomains` e `preload` no HSTS (afetariam o que mais morar em `ryanmorais.com.br`, e `preload` é quase irreversível).
 **Porquê.** Um cabeçalho só para o site todo é o mais simples de testar: o teste lê o `_headers` e compara a CSP com a `<meta>` do `index.html` e o `connect-src` com os hosts de `doh.js` (a mesma fonte da spec 006). `no-referrer` basta porque a página não precisa saber de onde veio o visitante, e os links externos já levam `noopener noreferrer`.
 **Trade-off.** A `404.html` recebe `connect-src` que não usa. Sem efeito, porque a `<meta>` dela já nega tudo. Uma `Permissions-Policy` enumerada envelhece quando o navegador cria recursos novos; a lista cobre o que existe hoje e a revisão é a da Lighthouse (boas práticas).
@@ -175,15 +174,15 @@ jobs:
 
 **Decisão.** HTML, CSS e JavaScript ficam com o padrão da plataforma para assets (`public, max-age=0, must-revalidate` e `ETag`): o navegador pergunta antes de reusar e recebe 304 se nada mudou. Só `/fonts/*` leva `Cache-Control: public, max-age=31536000, immutable`.
 **Alternativas.** Nomes com _hash_ e cache longo em tudo (exige build, contra o projeto); `max-age` curto no código (deploy novo demora a chegar e pode misturar módulos de versões diferentes).
-**Porquê.** Os módulos ES importam uns aos outros por caminho fixo: com `must-revalidate` o navegador valida cada arquivo a cada visita e não monta uma página com um `dominio.js` novo e um `pagina.js` velho. As fontes são `woff2` que não mudam; se mudarem, o arquivo ganha outro nome e o CSS aponta para ele (regra escrita no `docs/hospedagem.md`).
+**Porquê.** Os módulos ES importam uns aos outros por caminho fixo: com `must-revalidate` o navegador valida cada arquivo a cada visita e não monta uma página com um `dominio.js` novo e um `pagina.js` velho. As fontes são `woff2` que não mudam; se mudarem, o arquivo ganha outro nome e o CSS aponta para ele (regra de manutenção do projeto).
 **Trade-off.** Cada visita revalida ~20 arquivos (304, sem corpo). Aceito: o peso é de cabeçalho, e a alternativa quebra a regra de consistência. A doc não diz se um `Cache-Control` do `_headers` substitui ou se junta ao padrão nas fontes; a conferência compara o valor exato e o risco está registrado.
 
 ### ADR-5 — Deploy por workflow do GitHub Actions, depois do CI verde, com `wrangler` por `npx`
 
 **Decisão.** `deploy.yml` roda em `workflow_run` do `CI` na `main`, só quando o run terminou com sucesso, veio de `push` e do próprio repositório. O job usa o ambiente `producao` (segredos `CLOUDFLARE_API_TOKEN` e `CLOUDFLARE_ACCOUNT_ID`, branch de deploy restrita à `main`), faz checkout do `head_sha` do run e só segue se esse commit ainda for a ponta da `main`. A ferramenta entra por `npx --yes wrangler@${{ env.WRANGLER_VERSION }} deploy`, com a versão numa variável do workflow (**4.152.0**, de 2026-10-22; a 4.156.0, a mais nova, saiu há menos de 7 dias e o `minimumReleaseAge` do projeto é de uma semana). Concorrência: grupo `deploy`, sem cancelar o que está rodando.
 **Alternativas.** Workers Builds, a integração Git da Cloudflare (sem token no GitHub, mas o build e a conferência ficam fora do nosso CI); `cloudflare/wrangler-action` (mais uma ação de terceiro no caminho do segredo, sem ganho sobre `npx`); `push` com um job `needs` repetindo o portão (duplica o CI); `wrangler` como devDependency (a árvore dele engordaria o `pnpm audit` obrigatório, como a do `@lhci/cli`).
-**Porquê.** `workflow_run` encadeia no CI sem repeti-lo: se `qualidade` ou `seguranca` falham, o deploy não roda. O filtro `push` na `main` do próprio repositório impede que um PR (ou fork) dispare deploy ou toque o segredo. O teste da ponta da `main` evita que dois merges seguidos publiquem o mais velho por último. O Ryan decidiu por `npx` e segredo em 2026-10-31.
-**Trade-off.** O Dependabot não vê `npx`: a revisão da versão do `wrangler` é manual (mesmo caso do `LHCI_VERSION`). `workflow_run` roda o arquivo da branch padrão, então mexer no workflow só vale depois do merge, e o primeiro deploy é por `workflow_dispatch`, que o Ryan aciona.
+**Porquê.** `workflow_run` encadeia no CI sem repeti-lo: se `qualidade` ou `seguranca` falham, o deploy não roda. O filtro `push` na `main` do próprio repositório impede que um PR (ou fork) dispare deploy ou toque o segredo. O teste da ponta da `main` evita que dois merges seguidos publiquem o mais velho por último. Decisão de 2026-10-31: `npx` e segredo.
+**Trade-off.** O Dependabot não vê `npx`: a revisão da versão do `wrangler` é manual (mesmo caso do `LHCI_VERSION`). `workflow_run` roda o arquivo da branch padrão, então mexer no workflow só vale depois do merge, e o primeiro deploy é por `workflow_dispatch`, que o mantenedor aciona.
 
 ### ADR-6 — Conferir o que está no ar, no mesmo run
 
@@ -194,7 +193,7 @@ jobs:
 
 ### ADR-7 — Nada injetado: comparar o HTML byte a byte e desligar o que mexe na zona
 
-**Decisão.** A conferência compara o hash do HTML, do JavaScript, do CSS, do `robots.txt` e do `sitemap.xml` servidos com o dos arquivos de `public/`. O passo a passo do Ryan desliga, para o subdomínio ou a zona: Web Analytics da Cloudflare, Rocket Loader, Email Address Obfuscation e qualquer otimização automática que reescreva HTML ou JavaScript, e liga "Always Use HTTPS" (RF-01).
+**Decisão.** A conferência compara o hash do HTML, do JavaScript, do CSS, do `robots.txt` e do `sitemap.xml` servidos com o dos arquivos de `public/`. O guia operacional do mantenedor desliga, para o subdomínio ou a zona: Web Analytics da Cloudflare, Rocket Loader, Email Address Obfuscation e qualquer otimização automática que reescreva HTML ou JavaScript, e liga "Always Use HTTPS" (RF-01).
 **Alternativas.** Confiar que o plano gratuito não injeta nada (a Web Analytics pode ser ativada pelo painel sem nenhum commit); só olhar o HTML no navegador (a injeção às vezes depende do cabeçalho `Accept` ou do agente).
 **Porquê.** A regra "sem rastreador" é do projeto, e a CSP bloquearia um `<script>` injetado, mas quebraria a página em silêncio. A comparação transforma "nada foi injetado" de promessa em fato verificado a cada deploy.
 **Trade-off.** A conferência vê o que o runner do GitHub recebe, que pode diferir do que um navegador recebe (por exemplo, otimizações por agente). Por isso o passo a passo também manda abrir a página uma vez no navegador e ver o painel de rede.
@@ -208,7 +207,7 @@ jobs:
 
 ### ADR-9 — Token com o menor escopo e caminho de volta documentado
 
-**Decisão.** O token é da conta do Ryan, criado a partir do modelo "Edit Cloudflare Workers", restrito à conta e à zona `ryanmorais.com.br`, guardado só como segredo do ambiente `producao`. O `docs/hospedagem.md` descreve dois caminhos de volta: **(1)** reverter o commit por PR e deixar o deploy automático republicar; **(2)** emergência, `npx wrangler@4.152.0 rollback` da máquina do Ryan para a versão anterior. Um rollback real é feito uma vez antes do lançamento.
+**Decisão.** O token tem o menor escopo possível (só o deploy deste projeto) e vive apenas como segredo do ambiente `producao`. Há dois caminhos de volta, descritos no guia operacional do mantenedor: **(1)** reverter o commit por PR e deixar o deploy automático republicar; **(2)** emergência, `wrangler rollback` na conta, para a versão anterior. Um rollback real é feito uma vez antes do lançamento.
 **Alternativas.** Token de conta inteira (alcance maior que o necessário); chave global (nunca); sem caminho documentado (o problema aparece às duas da manhã).
 **Porquê.** Um segredo vazado deve poder, no máximo, trocar o conteúdo deste site. A doc da Cloudflare recomenda limitar o token à conta que recebe o deploy.
 **Trade-off.** Criar o domínio personalizado pode pedir permissão de DNS na zona além da do modelo; isso só aparece no primeiro deploy e o passo a passo diz como ampliar o escopo o mínimo necessário (risco registrado).
@@ -217,14 +216,13 @@ jobs:
 
 - **`public/index.html`:** uma linha (`canonical`). A `404.html` e o `public/js/` não mudam; os testes de `pagina-estatica` continuam valendo.
 - **`public/`:** quatro arquivos novos (`_headers`, `robots.txt`, `sitemap.xml`), que o Lighthouse CI mede junto da pasta; o peso da página inicial não muda.
-- **`wrangler.json`, `deploy.yml`, `producao-*.json`, `conferir-hospedagem.mjs`, `docs/hospedagem.md`:** novos.
+- **`wrangler.json`, `deploy.yml`, `producao-*.json`, `conferir-hospedagem.mjs`:** novos.
 - **`package.json`:** script `hospedagem:conferir`. Nenhuma dependência nova.
 - **`CLAUDE.md`:** a árvore ganha os arquivos novos; "hospedagem a decidir" passa a dizer Workers Static Assets; a seção de qualidade cita o deploy e a conferência.
 - **`docs/stack.md`:** Workers Static Assets, `wrangler`, `_headers`, HSTS e o ambiente `producao`.
 - **READMEs:** o endereço do site, sem data de lançamento, e a linha `v0.7` na tabela de marcos (nos dois idiomas).
 - **`specs/README.md`:** linha 007 no roadmap.
 - **Specs 001 a 006:** nenhuma mudança de comportamento.
-- **Memória do projeto:** estado da spec 007 e o que ficou com o Ryan.
 
 ## Riscos
 
@@ -236,7 +234,7 @@ jobs:
 - **`workflow_run` e segredo.** O workflow só roda a partir da `main`, com checkout do commit já mergeado. Mitigação: a condição `event == 'push'` e `head_repository`, o ambiente restrito à `main`, e um teste que falha se o deploy aceitar `pull_request`.
 - **`wrangler` e a doc mudam.** Mitigação: versão fixa, revisão manual a cada mês junto do Lighthouse, conferência do que está no ar a cada deploy.
 - **HSTS publicado é difícil de desfazer.** Mitigação: `max-age` de um ano, sem `includeSubDomains` nem `preload`; o escopo é um subdomínio só deste site.
-- **Domínio apontado para o Worker antes de o conteúdo estar certo.** O primeiro deploy já publica. Mitigação: `docs/hospedagem.md` manda conferir o `workflow_dispatch` com o resumo antes de divulgar o endereço; divulgar é ato do Ryan.
+- **Domínio apontado para o Worker antes de o conteúdo estar certo.** O primeiro deploy já publica. Mitigação: o guia operacional manda conferir o `workflow_dispatch` com o resumo antes de divulgar o endereço; divulgar é ato do mantenedor.
 
 ## Testes
 
@@ -261,7 +259,6 @@ O que a implementação mudou em relação ao texto acima, com o motivo:
 - **O deploy leva `--message "<sha>"`** (a flag existe na 4.152.0, conferida em `deploy --help`), para o histórico de versões da Cloudflare registrar o commit, e `WRANGLER_SEND_METRICS=false`.
 - **Os relatórios do Lighthouse de produção** viram o artefato `lighthouse-producao` (14 dias), como no `lighthouse.yml`.
 - **`wrangler deploy --dry-run`** na 4.152.0 leu o `wrangler.json` e a pasta `public/` sem erro (36 arquivos), antes do primeiro deploy real.
-- **Teste a mais:** `test/workflow-deploy.test.js` confere que os comandos `wrangler@…` de `docs/hospedagem.md` usam a mesma versão do workflow.
-- **A seção sobre a zona de `docs/hospedagem.md` não mexe na zona.** `ryanmorais.com.br` também serve o site principal (Django no Railway, atrás da Cloudflare). Olhado em 2026-10-31: sem Rocket Loader nem beacon no HTML; a ofuscação de e-mail está ligada (não se desliga na zona, e `public/` não tem e-mail); a regra "Segredo de origem" vale para todas as requisições e fica como está (o Worker não lê nem devolve o cabeçalho); o Bot Preference Sync prepende um bloco ao `robots.txt`, e a conferência deve aceitar esse prefixo se a primeira conferência o apontar.
+- **A configuração da zona não é alterada.** `ryanmorais.com.br` também serve o site principal (atrás da Cloudflare). A conferência de RF-06 prova que a zona não reescreve o conteúdo; o `Segredo de origem` vale para todas as requisições e o Worker não lê nem devolve o cabeçalho; o `robots.txt` gerenciado da zona prepende um bloco, e a conferência o aceita como prefixo.
 - **Primeiro deploy (2026-10-31, run #1): o `deploy` passou e a conferência falhou em tudo** com "não foi possível abrir o endereço": o domínio personalizado e o certificado ainda não estavam de pé quando o runner abriu o endereço. Minutos depois, `pnpm hospedagem:conferir` deu seis verificações verdes e uma falha, a esperada: o `robots.txt` servido leva na frente o bloco gerenciado da Cloudflare (Bot Preference Sync), que termina em `# END Cloudflare Managed Content`. A conferência passou a ignorar esse bloco e a comparar o resto com `public/robots.txt`. O `_headers` valeu na 404 e o `Cache-Control` das fontes não se juntou ao padrão: os dois riscos do design não se confirmaram.
 - **`http://` não passa mais por "recusado" quando nem o `https://` abre.** O run #1 mostrou o falso verde: com o DNS ainda sem resposta, a falha de conexão do `http://` contava como recusa. Agora a verificação falha nesse caso.

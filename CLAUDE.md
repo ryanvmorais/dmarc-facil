@@ -4,9 +4,9 @@ Este arquivo orienta o Claude Code (claude.ai/code) ao trabalhar neste repositó
 
 ## Visão geral do projeto
 
-**DMARC Fácil** é um site estático que consulta o DMARC, o SPF e o DKIM de um domínio, explica cada registro em português e diz o próximo passo (de `p=none` para `quarantine` e `reject`). Tudo roda no navegador do visitante, por DNS-over-HTTPS: nenhum servidor nosso vê o domínio. É o funil do MailVigil e material de conteúdo do canal.
+**DMARC Fácil** é um site estático que consulta o DMARC, o SPF e o DKIM de um domínio, explica cada registro em português e diz o próximo passo (de `p=none` para `quarantine` e `reject`). Tudo roda no navegador do visitante, por DNS-over-HTTPS: nenhum servidor nosso vê o domínio. É a porta de entrada do MailVigil.
 
-Stack: JavaScript puro (módulos ES, sem build), HTML e CSS, Node 26 e pnpm 12 só para as ferramentas de desenvolvimento. Público, Apache-2.0. Ainda não lançado: o primeiro lançamento será a `1.0.0`; hospedado como Workers Static Assets da Cloudflare em `dmarcfacil.ryanmorais.com.br` (spec 007; publicar e desfazer um deploy: [docs/hospedagem.md](docs/hospedagem.md)).
+Stack: JavaScript puro (módulos ES, sem build), HTML e CSS, Node 26 e pnpm 12 só para as ferramentas de desenvolvimento. Público, Apache-2.0. Não tem versão numerada: é uma página que se atualiza sozinha, e cada merge na `main` com o CI verde publica a nova (spec 007). Hospedado como Workers Static Assets da Cloudflare em `dmarcfacil.ryanmorais.com.br`.
 
 ## Comandos comuns
 
@@ -80,7 +80,7 @@ public/                  # o site: é o que vai para a hospedagem, sem build
     tipos.js             # só typedef: o estado de cada parte (verificando, pronto, falha) e da verificação
     selo.js              # calcularSelo: a regra única do selo dos três cartões (puro)
     escada.js            # montarEscada: degraus none/quarantine/reject, próximo passo e ressalvas (puro)
-    textos-achados.js    # dados: o português de cada código de achado; textoDoAchado (provisorio marca o não final)
+    textos-achados.js    # dados: o português de cada código de achado; textoDoAchado
     textos-interface.js  # dados: selos, degraus, falhas, anúncios e demais frases montadas por script
     apresentacao.js      # cartões de DMARC, SPF e DKIM prontos para desenhar, seletores digitados, anúncios (puro)
     endereco.js          # ?dominio= do endereço compartilhável (puro: preenche o campo, não verifica)
@@ -88,9 +88,8 @@ public/                  # o site: é o que vai para a hospedagem, sem build
     dom.js               # criar, urlHttps: o único jeito de um texto virar nó (lista fixa de tags e atributos)
     pagina.js            # o único módulo com document/history: liga o formulário e desenha o resultado
 test/                    # testes com o runner nativo do Node (node:test); ajudas/ monta chaves, estados e um documento falso
-scripts/                 # scripts em Node (conferir-links-dkim.mjs: links dos provedores; conferir-hospedagem.mjs: o que está no ar; listar-textos-provisorios.mjs)
+scripts/                 # scripts em Node (conferir-links-dkim.mjs: links dos provedores; conferir-hospedagem.mjs: o que está no ar)
 docs/                    # documentação do projeto
-  hospedagem.md          # passo a passo do Ryan: token, ambiente producao, painel, primeiro deploy, rollback
   stack.md               # mapa de cada tecnologia: o que faz, por que, o que estudar
   images/                # logo oficial (SVG) e a captura da página usada no README
 specs/                   # specs de cada marco (requirements, design, tasks)
@@ -111,25 +110,25 @@ Camadas: a lógica de parsing (DMARC, SPF, DKIM) e de validação mora em módul
 
 ## Convenções
 
-- **Idioma do código, comentários, commits e specs: português** (projeto público educativo da home; regra em `/idioma`). Strings visíveis, em português. Nomes técnicos universais (`DoH`, `TXT`, `DKIM`) ficam como são.
-- **Estilo dos arquivos:** `/estilo-arquivos`.
+- **Idioma do código, comentários, commits e specs: português** (projeto público e educativo). Strings visíveis, em português. Nomes técnicos universais (`DoH`, `TXT`, `DKIM`) ficam como são.
+- **Estilo dos arquivos:** siga o do restante do repositório: cabeçalho `@file` e JSDoc completo nas funções exportadas, `// @ts-check`, comentários que explicam o porquê, formatação pelo Prettier (`pnpm format`).
 - **Marca:** logo A (escudo com olho aberto), da família MailVigil/WebVigil: azul `#2563eb`, `Sora` 800 no nome, `JetBrains Mono` no código. SVG oficial em `docs/images/`, um `<path>` só com `evenodd`; o teste `test/logo.test.js` o guarda. Fontes locais na página final, nunca CDN.
-- **Interface:** decidida (interface C: escada `none` → `quarantine` → `reject` com a etiqueta "Próximo passo" no degrau seguinte ao atual; o cartão de DMARC fica só com registro e selo). A spec da página traz o mockup aprovado. Os textos da interface estão revisados; texto novo entra marcado (`provisorio: true` nos catálogos, `data-provisorio` no HTML) até o Ryan revisar.
+- **Interface:** decidida (interface C: escada `none` → `quarantine` → `reject` com a etiqueta "Próximo passo" no degrau seguinte ao atual; o cartão de DMARC fica só com registro e selo). A spec da página traz o mockup aprovado. Mudança de interface parte de um mockup, não do código.
 - **DKIM:** nunca dizer "você não tem DKIM"; dizer "não encontrei nesses seletores" (o seletor é escolha do remetente e não dá para listar). 15 a 20 seletores comuns em arquivo de dados, com link da doc de cada provedor, mais campo livre.
 
 ## Qualidade e automação
 
 - **CI** (`.github/workflows/ci.yml`): job `qualidade` (Prettier, ESLint, `tsc`, testes) e job `seguranca` (`pnpm audit`). Mais CodeQL e `dependency-review`. Toda `uses:` fixada por SHA, `runs-on: ubuntu-26.04`.
 - **Links DKIM** (`.github/workflows/links-dkim.yml`, `pnpm links:dkim`): toda segunda abre cada `documentacao` de `public/js/seletores-dkim.js`; run vermelho = link quebrado (404/410/rede) ou página que não cita mais o seletor; 403 e site fora do ar são só aviso. Não é check obrigatório. Ao mexer na lista, atualize o `conferido` do item.
-- **Lighthouse CI** (`.github/workflows/lighthouse.yml`, limites em `.github/lighthouse/{mobile,desktop}.json`): mede `index.html` e `404.html` sobre `public/`; acessibilidade = 1 e as outras notas ≥ 0,95, peso abaixo de 150 KB. Não é check obrigatório. O `@lhci/cli` entra por `npx` numa variável do workflow, nunca como dependência (a árvore dele derruba o `pnpm audit`). `pnpm textos:provisorios` lista os textos novos que o Ryan ainda não revisou.
-- **Deploy** (`.github/workflows/deploy.yml`, spec 007): roda depois do `CI` verde na `main` (`workflow_run`, só `push` do próprio repositório) e por `workflow_dispatch`; ambiente `producao` com os segredos da Cloudflare; publica com `npx wrangler@<WRANGLER_VERSION>` (não é dependência: a árvore derrubaria o `pnpm audit`), confere o que ficou no ar (`scripts/conferir-hospedagem.mjs`: cabeçalhos, 404, HTML byte a byte) e mede o endereço real com o Lighthouse (`producao-{mobile,desktop}.json`). As versões do `wrangler` e do `@lhci/cli` são revistas à mão todo mês (o Dependabot não vê `npx`). **Publicar, o token e rollback são do Ryan** (`docs/hospedagem.md`).
+- **Lighthouse CI** (`.github/workflows/lighthouse.yml`, limites em `.github/lighthouse/{mobile,desktop}.json`): mede `index.html` e `404.html` sobre `public/`; acessibilidade = 1 e as outras notas ≥ 0,95, peso abaixo de 150 KB. Não é check obrigatório. O `@lhci/cli` entra por `npx` numa variável do workflow, nunca como dependência (a árvore dele derruba o `pnpm audit`).
+- **Deploy** (`.github/workflows/deploy.yml`, spec 007): roda depois do `CI` verde na `main` (`workflow_run`, só `push` do próprio repositório) e por `workflow_dispatch`; ambiente `producao` com os segredos da Cloudflare; publica com `npx wrangler@<WRANGLER_VERSION>` (não é dependência: a árvore derrubaria o `pnpm audit`), confere o que ficou no ar (`scripts/conferir-hospedagem.mjs`: cabeçalhos, 404, HTML byte a byte) e mede o endereço real com o Lighthouse (`producao-{mobile,desktop}.json`). As versões do `wrangler` e do `@lhci/cli` são revistas à mão todo mês (o Dependabot não vê `npx`). Para desfazer um deploy ruim, reverta o commit na `main` (o `wrangler rollback`, com credencial da conta, é só o caminho de emergência).
 - **Ruleset `proteger-main`:** PR obrigatório, só squash, histórico linear, `qualidade` e `seguranca` exigidos. Nada de commit direto na `main`.
 - **Pre-commit** (`.githooks/pre-commit`): o mesmo portão do CI em modo verificação.
 - **Hooks do Claude** em `.claude/` (scripts `.mjs` em `.claude/hooks/`, ligados por `.claude/settings.json`): `proteger-gerados` (PreToolUse, bloqueia edição manual do `pnpm-lock.yaml`), `formatar` (PostToolUse, Prettier no arquivo editado) e `validar` (Stop, ESLint + `tsc` se há `.js`/`.mjs` alterado; testes ficam no pre-commit); `ferramentas.mjs` guarda os utilitários que os três usam.
 
 ## Fluxo de trabalho
 
-Spec-driven (`/spec`): requirements, design e tasks com portão de aprovação em cada um, uma pasta `specs/NNN-nome/` por marco. Convenções de numeração e status em [specs/README.md](specs/README.md). Uma issue, uma branch, um PR; o merge é do Ryan. Ao fim da sessão: `/atualizar-docs` e `/fechar-sessao`.
+Desenvolvimento guiado por specs: requirements, design e tasks, cada um aprovado antes do seguinte, numa pasta `specs/NNN-nome/` por marco. Convenções de numeração e status em [specs/README.md](specs/README.md). Uma issue, uma branch, um PR; o PR é mesclado pelo mantenedor depois da revisão. Antes de abrir o PR, rode o portão de qualidade e confira se o README (nas duas línguas), este arquivo e `docs/stack.md` refletem a mudança.
 
 ## Gestão de dependências
 
@@ -137,4 +136,4 @@ pnpm 12 (campo `packageManager` do `package.json`); `package.json` e `pnpm-lock.
 
 > Cuidado: `pnpm-workspace.yaml` guarda a configuração do pnpm 12 (o campo `pnpm` do `package.json` é ignorado): `minimumReleaseAge` de uma semana e as exceções aceitas do `pnpm audit`, cada uma com o motivo e a condição de saída comentados ali.
 
-> Cuidado: o Dependabot agrupa minor e patch num PR por ecossistema, com cooldown de 7 dias. Revise com `/revisar-dependabot`.
+> Cuidado: o Dependabot agrupa minor e patch num PR por ecossistema, com cooldown de 7 dias. Revise cada PR pelo diff e pelo changelog do pacote.

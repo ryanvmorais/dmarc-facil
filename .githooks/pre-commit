@@ -3,8 +3,8 @@
 # Hook de pre-commit (versionado): portão de qualidade do DMARC Fácil.
 #
 # Roda a mesma sequência do CI em modo VERIFICAÇÃO (não altera arquivos): se passa aqui,
-# passa no job `qualidade`. Aborta o commit se qualquer etapa falhar. É o portão que vale
-# enquanto a `main` ainda não tem ruleset exigindo o CI.
+# passa no job `qualidade`. Aborta o commit se qualquer etapa falhar. É o portão local;
+# o CI repete a mesma sequência.
 #
 # ATIVAÇÃO (uma vez por clone):
 #     git config core.hooksPath .githooks

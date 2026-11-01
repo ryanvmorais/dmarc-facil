@@ -14,7 +14,7 @@ As specs 001 a 005 entregam a lógica: validar o domínio, consultar TXT por DNS
 
 O visitante é quem recebeu "seu DMARC está em `p=none`" de um provedor de e-mail e não sabe o que fazer. A página precisa responder, sem jargão antes da hora, três coisas: **o que o meu domínio publica**, **está certo?** e **o que eu faço agora?** (de `p=none` para `quarantine` e depois `reject`).
 
-A interface foi decidida antes desta spec (mockup no [Artifact](https://claude.ai/artifact/VPDUjkidb1Fr6rGu3MpFSH), aprovado pelo Ryan em 2026-10-31): **interface C**, com a escada `none` → `quarantine` → `reject`, a etiqueta "Próximo passo" no degrau seguinte ao atual, e o cartão de DMARC só com o registro e o selo. O mockup existe em 390 px; o de 1280 px (e o 404) entram no design, antes de qualquer HTML ou CSS (`/nova-interface`).
+A interface foi decidida antes desta spec (mockup no [Artifact](https://claude.ai/artifact/VPDUjkidb1Fr6rGu3MpFSH), aprovado em 2026-10-31): **interface C**, com a escada `none` → `quarantine` → `reject`, a etiqueta "Próximo passo" no degrau seguinte ao atual, e o cartão de DMARC só com o registro e o selo. O mockup existe em 390 px; o de 1280 px (e o 404) entram no design, antes de qualquer HTML ou CSS (`/nova-interface`).
 
 Quatro regras do projeto pesam aqui e nenhuma pode regredir (`CLAUDE.md`):
 
@@ -31,7 +31,7 @@ Quatro regras do projeto pesam aqui e nenhuma pode regredir (`CLAUDE.md`):
 - **DKIM com seletores**: a lista comum já vem tentada; o visitante pode acrescentar os seus (campo livre) e ver a lista dos tentados.
 - **Catálogo de textos** de todos os achados, em arquivo de dados, fora da lógica de tela, com cobertura conferida por teste.
 - **Privacidade dita na tela**, no lugar onde o visitante decide digitar.
-- **Páginas de erro necessárias**: `404.html` com o logo e o link de volta (decisão do Ryan, 2026-10-31).
+- **Páginas de erro necessárias**: `404.html` com o logo e o link de volta (decisão do mantenedor, 2026-10-31).
 - **Acessível e responsiva**: de 320 a 1440 px, por teclado, com leitor de tela.
 - **Defesa contra marcação**: regra de lint que proíbe as formas de inserir HTML a partir de texto, e um teste que alimenta um TXT hostil.
 
@@ -182,13 +182,10 @@ Quatro regras do projeto pesam aqui e nenhuma pode regredir (`CLAUDE.md`):
 
 - **Given** o arquivo de dados dos textos
   **When** é carregado
-  **Then** tem uma entrada por código de achado de `lerDmarc`, `lerSpf`, `lerSpfComConsultas`, `lerDkim` e `buscarDkim`, com `titulo`, `explicacao` e `acao`, e um campo que marca o texto ainda não final.
+  **Then** tem uma entrada por código de achado de `lerDmarc`, `lerSpf`, `lerSpfComConsultas`, `lerDkim` e `buscarDkim`, com `titulo`, `explicacao` e `acao`.
 - **Given** os códigos de achado que os módulos podem emitir
   **When** o teste de dados roda
   **Then** falha se algum código não tem entrada no catálogo, ou se o catálogo tem entrada de código que nenhum módulo emite.
-- **Given** o texto não final
-  **When** a revisão do Ryan antes da `1.0.0` chegar
-  **Then** um comando lista todos os textos ainda marcados, para a revisão não depender de procurar na página.
 - **Given** o catálogo
   **When** é lido
   **Then** nenhum texto afirma o que a ferramenta não sabe: não diz "você não tem DKIM", não diz que o domínio "está protegido" quando só `p=none` foi lido, e não promete resultado de entrega de e-mail.
@@ -277,7 +274,7 @@ Todo registro nos testes é montado no próprio teste (`exemplo.com.br`), nunca 
 
 ### RNF-06 — Texto de interface
 
-Todo texto novo da página é em português do Brasil, direto, sem jargão antes de explicar o termo, sem tom de alarme e sem promessa que a ferramenta não cumpre. O que ainda não é final fica marcado no catálogo (RF-09) e é revisado pelo Ryan antes da `1.0.0`.
+Todo texto novo da página é em português do Brasil, direto, sem jargão antes de explicar o termo, sem tom de alarme e sem promessa que a ferramenta não cumpre.
 
 ## Perguntas em aberto
 
@@ -285,16 +282,16 @@ Nenhuma.
 
 ## Decisões resolvidas
 
-1. Interface C (escada com "Próximo passo" no degrau seguinte; cartão de DMARC só com registro e selo), logo A, marca e fontes: Ryan, 2026-10-31.
-2. As páginas de erro necessárias entram nesta spec, com mockup junto do da página (Ryan, 2026-10-31). A 5xx não se personaliza.
-3. Os textos da interface são provisórios de propósito e o Ryan os revisa antes do `1.0.0`, com o produto pronto (Ryan, 2026-10-31).
+1. Interface C (escada com "Próximo passo" no degrau seguinte; cartão de DMARC só com registro e selo), logo A, marca e fontes: decisão do mantenedor, 2026-10-31.
+2. As páginas de erro necessárias entram nesta spec, com mockup junto do da página (decisão do mantenedor, 2026-10-31). A 5xx não se personaliza.
+3. Os textos da interface nasceram provisórios e foram revisados com o produto pronto (decisão do mantenedor, 2026-10-31); hoje estão finais.
 4. DKIM: "não encontrei nesses seletores", nunca "você não tem DKIM" (`CLAUDE.md`).
 5. A regra de lint contra `innerHTML` e afins vem para esta spec (decidido ao descartar o hook de `innerHTML`, 2026-10-31).
-6. Endereço compartilhável: `?dominio=` preenche o campo ao abrir e só verifica quando o visitante aperta o botão; o endereço é atualizado a cada verificação (Ryan, 2026-10-31).
-7. Fonte do corpo: a do sistema; só Sora 800 e JetBrains Mono são locais (Ryan, 2026-10-31).
+6. Endereço compartilhável: `?dominio=` preenche o campo ao abrir e só verifica quando o visitante aperta o botão; o endereço é atualizado a cada verificação (decisão do mantenedor, 2026-10-31).
+7. Fonte do corpo: a do sistema; só Sora 800 e JetBrains Mono são locais (decisão do mantenedor, 2026-10-31).
 8. Link do MailVigil: [repositório do MailVigil](https://github.com/ryanvmorais/mailvigil), sem parâmetro de origem. O MailVigil não tem site próprio (o `Homepage` do `pyproject.toml` é o repositório; a página do PyPI é [https://pypi.org/project/mailvigil/](https://pypi.org/project/mailvigil/)), e o GitHub não devolveria a origem do clique de qualquer jeito. Conferido no repositório dele em 2026-10-31.
-9. Lighthouse CI entra nesta spec, como a última etapa do `tasks.md` (Ryan, 2026-10-31).
-10. Texto não final: campo `provisorio` no catálogo, invisível ao visitante, e `pnpm textos:provisorios` lista o que falta revisar antes da `1.0.0` (Ryan, 2026-10-31).
+9. Lighthouse CI entra nesta spec, como a última etapa do `tasks.md` (decisão do mantenedor, 2026-10-31).
+10. Removida em 2026-11-01: o campo `provisorio` e o comando `pnpm textos:provisorios` saíram do código quando os textos ficaram finais e o site passou a não ter versão numerada.
 
 ## Testes
 

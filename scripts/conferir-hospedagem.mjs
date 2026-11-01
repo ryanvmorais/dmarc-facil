@@ -35,7 +35,7 @@ const AGENTE = "dmarc-facil-conferir-hospedagem (+https://github.com/ryanvmorais
 const CAMINHO_INEXISTENTE = "/conferencia-caminho-inexistente/a/b";
 // `http://` só pode terminar em redirecionamento (para `https://`) ou em conexão recusada; nunca em 200.
 const REDIRECIONAMENTOS = [301, 302, 307, 308];
-// A zona tem o "Bot Preference Sync" ligado: a Cloudflare põe o seu bloco de content signals na
+// Com o "Bot Preference Sync" ligado na zona, a Cloudflare põe o seu bloco de content signals na
 // frente de todo `robots.txt`, e o bloco termina nesta linha. Só o que vem depois é nosso.
 const FIM_BLOCO_GERENCIADO = "# END Cloudflare Managed Content";
 

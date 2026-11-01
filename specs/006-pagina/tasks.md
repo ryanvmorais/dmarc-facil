@@ -8,7 +8,9 @@ origin: conception
 
 # 006 — Página — Tasks
 
-Tarefas pequenas, na ordem. Cada etapa fecha com o portão de qualidade (`pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test`) e o resultado real registrado na própria tarefa. Registro DNS em teste é sempre sintético (`exemplo.com.br`). Nenhum HTML ou CSS é escrito antes da etapa 6, e só a partir do mockup aprovado (`Desktop-C-coluna`, `Celular-C`, `Celular-C-estados`, `Erro-404-*`); texto de interface não final leva `provisorio`/`data-provisorio`.
+Tarefas pequenas, na ordem. Cada etapa fecha com o portão de qualidade (`pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test`) e o resultado real registrado na própria tarefa. Registro DNS em teste é sempre sintético (`exemplo.com.br`). Nenhum HTML ou CSS é escrito antes da etapa 6, e só a partir do mockup aprovado (`Desktop-C-coluna`, `Celular-C`, `Celular-C-estados`, `Erro-404-*`).
+
+> Nota (2026-11-01): as tarefas abaixo que citam `provisorio`, `data-provisorio` ou `pnpm textos:provisorios` registram o que foi feito; o mecanismo foi removido do código depois (ver a decisão 10 dos requisitos).
 
 ## Etapa 1 — Defesa do DOM
 

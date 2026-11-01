@@ -160,7 +160,7 @@ Tabela dos códigos de achado, o contrato que a spec da página consome:
 
 **Decisão.** Cada achado é `{ codigo, gravidade, tag?, detalhe? }`. A ordem é gravidade (`erro`, `aviso`, `info`) e, dentro dela, a ordem de geração do passo 8.
 **Alternativas.** (a) Texto em português dentro do módulo; (b) um campo booleano por situação (`semRua: true`, `parcial: true`…).
-**Porquê.** RNF-05: o texto é revisado pelo Ryan antes do `1.0.0` e vive na spec da página; o código é o contrato estável. Uma lista de achados cresce sem mudar o tipo de retorno, e a ordem estável torna o teste e a tela determinísticos.
+**Porquê.** RNF-05: o texto vive na spec da página; o código é o contrato estável. Uma lista de achados cresce sem mudar o tipo de retorno, e a ordem estável torna o teste e a tela determinísticos.
 **Trade-off.** A página precisa de uma tabela código → texto (e o teste da página deve garantir que todo código tem texto). Custo pequeno, e é onde a decisão de redação deve ficar.
 
 ### ADR-4 — Valor inválido de tag opcional usa o padrão, com achado; tag duplicada vale a primeira

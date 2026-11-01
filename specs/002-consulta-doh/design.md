@@ -109,7 +109,7 @@ Contrato da requisição, igual nos dois resolvedores:
 | Cloudflare | `https://cloudflare-dns.com/dns-query` | `name=<nome>&type=TXT` | `accept: application/dns-json` |
 | Google     | `https://dns.google/resolve`           | `name=<nome>&type=TXT` | `accept: application/dns-json` |
 
-Opções do `fetch`: `method: "GET"`, `credentials: "omit"`, `referrerPolicy: "no-referrer"`, `redirect: "error"`, `signal`. Os motivos em português ficam como constantes do módulo e levam `[provisório]` no comentário, como o resto do texto de interface que o Ryan revisa antes do lançamento.
+Opções do `fetch`: `method: "GET"`, `credentials: "omit"`, `referrerPolicy: "no-referrer"`, `redirect: "error"`, `signal`. Os motivos em português ficam como constantes do módulo.
 
 ## ADRs
 
