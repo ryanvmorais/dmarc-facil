@@ -6,8 +6,6 @@
 ![deps](https://img.shields.io/badge/deps-pnpm-F69220?logo=pnpm&logoColor=white)
 ![runtime deps](https://img.shields.io/badge/runtime%20deps-0-brightgreen)
 [![CI](https://github.com/ryanvmorais/dmarc-facil/actions/workflows/ci.yml/badge.svg)](https://github.com/ryanvmorais/dmarc-facil/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/ryanvmorais/dmarc-facil/actions/workflows/codeql.yml/badge.svg)](https://github.com/ryanvmorais/dmarc-facil/actions/workflows/codeql.yml)
-[![Lighthouse CI](https://github.com/ryanvmorais/dmarc-facil/actions/workflows/lighthouse.yml/badge.svg)](https://github.com/ryanvmorais/dmarc-facil/actions/workflows/lighthouse.yml)
 ![lint](https://img.shields.io/badge/lint-ESLint-4B32C3?logo=eslint&logoColor=white)
 ![style](https://img.shields.io/badge/style-Prettier-F7B93E?logo=prettier&logoColor=black)
 ![types](https://img.shields.io/badge/types-JSDoc%20%2B%20tsc-3178C6?logo=typescript&logoColor=white)
