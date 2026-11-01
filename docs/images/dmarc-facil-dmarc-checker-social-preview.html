@@ -1,0 +1,259 @@
+<!doctype html>
+<!--
+  Fonte da imagem social do GitHub (dmarc-facil-dmarc-checker-social-preview.png, 1280 x 640).
+  Não vai para a hospedagem: serve só para refazer o PNG, que o Ryan envia à mão em
+  Settings > Social preview. O texto sai exato e o logo é o mesmo do SVG oficial (o `d` do
+  <path> é conferido por test/imagem-social.test.js). Os textos da escada são os de
+  public/js/textos-interface.js; a frase e as três pílulas são texto novo e ainda provisório.
+
+  Para refazer, a partir da raiz do repositório (Chrome instalado):
+    chrome --headless=new --hide-scrollbars --force-device-scale-factor=1 --window-size=1280,640 \
+      --screenshot=docs/images/dmarc-facil-dmarc-checker-social-preview.png \
+      file:///<raiz>/docs/images/dmarc-facil-dmarc-checker-social-preview.html
+-->
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=1280" />
+    <title>DMARC Fácil: imagem social</title>
+    <style>
+      /* Fontes locais da página (public/fonts/): a imagem usa as mesmas, sem CDN. */
+      @font-face {
+        font-family: "Sora";
+        font-style: normal;
+        font-weight: 800;
+        src: url("../../public/fonts/Sora-800-latin.woff2") format("woff2");
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 1280px;
+        height: 640px;
+        margin: 0;
+        overflow: hidden;
+      }
+
+      /* Margem de 80 px em volta: o GitHub e os chats cortam as bordas da imagem. */
+      body {
+        display: flex;
+        align-items: center;
+        gap: 56px;
+        padding: 80px;
+        font-family:
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        line-height: 1.4;
+        color: #0f172a;
+        background: #f8fafc;
+      }
+
+      .esquerda {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: 22px;
+        min-width: 0;
+      }
+
+      .escudo {
+        display: block;
+        fill: #2563eb;
+      }
+
+      .nome {
+        margin: 0;
+        font-family: "Sora", system-ui, sans-serif;
+        font-size: 66px;
+        font-weight: 800;
+        line-height: 1;
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+      }
+
+      .frase {
+        margin: 0;
+        font-size: 31px;
+        line-height: 1.3;
+        color: #334155;
+      }
+
+      .pilulas {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 6px;
+      }
+
+      .pilula {
+        padding: 6px 14px;
+        font-size: 19px;
+        font-weight: 600;
+        white-space: nowrap;
+        color: #1d4ed8;
+        background: #eff6ff;
+        border: 1px solid #bfdbfe;
+        border-radius: 999px;
+      }
+
+      .direita {
+        flex: none;
+        width: 520px;
+        padding: 26px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+      }
+
+      .titulo-escada {
+        margin: 0 0 16px;
+        font-size: 22px;
+        font-weight: 700;
+      }
+
+      .escada {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .degrau {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 14px 16px;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+      }
+
+      /* Como na página: o degrau atual tem borda cheia e o próximo, tracejada. */
+      .degrau-atual {
+        padding: 13px 15px;
+        background: #eff6ff;
+        border: 2px solid #2563eb;
+      }
+
+      .degrau-proximo {
+        padding: 13px 15px;
+        border: 2px dashed #2563eb;
+      }
+
+      .numero {
+        display: flex;
+        flex: none;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        font-size: 18px;
+        font-weight: 700;
+        color: #334155;
+        background: #e2e8f0;
+        border-radius: 50%;
+      }
+
+      .degrau-atual .numero {
+        color: #ffffff;
+        background: #2563eb;
+      }
+
+      .linha {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 10px;
+        align-items: center;
+      }
+
+      .degrau-titulo {
+        font-size: 20px;
+        font-weight: 700;
+      }
+
+      .degrau-resumo {
+        margin-top: 2px;
+        font-size: 17px;
+        line-height: 1.35;
+        color: #334155;
+      }
+
+      .etiqueta {
+        padding: 2px 12px;
+        font-size: 15px;
+        font-weight: 700;
+        color: #ffffff;
+        background: #2563eb;
+        border-radius: 999px;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ============================================================
+         SEÇÃO: MARCA E FRASE (esquerda)
+         ============================================================ -->
+    <div class="esquerda">
+      <svg class="escudo" width="77" height="96" viewBox="2 1 40 50" aria-hidden="true">
+        <path
+          fill-rule="evenodd"
+          d="M22 1Q32 8 42 9V26C42 39 33 46.5 22 51C11 46.5 2 39 2 26V9Q12 8 22 1ZM9 27Q22 18 35 27Q22 36 9 27ZM18.5 27a3.5 3.5 0 1 0 7 0a3.5 3.5 0 1 0-7 0Z"
+        />
+      </svg>
+      <p class="nome">DMARC Fácil</p>
+      <p class="frase">
+        Veja o que o DMARC, o SPF e o DKIM do seu domínio dizem e qual é o próximo passo.
+      </p>
+      <div class="pilulas">
+        <span class="pilula">Roda no navegador</span>
+        <span class="pilula">Sem conta</span>
+        <span class="pilula">Código aberto</span>
+      </div>
+    </div>
+    <!-- fim: MARCA E FRASE -->
+
+    <!-- ============================================================
+         SEÇÃO: ESCADA DO DMARC (direita)
+         Os mesmos três degraus e textos da página, com o degrau 2 como atual.
+         ============================================================ -->
+    <div class="direita">
+      <p class="titulo-escada">Em que degrau do DMARC você está</p>
+      <div class="escada">
+        <div class="degrau">
+          <span class="numero">1</span>
+          <div>
+            <div class="linha"><span class="degrau-titulo">p=none</span></div>
+            <div class="degrau-resumo">
+              Só monitora. Falsificação ainda chega à caixa de entrada.
+            </div>
+          </div>
+        </div>
+        <div class="degrau degrau-atual">
+          <span class="numero">2</span>
+          <div>
+            <div class="linha">
+              <span class="degrau-titulo">p=quarantine · você está aqui</span>
+            </div>
+            <div class="degrau-resumo">Falsificação vai para o spam.</div>
+          </div>
+        </div>
+        <div class="degrau degrau-proximo">
+          <span class="numero">3</span>
+          <div>
+            <div class="linha">
+              <span class="degrau-titulo">p=reject</span>
+              <span class="etiqueta">Próximo passo</span>
+            </div>
+            <div class="degrau-resumo">Falsificação é recusada. Proteção completa.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- fim: ESCADA DO DMARC -->
+  </body>
+</html>
