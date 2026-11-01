@@ -37,7 +37,7 @@ Nenhuma fase começa sem a aprovação explícita da anterior.
 
 ## Roadmap
 
-A entrega é o marco da construção (`v0.x`), como no README. Nenhum marco foi publicado: o primeiro lançamento é a `1.0.0` e contém todos os marcos.
+A entrega é o marco da construção (`v0.x`), como no README. O site não tem versão numerada: cada merge na `main` com o CI verde publica a página.
 
 | Spec                                    | Escopo                                                                                                                                                                                                     | Entrega | Status    |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | --------- |

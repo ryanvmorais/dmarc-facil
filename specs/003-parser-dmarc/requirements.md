@@ -167,7 +167,7 @@ Só JavaScript da plataforma. O `package.json` continua sem `dependencies`.
 
 ### RNF-05 — Sem texto de interface
 
-O módulo devolve códigos e dados, nunca frases para o visitante. O português da explicação é da spec da página, onde o Ryan revisa os textos `[provisório]` antes do `1.0.0`.
+O módulo devolve códigos e dados, nunca frases para o visitante. O português da explicação é da spec da página, onde ficam os textos da interface.
 
 ## Perguntas em aberto
 

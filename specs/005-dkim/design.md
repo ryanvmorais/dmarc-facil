@@ -238,7 +238,7 @@ Fora da lista, por decisão: `default`, `dkim`, `mail`, `smtp`, `k1` e semelhant
 
 **Decisão.** `seletor-dkim.js`, `chave-rsa.js`, `dkim.js` e `dkim-busca.js`, mais o arquivo de dados. `dkim.js` importa `chave-rsa.js`; só `dkim-busca.js` conhece a consulta.
 **Alternativas.** (a) Um `dkim.js` com tudo; (b) a busca dentro da página.
-**Porquê.** A leitura ASN.1 é a parte de maior risco e a única que o Ryan deixou como pergunta; isolada, ela tem teste de entrada torta próprio e sai inteira se um dia for removida. A busca com injeção testa a concorrência com uma consulta falsa que mede quantas estão em andamento, o que não se faz com `fetch` de verdade. A lógica na página ficaria sem teste unitário (ver ADR-1 da spec 004).
+**Porquê.** A leitura ASN.1 é a parte de maior risco e a única que ficou como pergunta em aberto; isolada, ela tem teste de entrada torta próprio e sai inteira se um dia for removida. A busca com injeção testa a concorrência com uma consulta falsa que mede quantas estão em andamento, o que não se faz com `fetch` de verdade. A lógica na página ficaria sem teste unitário (ver ADR-1 da spec 004).
 **Trade-off.** Cinco arquivos para uma funcionalidade; cada um é curto e o `CLAUDE.md` ganha uma linha por módulo.
 
 ### ADR-2 — Os dados são um módulo ES, não JSON

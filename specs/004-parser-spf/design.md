@@ -257,7 +257,7 @@ Tabela dos códigos de achado, o contrato que a spec da página consome (`domini
 
 **Decisão.** `TETO_CONSULTAS = 30` termos contados, em todos os níveis; `MAXIMO_FALHAS = 3`. Passando de qualquer um, a caminhada para com `interrompida` e `incompleta` e o achado `caminhada-interrompida`; o `total` fica no teto.
 **Alternativas.** (a) Parar no 11º termo; (b) teto separado de profundidade e de consultas de rede; (c) sem teto de falhas.
-**Porquê.** Parar no 11º é a opção que o Ryan recusou (decisão 4 dos requisitos): o total real e o caminho ajudam a decidir o que cortar. Todo `include` ou `redirect` seguido já foi contado, então 30 termos limitam as consultas de rede (no máximo 30), a profundidade (no máximo 30) e a CPU de um registro que se repete em ramos; não é preciso um segundo teto. 30 é o triplo do limite da RFC. Três falhas (cada uma pode esperar o tempo dos dois resolvedores) limitam a espera quando a rede caiu.
+**Porquê.** Parar no 11º é a opção descartada (decisão 4 dos requisitos): o total real e o caminho ajudam a decidir o que cortar. Todo `include` ou `redirect` seguido já foi contado, então 30 termos limitam as consultas de rede (no máximo 30), a profundidade (no máximo 30) e a CPU de um registro que se repete em ramos; não é preciso um segundo teto. 30 é o triplo do limite da RFC. Três falhas (cada uma pode esperar o tempo dos dois resolvedores) limitam a espera quando a rede caiu.
 **Trade-off.** Registro com mais de 30 termos mostra "30 ou mais". Para quem já passou de 10, o ponto é o mesmo.
 
 ### ADR-7 — Só TXT: `a`, `mx`, `ptr` e `exists` contam e não são resolvidos
