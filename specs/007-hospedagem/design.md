@@ -1,5 +1,5 @@
 ---
-feature: Hospedagem — a pasta public/ no ar em dmarcfacil.ryanmorais.com.br, com cabeçalhos de segurança e a 404 certa
+feature: Hospedagem — a pasta public/ no ar em dmarc-facil.ryanmorais.com.br, com cabeçalhos de segurança e a 404 certa
 status: concluído
 date: 2026-10-31
 related: [001-fundacao, 006-pagina]
@@ -10,7 +10,7 @@ origin: conception
 
 ## Visão geral
 
-O site é a pasta `public/` servida como **Workers Static Assets**, um Worker só de arquivos (sem `main`, sem código de servidor) ligado ao domínio `dmarcfacil.ryanmorais.com.br` por uma rota de domínio personalizado. Tudo o que dá para versionar mora no repositório: `wrangler.json` (projeto, rota, pasta e tratamento da 404), `public/_headers` (cabeçalhos e cache), `public/robots.txt` e `public/sitemap.xml`, o workflow `deploy.yml` e o script de conferência. O que só existe no painel (criar o token, o ambiente `producao` e os segredos, desligar recursos da zona) fica no guia operacional do mantenedor, mantido fora do repositório.
+O site é a pasta `public/` servida como **Workers Static Assets**, um Worker só de arquivos (sem `main`, sem código de servidor) ligado ao domínio `dmarc-facil.ryanmorais.com.br` por uma rota de domínio personalizado. Tudo o que dá para versionar mora no repositório: `wrangler.json` (projeto, rota, pasta e tratamento da 404), `public/_headers` (cabeçalhos e cache), `public/robots.txt` e `public/sitemap.xml`, o workflow `deploy.yml` e o script de conferência. O que só existe no painel (criar o token, o ambiente `producao` e os segredos, desligar recursos da zona) fica no guia operacional do mantenedor, mantido fora do repositório.
 
 ```text
  PR ─▶ ci.yml (qualidade + seguranca) ─┐
@@ -49,7 +49,7 @@ A conferência do que está no ar (RF-07) é um passo do workflow, não do port�
   "compatibility_date": "2026-10-31",
   "workers_dev": false,
   "preview_urls": false,
-  "routes": [{ "pattern": "dmarcfacil.ryanmorais.com.br", "custom_domain": true }],
+  "routes": [{ "pattern": "dmarc-facil.ryanmorais.com.br", "custom_domain": true }],
   "assets": {
     "directory": "./public",
     "not_found_handling": "404-page",
@@ -84,7 +84,7 @@ Limites da plataforma: 100 regras e 2.000 caracteres por linha; a linha da CSP t
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://dmarcfacil.ryanmorais.com.br/</loc></url>
+  <url><loc>https://dmarc-facil.ryanmorais.com.br/</loc></url>
 </urlset>
 ```
 
@@ -92,7 +92,7 @@ Limites da plataforma: 100 regras e 2.000 caracteres por linha; a linha da CSP t
 User-agent: *
 Allow: /
 
-Sitemap: https://dmarcfacil.ryanmorais.com.br/sitemap.xml
+Sitemap: https://dmarc-facil.ryanmorais.com.br/sitemap.xml
 ```
 
 Sem `<lastmod>`: uma data à mão envelhece sozinha e o buscador a desconfia.
@@ -200,7 +200,7 @@ jobs:
 
 ### ADR-8 — Descoberta: `canonical`, `robots.txt`, `sitemap.xml`
 
-**Decisão.** `index.html` leva `<link rel="canonical" href="https://dmarcfacil.ryanmorais.com.br/">`. `robots.txt` permite tudo e aponta o sitemap. `sitemap.xml` lista só a página inicial, sem `lastmod`. A `404.html` não leva `canonical` (a resposta 404 já tira a página do índice).
+**Decisão.** `index.html` leva `<link rel="canonical" href="https://dmarc-facil.ryanmorais.com.br/">`. `robots.txt` permite tudo e aponta o sitemap. `sitemap.xml` lista só a página inicial, sem `lastmod`. A `404.html` não leva `canonical` (a resposta 404 já tira a página do índice).
 **Alternativas.** Não ter nada disso (o buscador adivinha); `canonical` relativo (o padrão exige o endereço absoluto); `noindex` na 404 (redundante com o status 404).
 **Porquê.** O endereço compartilhável `?dominio=exemplo.com.br` seria outra URL para o buscador; o `canonical` as junta na página inicial. A Lighthouse (SEO) pede o `canonical` e um `robots.txt` válido.
 **Trade-off.** A auditoria `robots-txt` do Lighthouse continua ignorada: a CSP sem `connect-src 'self'` impede o Lighthouse de baixar o arquivo (spec 006). A validade do `robots.txt` e do sitemap passa a ser conferida pelos nossos testes e pela conferência do que está no ar.
@@ -238,7 +238,7 @@ jobs:
 
 ## Testes
 
-- `test/hospedagem.test.js`: `wrangler.json` sem `main`; `assets.directory` é `./public`; `not_found_handling` é `404-page`; `workers_dev` e `preview_urls` são `false`; a rota é `custom_domain` com o endereço de `dmarcfacil.ryanmorais.com.br`; `observability` desligada; `package.json` sem `wrangler` entre as dependências.
+- `test/hospedagem.test.js`: `wrangler.json` sem `main`; `assets.directory` é `./public`; `not_found_handling` é `404-page`; `workers_dev` e `preview_urls` são `false`; a rota é `custom_domain` com o endereço de `dmarc-facil.ryanmorais.com.br`; `observability` desligada; `package.json` sem `wrangler` entre as dependências.
 - `test/cabecalhos.test.js`: `_headers` traz cada cabeçalho de RF-02; a CSP do cabeçalho é igual à `<meta>` do `index.html` mais `frame-ancestors 'none'`; o `connect-src` lista exatamente `RESOLVEDORES` de `doh.js`; a `<meta>` da `404.html` não é mais frouxa que o cabeçalho; nenhuma tem `unsafe-inline` ou `unsafe-eval`; HSTS sem `includeSubDomains` e sem `preload`; `Cache-Control` longo só em `/fonts/*`; nenhuma linha passa de 2.000 caracteres e há no máximo 100 regras.
 - `test/descoberta.test.js`: `canonical` do `index.html`, `robots.txt` e `sitemap.xml` com o endereço da rota; sitemap bem formado, com uma só URL; `404.html` sem `canonical`.
 - `test/workflow-deploy.test.js`: toda `uses:` por SHA; `runs-on: ubuntu-26.04`; gatilho só `workflow_run` do `CI` na `main` e `workflow_dispatch` (nenhum `pull_request`); condição de sucesso, `push` e repositório; ambiente `producao`; `permissions` só `contents: read`; o segredo só no job de deploy; `WRANGLER_VERSION` fixa; `LHCI_VERSION` igual à do `lighthouse.yml`; concorrência sem cancelamento.

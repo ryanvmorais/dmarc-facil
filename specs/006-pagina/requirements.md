@@ -37,7 +37,7 @@ Quatro regras do projeto pesam aqui e nenhuma pode regredir (`CLAUDE.md`):
 
 ## Não-objetivos
 
-- **Hospedagem, cabeçalhos HTTP e domínio** `dmarcfacil.ryanmorais.com.br`: fora desta spec. Ela entrega arquivos estáticos que funcionam em qualquer hospedagem; o que a hospedagem faz com a 404 é conferido na doc oficial da hospedagem escolhida.
+- **Hospedagem, cabeçalhos HTTP e domínio** `dmarc-facil.ryanmorais.com.br`: fora desta spec. Ela entrega arquivos estáticos que funcionam em qualquer hospedagem; o que a hospedagem faz com a 404 é conferido na doc oficial da hospedagem escolhida.
 - **Imagem de pré-visualização social** e `og:image`: só com a página real pronta.
 - **Gerar o registro** pronto para colar, ou verificar o alinhamento do DMARC com o `From` de uma mensagem.
 - **Ler relatórios DMARC** (`rua`/`ruf`): é o produto MailVigil; a página só aponta para ele.

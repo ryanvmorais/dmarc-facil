@@ -54,7 +54,7 @@ describe("wrangler.json", () => {
 
   it("liga o site a um domínio personalizado, o único endereço (ADR-2)", async () => {
     const { routes } = await lerJson("wrangler.json");
-    assert.deepEqual(routes, [{ pattern: "dmarcfacil.ryanmorais.com.br", custom_domain: true }]);
+    assert.deepEqual(routes, [{ pattern: "dmarc-facil.ryanmorais.com.br", custom_domain: true }]);
   });
 
   it("deixa a observabilidade desligada (RNF-01)", async () => {

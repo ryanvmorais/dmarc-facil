@@ -153,7 +153,7 @@ Formata JavaScript, JSON, YAML e Markdown. O `pnpm format:check` falha se algum 
 
 ### Workers Static Assets (Cloudflare)
 
-O site é a pasta `public/` servida como um Worker só de arquivos: o `wrangler.json` não tem `main`, só o nome, a pasta (`./public`), a rota do domínio `dmarcfacil.ryanmorais.com.br` e `not_found_handling: "404-page"`, que serve a `404.html` com status 404 em qualquer caminho que não existe. Nenhum código de servidor. O `workers_dev` e as pré-visualizações públicas ficam desligados, para o domínio ser o único endereço.
+O site é a pasta `public/` servida como um Worker só de arquivos: o `wrangler.json` não tem `main`, só o nome, a pasta (`./public`), a rota do domínio `dmarc-facil.ryanmorais.com.br` e `not_found_handling: "404-page"`, que serve a `404.html` com status 404 em qualquer caminho que não existe. Nenhum código de servidor. O `workers_dev` e as pré-visualizações públicas ficam desligados, para o domínio ser o único endereço.
 
 **Por que esta:** a zona `ryanmorais.com.br` já está na Cloudflare, requisição a arquivo estático é grátis e ilimitada, `_headers` vale, e a doc da Cloudflare manda começar projeto novo por Workers, não por Pages. Alternativas descartadas: Cloudflare Pages e outra hospedagem estática (sem ganho aqui).
 

@@ -1,5 +1,5 @@
 ---
-feature: Hospedagem — a pasta public/ no ar em dmarcfacil.ryanmorais.com.br, com cabeçalhos de segurança e a 404 certa
+feature: Hospedagem — a pasta public/ no ar em dmarc-facil.ryanmorais.com.br, com cabeçalhos de segurança e a 404 certa
 status: concluído
 date: 2026-10-31
 related: [001-fundacao, 006-pagina]
@@ -12,7 +12,7 @@ Tarefas pequenas, na ordem. Cada etapa de código fecha com o portão de qualida
 
 ## Etapa 1 — Configuração, cabeçalhos e descoberta
 
-- [x] `wrangler.json`: JSON estrito, sem `main`; `name` `dmarc-facil`, `compatibility_date` `2026-10-31`, `workers_dev` e `preview_urls` `false`, rota `custom_domain` para `dmarcfacil.ryanmorais.com.br`, `assets` com `./public`, `404-page` e `auto-trailing-slash`, `observability` desligada. — RF-01, RF-03, ADR-1, ADR-2
+- [x] `wrangler.json`: JSON estrito, sem `main`; `name` `dmarc-facil`, `compatibility_date` `2026-10-31`, `workers_dev` e `preview_urls` `false`, rota `custom_domain` para `dmarc-facil.ryanmorais.com.br`, `assets` com `./public`, `404-page` e `auto-trailing-slash`, `observability` desligada. — RF-01, RF-03, ADR-1, ADR-2
 - [x] `test/hospedagem.test.js`: cada chave do `wrangler.json` conforme o ADR-1; sem `main`; rota `custom_domain`; `package.json` sem `wrangler` entre as dependências. — RF-01, RF-03, RNF-03, RNF-04
 - [x] `public/_headers`: regra `/*` com os sete cabeçalhos do ADR-3 (CSP igual à `<meta>` do `index.html` mais `frame-ancestors 'none'`, HSTS só com `max-age=31536000`) e regra `/fonts/*` com o cache longo do ADR-4. — RF-02, RF-04, ADR-3, ADR-4
 - [x] `test/cabecalhos.test.js`: lê o `_headers` e confere cada cabeçalho; a CSP do cabeçalho igual à `<meta>` do `index.html` mais `frame-ancestors`; `connect-src` com exatamente `RESOLVEDORES` de `doh.js`; a `<meta>` da `404.html` não é mais frouxa que o cabeçalho; sem `unsafe-inline` e `unsafe-eval`; HSTS sem `includeSubDomains` e sem `preload`; `Cache-Control` longo só em `/fonts/*`; no máximo 100 regras e 2.000 caracteres por linha. — RF-02, RF-04, RNF-04, ADR-3
@@ -53,5 +53,5 @@ Etapa sem código, por isso sem portão de qualidade: o que ela entrega é o sit
 - [x] Resumo da conferência lido (Deploy #2, run 41251796843: as sete verificações verdes; a única falha real do primeiro deploy foi o bloco gerenciado do `robots.txt`, tratado no PR #15 e registrado no design; o `_headers` valeu na 404 e o `Cache-Control` das fontes não se juntou ao padrão): todas as verificações verdes, ou cada falha tratada (cabeçalho na 404, `Cache-Control` das fontes, permissão do token, os riscos do design) com o desvio registrado em "Ajustes feitos na implementação" do `design.md`. — RF-02, RF-03, RF-04, RF-06, RF-07
 - [x] Lighthouse de produção verde nos dois modos, com as notas e o peso registrados aqui (Deploy #2: desempenho, acessibilidade, boas práticas e SEO com nota 1,0 em mobile e desktop; peso ~122 KB nos dois; CLS 0 no mobile e ~0,001 no desktop; conferida também a página aberta no Chrome, só com o próprio site e `cloudflare-dns.com` na rede, sem beacon e com a 404 certa). — RF-07, RNF-04
 - [x] Um rollback real feito e voltado, antes de divulgar o endereço (2026-10-31, pelo painel: Rollback para a `2c50f806` e Promote version de volta para a `6d756cff`; a conferência passou nas duas pontas). — RF-05, ADR-9
-- [x] `*.workers.dev` e o endereço de pré-visualização conferidos como fora do ar (aba Domains do Worker: só `dmarcfacil.ryanmorais.com.br`, tipo Production). — RF-01
+- [x] `*.workers.dev` e o endereço de pré-visualização conferidos como fora do ar (aba Domains do Worker: só `dmarc-facil.ryanmorais.com.br`, tipo Production). — RF-01
 - [x] Os três arquivos da spec com `status: concluído` e a linha da 007 em `specs/README.md` como `concluído`. — Impacto

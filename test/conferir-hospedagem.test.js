@@ -27,7 +27,7 @@ import {
 
 const RAIZ = fileURLToPath(new URL("../", import.meta.url));
 const PASTA = `${RAIZ}public`;
-const ENDERECO = "https://dmarcfacil.ryanmorais.com.br/";
+const ENDERECO = "https://dmarc-facil.ryanmorais.com.br/";
 
 const TEXTO_HEADERS = await readFile(`${PASTA}/_headers`, "utf8");
 const GERAIS = lerCabecalhosEsperados(TEXTO_HEADERS, "/*");
@@ -250,7 +250,7 @@ describe("conferirHospedagem: site íntegro", () => {
     });
     assert.ok(pedidos.length >= 8);
     for (const pedido of pedidos) {
-      assert.equal(new URL(pedido).hostname, "dmarcfacil.ryanmorais.com.br", pedido);
+      assert.equal(new URL(pedido).hostname, "dmarc-facil.ryanmorais.com.br", pedido);
     }
   });
 });

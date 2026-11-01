@@ -6,7 +6,7 @@ Este arquivo orienta o Claude Code (claude.ai/code) ao trabalhar neste repositó
 
 **DMARC Fácil** é um site estático que consulta o DMARC, o SPF e o DKIM de um domínio, explica cada registro em português e diz o próximo passo (de `p=none` para `quarantine` e `reject`). Tudo roda no navegador do visitante, por DNS-over-HTTPS: nenhum servidor nosso vê o domínio. É a porta de entrada do MailVigil.
 
-Stack: JavaScript puro (módulos ES, sem build), HTML e CSS, Node 26 e pnpm 12 só para as ferramentas de desenvolvimento. Público, Apache-2.0. Não tem versão numerada: é uma página que se atualiza sozinha, e cada merge na `main` com o CI verde publica a nova (spec 007). Hospedado como Workers Static Assets da Cloudflare em `dmarcfacil.ryanmorais.com.br`.
+Stack: JavaScript puro (módulos ES, sem build), HTML e CSS, Node 26 e pnpm 12 só para as ferramentas de desenvolvimento. Público, Apache-2.0. Não tem versão numerada: é uma página que se atualiza sozinha, e cada merge na `main` com o CI verde publica a nova (spec 007). Hospedado como Workers Static Assets da Cloudflare em `dmarc-facil.ryanmorais.com.br`.
 
 ## Comandos comuns
 

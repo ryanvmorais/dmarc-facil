@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 # Deploy do site (spec 007, ADR-5 e ADR-6): publica `public/` como Workers Static Assets em
-# dmarcfacil.ryanmorais.com.br, confere o que ficou no ar e mede o endereço real com o
+# dmarc-facil.ryanmorais.com.br, confere o que ficou no ar e mede o endereço real com o
 # Lighthouse. Roda depois do CI verde na `main` e, à mão, por `workflow_dispatch` (o primeiro
 # deploy e a republicação de uma versão antiga; quem dispara precisa de acesso ao ambiente
 # `producao`). Para desfazer um deploy ruim, reverta o commit na `main` (ADR-6).
