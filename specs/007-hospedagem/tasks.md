@@ -38,7 +38,7 @@ Tarefas pequenas, na ordem. Cada etapa de código fecha com o portão de qualida
 
 ## Etapa 4 — Documentação
 
-- [x] Guia operacional do mantenedor (movido para fora do repositório em 2026-11-01): passo a passo em ordem, cada passo dizendo quem faz e o que conferir — criar o token (modelo "Edit Cloudflare Workers", só a conta e a zona), criar o ambiente `producao` restrito à `main` com os dois segredos, desligar Web Analytics, Rocket Loader e ofuscação de e-mail e ligar "Always Use HTTPS", primeiro deploy por `workflow_dispatch`, ler o resumo da conferência, abrir a página no navegador e olhar a rede, conferir que `*.workers.dev` não serve o site; a regra das fontes (arquivo muda, nome muda); os dois caminhos de volta do ADR-9; revisão mensal da versão do `wrangler`. — RF-08, ADR-7, ADR-9
+- [x] Guia operacional do mantenedor, mantido fora do repositório (movido em 2026-11-01): publicar, conferir o resumo, validar a página no navegador, as regras de manutenção e os dois caminhos de volta do ADR-9. — RF-08, ADR-7, ADR-9
 - [x] `CLAUDE.md` (manter abaixo de ~20 KB): árvore de arquitetura com `wrangler.json`, `deploy.yml`, `producao-*.json` e `conferir-hospedagem.mjs`; a linha de visão geral deixa de dizer "a decidir"; a seção de qualidade cita o deploy e a conferência. — Impacto, RF-08
 - [x] `docs/stack.md`: Workers Static Assets, `wrangler` por `npx`, `_headers`, HSTS, ambiente `producao`. — Impacto
 - [x] `README.md` e `README.en.md`: o endereço do site, sem data de lançamento, e a linha `v0.7` na tabela de marcos nos dois idiomas. — Impacto, RF-08

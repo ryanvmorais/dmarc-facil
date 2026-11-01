@@ -268,7 +268,6 @@ urlHttps(texto) → string | null                       // só https vira href
 
 - **Fonte `woff2` de origem externa.** Os dois arquivos precisam vir de uma fonte confiável (o repositório oficial de cada fonte) e ser conferidos por hash; a licença OFL vai junto. Mitigação: baixar uma vez, registrar a origem e o hash no `docs/stack.md`.
 - **Varredura textual do ADR-7 frágil.** Mitigada pelo teste que exige código em cada um dos cinco arquivos.
-- **Texto do catálogo com afirmação demais.** O teste de frases proibidas (RF-09) pega "você não tem DKIM" e "está protegido", mas não o resto; a revisão humana dos textos é o portão final.
 - **Lighthouse CI instável.** Notas variam por execução. Mitigação: limites de 0.95 (não 1.0, exceto acessibilidade) e três execuções por página.
 - **`<meta>` de CSP não protege o `<head>` antes dele.** A política vem como a primeira tag depois de `charset`.
 
