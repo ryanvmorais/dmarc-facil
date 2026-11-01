@@ -56,19 +56,14 @@ DMARC Fácil is small on purpose: it reads the DNS and explains what it finds. F
 - **DKIM depends on the selector.** The page only finds the key in common selectors and in the one you type. _Instead:_ find the selector in the header of an email of yours (`DKIM-Signature`, the `s=` field) and enter it on the page.
 - **It shows what the public resolver returned right now.** A recent DNS change may take a while to show up because of caching. _Instead:_ wait for the record's TTL and check again.
 
-## What it does
+## What it checks
 
-DMARC Fácil is built milestone by milestone, each one designed first as a spec, in [`specs/`](specs/) (in Portuguese). The milestones are the construction history, not published versions.
+- **DMARC:** finds the record, reads the tags and tells you which step of the ladder the domain is on (`p=none`, `p=quarantine` or `p=reject`) and what to do to move up.
+- **SPF:** reads the record, follows `include` and `redirect`, counts the DNS lookups (the limit is 10) and points out what is wrong.
+- **DKIM:** looks for the key in 15 common selectors and in the ones you type, and measures the key size.
+- **Each finding** comes with a sentence saying what it means and what to do.
 
-| Milestone | Focus                                                                                                                                                        | Status  |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------- |
-| `v0.1`    | Foundation: validation and normalization of the typed domain, skeleton with no build step, tests, CI and quality gate                                        | shipped |
-| `v0.2`    | DoH query: TXT records of a name over DNS-over-HTTPS, with fallback between resolvers                                                                        | shipped |
-| `v0.3`    | DMARC parser: picks the record among the TXT strings, reads the tags and reports the findings and the stage on the ladder                                    | shipped |
-| `v0.4`    | SPF parser: reads the record, follows `include` and `redirect`, counts the DNS lookups and reports the findings                                              | shipped |
-| `v0.5`    | DKIM: looks for the key in common and typed selectors with a bounded number of parallel lookups, reads the record, measures the key and reports the findings | shipped |
-| `v0.6`    | Page: form, DMARC ladder, DMARC, SPF and DKIM cards with a badge, finding texts, privacy on screen, 404 page and Lighthouse CI                               | shipped |
-| `v0.7`    | Hosting: Workers Static Assets, security headers, a 404 with status 404, deploy through GitHub Actions and a check of what is live                           | shipped |
+How the tool was built, one step at a time, is in [`specs/`](specs/) (in Portuguese).
 
 ## Development
 
