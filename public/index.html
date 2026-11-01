@@ -22,7 +22,7 @@
     <title>DMARC Fácil: verifique o DMARC, o SPF e o DKIM do seu domínio</title>
     <meta
       name="description"
-      content="Digite o seu domínio e veja, em português, o que o DMARC, o SPF e o DKIM dizem e qual é o próximo passo. A consulta sai do seu navegador."
+      content="Digite o seu domínio e veja o que o DMARC, o SPF e o DKIM dizem e qual é o próximo passo. A consulta sai do seu navegador."
     />
     <link rel="canonical" href="https://dmarcfacil.ryanmorais.com.br/" />
     <meta name="color-scheme" content="light" />
@@ -61,14 +61,12 @@
            não é anunciado por todo leitor) e ligado ao campo por aria-describedby (RF-01).
            ============================================================ -->
       <section class="apresentacao" aria-labelledby="titulo-pagina">
-        <h1 class="titulo" id="titulo-pagina">Seu e-mail pode ser falsificado?</h1>
-        <p data-provisorio>
-          Digite o domínio e veja, em português, o que DMARC, SPF e DKIM dizem e o que fazer agora.
-        </p>
+        <h1 id="titulo-pagina" class="titulo">Alguém pode enviar e-mail em nome do seu domínio?</h1>
+        <p>Digite o domínio e veja o que DMARC, SPF e DKIM dizem sobre ele e o que fazer agora.</p>
       </section>
 
       <noscript>
-        <p class="aviso-noscript" data-provisorio>
+        <p class="aviso-noscript">
           A verificação precisa de JavaScript, porque a consulta sai do seu navegador. Ative o
           JavaScript e recarregue a página.
         </p>
@@ -104,10 +102,10 @@
           <span id="erro-dominio-texto"></span>
         </p>
         <button class="botao botao-cheio" id="botao-verificar" type="submit">Verificar</button>
-        <p class="nota" id="privacidade" data-provisorio>
+        <p id="privacidade" class="nota">
           A consulta sai do seu navegador direto para o DNS público da Cloudflare (ou do Google, se
           a Cloudflare não responder). Quem responde vê o domínio, os seletores DKIM que tentamos e
-          o seu IP. O DMARC Fácil não guarda nada.
+          o seu IP. O DMARC Fácil não guarda o domínio que você digita.
         </p>
       </form>
       <!-- fim: APRESENTAÇÃO E FORMULÁRIO -->
@@ -128,7 +126,7 @@
          ============================================================ -->
     <footer class="coluna rodape">
       <div class="rodape-interno">
-        <p class="nota" data-provisorio>
+        <p class="nota">
           O DMARC Fácil é código aberto (Apache-2.0). Nenhum domínio consultado é guardado.
         </p>
         <a class="link-doc" href="https://github.com/ryanvmorais/dmarc-facil">Código no GitHub</a>

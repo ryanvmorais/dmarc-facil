@@ -113,9 +113,13 @@ describe("listarProvisorios: catálogo e HTML sintéticos", () => {
 });
 
 describe("listarProvisorios: o repositório de verdade", () => {
-  it("lista os catálogos reais sem lançar, e o catálogo de achados tem marcados", async () => {
+  it("lista os catálogos reais sem lançar, e cada item diz onde está e o texto", async () => {
     const lista = await listarProvisorios();
 
-    assert.ok(lista.some((item) => item.onde.startsWith("public/js/textos-achados.js:")));
+    assert.ok(Array.isArray(lista));
+    for (const item of lista) {
+      assert.equal(typeof item.onde, "string");
+      assert.equal(typeof item.texto, "string");
+    }
   });
 });

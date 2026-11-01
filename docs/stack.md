@@ -107,7 +107,7 @@ Ao verificar, a página troca o endereço para `?dominio=exemplo.com.br` sem cri
 
 ### `pnpm textos:provisorios`
 
-Lista os textos da interface ainda não finais: o campo `provisorio: true` nos catálogos (`public/js/textos-achados.js`, `public/js/textos-interface.js`) e o atributo `data-provisorio` nos HTML. O visitante não vê a marca; é a lista de revisão do Ryan antes da `1.0.0`.
+Lista os textos da interface ainda não finais: o campo `provisorio: true` nos catálogos (`public/js/textos-achados.js`, `public/js/textos-interface.js`) e o atributo `data-provisorio` nos HTML. O visitante não vê a marca; é a lista de revisão do Ryan para texto novo.
 
 **Estudar:** como `import()` dinâmico lê um módulo ES dentro de um script Node.
 

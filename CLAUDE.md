@@ -92,7 +92,7 @@ scripts/                 # scripts em Node (conferir-links-dkim.mjs: links dos p
 docs/                    # documentação do projeto
   hospedagem.md          # passo a passo do Ryan: token, ambiente producao, painel, primeiro deploy, rollback
   stack.md               # mapa de cada tecnologia: o que faz, por que, o que estudar
-  images/                # logo oficial (SVG)
+  images/                # logo oficial (SVG) e a captura da página usada no README
 specs/                   # specs de cada marco (requirements, design, tasks)
 .githooks/pre-commit     # portão de qualidade local, o mesmo do CI
 .claude/                 # hooks do Claude Code (scripts em hooks/, ligados por settings.json)
@@ -114,14 +114,14 @@ Camadas: a lógica de parsing (DMARC, SPF, DKIM) e de validação mora em módul
 - **Idioma do código, comentários, commits e specs: português** (projeto público educativo da home; regra em `/idioma`). Strings visíveis, em português. Nomes técnicos universais (`DoH`, `TXT`, `DKIM`) ficam como são.
 - **Estilo dos arquivos:** `/estilo-arquivos`.
 - **Marca:** logo A (escudo com olho aberto), da família MailVigil/WebVigil: azul `#2563eb`, `Sora` 800 no nome, `JetBrains Mono` no código. SVG oficial em `docs/images/`, um `<path>` só com `evenodd`; o teste `test/logo.test.js` o guarda. Fontes locais na página final, nunca CDN.
-- **Interface:** decidida (interface C: escada `none` → `quarantine` → `reject` com a etiqueta "Próximo passo" no degrau seguinte ao atual; o cartão de DMARC fica só com registro e selo). A spec da página traz o mockup aprovado. Texto de interface que ainda não é final fica marcado `[provisório]`.
+- **Interface:** decidida (interface C: escada `none` → `quarantine` → `reject` com a etiqueta "Próximo passo" no degrau seguinte ao atual; o cartão de DMARC fica só com registro e selo). A spec da página traz o mockup aprovado. Os textos da interface estão revisados; texto novo entra marcado (`provisorio: true` nos catálogos, `data-provisorio` no HTML) até o Ryan revisar.
 - **DKIM:** nunca dizer "você não tem DKIM"; dizer "não encontrei nesses seletores" (o seletor é escolha do remetente e não dá para listar). 15 a 20 seletores comuns em arquivo de dados, com link da doc de cada provedor, mais campo livre.
 
 ## Qualidade e automação
 
 - **CI** (`.github/workflows/ci.yml`): job `qualidade` (Prettier, ESLint, `tsc`, testes) e job `seguranca` (`pnpm audit`). Mais CodeQL e `dependency-review`. Toda `uses:` fixada por SHA, `runs-on: ubuntu-26.04`.
 - **Links DKIM** (`.github/workflows/links-dkim.yml`, `pnpm links:dkim`): toda segunda abre cada `documentacao` de `public/js/seletores-dkim.js`; run vermelho = link quebrado (404/410/rede) ou página que não cita mais o seletor; 403 e site fora do ar são só aviso. Não é check obrigatório. Ao mexer na lista, atualize o `conferido` do item.
-- **Lighthouse CI** (`.github/workflows/lighthouse.yml`, limites em `.github/lighthouse/{mobile,desktop}.json`): mede `index.html` e `404.html` sobre `public/`; acessibilidade = 1 e as outras notas ≥ 0,95, peso abaixo de 150 KB. Não é check obrigatório. O `@lhci/cli` entra por `npx` numa variável do workflow, nunca como dependência (a árvore dele derruba o `pnpm audit`). `pnpm textos:provisorios` lista os textos que o Ryan ainda revisa antes da `1.0.0`.
+- **Lighthouse CI** (`.github/workflows/lighthouse.yml`, limites em `.github/lighthouse/{mobile,desktop}.json`): mede `index.html` e `404.html` sobre `public/`; acessibilidade = 1 e as outras notas ≥ 0,95, peso abaixo de 150 KB. Não é check obrigatório. O `@lhci/cli` entra por `npx` numa variável do workflow, nunca como dependência (a árvore dele derruba o `pnpm audit`). `pnpm textos:provisorios` lista os textos novos que o Ryan ainda não revisou.
 - **Deploy** (`.github/workflows/deploy.yml`, spec 007): roda depois do `CI` verde na `main` (`workflow_run`, só `push` do próprio repositório) e por `workflow_dispatch`; ambiente `producao` com os segredos da Cloudflare; publica com `npx wrangler@<WRANGLER_VERSION>` (não é dependência: a árvore derrubaria o `pnpm audit`), confere o que ficou no ar (`scripts/conferir-hospedagem.mjs`: cabeçalhos, 404, HTML byte a byte) e mede o endereço real com o Lighthouse (`producao-{mobile,desktop}.json`). As versões do `wrangler` e do `@lhci/cli` são revistas à mão todo mês (o Dependabot não vê `npx`). **Publicar, o token e rollback são do Ryan** (`docs/hospedagem.md`).
 - **Ruleset `proteger-main`:** PR obrigatório, só squash, histórico linear, `qualidade` e `seguranca` exigidos. Nada de commit direto na `main`.
 - **Pre-commit** (`.githooks/pre-commit`): o mesmo portão do CI em modo verificação.
