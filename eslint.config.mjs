@@ -37,6 +37,36 @@ const configuracao = [
         { property: "insertAdjacentHTML", message: "Use criar() de dom.js." },
         { object: "document", property: "write", message: "Use criar() de dom.js." },
         { object: "document", property: "writeln", message: "Use criar() de dom.js." },
+        // O idioma é o endereço da página, nunca o navegador do visitante, e a página não
+        // guarda nada dele (ADR-10 da spec 008; "sem rastreador" é promessa que vira teste).
+        { object: "navigator", property: "language", message: "O idioma é o endereço (ADR-10)." },
+        { object: "navigator", property: "languages", message: "O idioma é o endereço (ADR-10)." },
+        {
+          object: "document",
+          property: "cookie",
+          message: "A página não guarda dado do visitante.",
+        },
+        {
+          object: "window",
+          property: "localStorage",
+          message: "A página não guarda dado do visitante.",
+        },
+        {
+          object: "window",
+          property: "sessionStorage",
+          message: "A página não guarda dado do visitante.",
+        },
+        {
+          object: "window",
+          property: "indexedDB",
+          message: "A página não guarda dado do visitante.",
+        },
+      ],
+      "no-restricted-globals": [
+        "error",
+        { name: "localStorage", message: "A página não guarda dado do visitante." },
+        { name: "sessionStorage", message: "A página não guarda dado do visitante." },
+        { name: "indexedDB", message: "A página não guarda dado do visitante." },
       ],
       "no-eval": "error",
       "no-new-func": "error",

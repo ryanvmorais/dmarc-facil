@@ -75,6 +75,65 @@ describe("lint de public/: formas de inserir HTML ou código", () => {
 });
 
 // ---------------------------------------------------------------------------
+// IDIOMA E ARMAZENAMENTO
+// ---------------------------------------------------------------------------
+
+describe("lint de public/: idioma e armazenamento (ADR-10 da spec 008)", () => {
+  /** @type {Array<[string, string, string]>} Rótulo, trecho e regra esperada. */
+  const casos = [
+    [
+      "navigator.language",
+      "export const f = () => navigator.language;",
+      "no-restricted-properties",
+    ],
+    [
+      "navigator.languages",
+      "export const f = () => navigator.languages;",
+      "no-restricted-properties",
+    ],
+    [
+      "localStorage",
+      'export const f = () => localStorage.setItem("a", "b");',
+      "no-restricted-globals",
+    ],
+    [
+      "sessionStorage",
+      'export const f = () => sessionStorage.getItem("a");',
+      "no-restricted-globals",
+    ],
+    ["indexedDB", 'export const f = () => indexedDB.open("a");', "no-restricted-globals"],
+    [
+      "window.localStorage",
+      "export const f = () => window.localStorage;",
+      "no-restricted-properties",
+    ],
+    [
+      "window.sessionStorage",
+      "export const f = () => window.sessionStorage;",
+      "no-restricted-properties",
+    ],
+    ["window.indexedDB", "export const f = () => window.indexedDB;", "no-restricted-properties"],
+    [
+      "document.cookie",
+      'export const f = () => { document.cookie = "a=b"; };',
+      "no-restricted-properties",
+    ],
+  ];
+
+  for (const [rotulo, trecho, regra] of casos) {
+    it(`recusa ${rotulo}`, async () => {
+      assert.ok((await regrasQueFalham(trecho)).includes(regra));
+    });
+  }
+
+  it("não cobra a regra dos testes", async () => {
+    const regras = await regrasQueFalham("export const f = () => localStorage;", "test/x.js");
+
+    assert.ok(!regras.includes("no-restricted-globals"));
+  });
+});
+
+// ---------------------------------------------------------------------------
 // FORMAS PERMITIDAS
 // ---------------------------------------------------------------------------
 
