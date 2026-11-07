@@ -62,10 +62,10 @@ public/                  # o site: é o que vai para a hospedagem, sem build
   index.html, 404.html   # as duas páginas (CSP por <meta>, sem style= nem script inline; caminhos absolutos; canonical só no index)
   _headers               # cabeçalhos de segurança (/*) e cache longo das fontes (/fonts/*); a plataforma o consome, não o publica
   robots.txt, sitemap.xml # descoberta; citam o endereço da rota do wrangler.json
-  favicon.svg            # ícone da aba, referenciado pelas duas páginas
+  favicon.svg            # ícone da aba (troca de cor no tema escuro), referenciado pelas duas páginas
   apple-touch-icon.png   # ícone de tela inicial (180 x 180, o logo em branco sobre o azul da marca); só o index o cita
   social-pt.png          # og:image do index (1280 x 640); igual, byte a byte, à social preview do GitHub em docs/images/
-  css/pagina.css         # a folha das duas páginas (tokens, cartões, escada); fontes em fonts/ (OFL ao lado)
+  css/pagina.css         # a folha das duas páginas (tokens claros e escuros, cartões, escada); fontes em fonts/ (OFL ao lado)
   js/                    # módulos ES carregados direto pelo navegador
     dominio.js           # valida e normaliza o domínio digitado (módulo puro: sem DOM, sem rede)
     nome-dns.js          # valida o nome DNS montado pela ferramenta antes de virar URL (puro)

@@ -9,7 +9,7 @@
  *
  * Estrutura do arquivo:
  *   1. Fontes locais (Sora 800 e JetBrains Mono 400)
- *   2. Tokens (custom properties)
+ *   2. Tokens (custom properties), claros e escuros
  *   3. Base
  *   4. Cabeçalho, apresentação e formulário
  *   5. Cartões, selos e achados
@@ -41,7 +41,11 @@
 
 /* 2. Tokens
  * Vêm do mockup aprovado (spec 006, ADR-3). Texto contra o fundo do cartão: 4,5:1 ou mais
- * (RF-07); o azul da marca contra o branco passa em 5,1:1. */
+ * (RF-07); o azul da marca contra o branco passa em 5,1:1.
+ * O tema escuro segue o sistema (`prefers-color-scheme`), sem botão: só redefine estes mesmos
+ * tokens, no bloco logo abaixo, então nenhuma regra do resto do arquivo conhece o tema. Por
+ * isso cor que não varia com o tema também é token (o hover do botão, o botão desabilitado e
+ * o logo): um valor fixo numa regra ficaria errado em um dos dois temas. */
 :root {
   color-scheme: light;
 
@@ -57,6 +61,9 @@
   --cor-codigo-fundo: #f1f5f9;
   --cor-campo-borda: #64748b;
   --cor-foco: #1d4ed8;
+  --cor-marca-hover: #1d4ed8;
+  --cor-botao-desabilitado: #94a3b8;
+  --cor-logo: #2563eb;
 
   /* Selos e gravidades: texto e fundo de cada estado (ícone e palavra o distinguem). */
   --selo-ok-texto: #166534;
@@ -75,6 +82,41 @@
   --fonte-corpo: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --fonte-titulo: "Sora", system-ui, sans-serif;
   --fonte-codigo: "JetBrains Mono", Consolas, monospace;
+}
+
+/* Tema escuro (mockup aprovado). Mesmos nomes dos tokens claros; `test/tema-escuro.test.js`
+ * exige que nenhum fique de fora e mede o contraste dos pares de texto e fundo. A marca
+ * continua o azul `#2563eb` nos botões (branco sobre ele passa em 5,2:1); o azul claro
+ * `--cor-marca-escura` é só para link e texto sobre o fundo escuro. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --cor-fundo: #0b1220;
+    --cor-cartao: #111a2e;
+    --cor-borda: #1e293b;
+    --cor-texto: #f1f5f9;
+    --cor-texto-2: #cbd5e1;
+    --cor-texto-3: #94a3b8;
+    --cor-marca: #2563eb;
+    --cor-marca-escura: #93c5fd;
+    --cor-marca-fundo: #12254a;
+    --cor-codigo-fundo: #162036;
+    --cor-campo-borda: #94a3b8;
+    --cor-foco: #93c5fd;
+    --cor-marca-hover: #1d4ed8;
+    --cor-botao-desabilitado: #475569;
+    --cor-logo: #60a5fa;
+
+    --selo-ok-texto: #86efac;
+    --selo-ok-fundo: #12301f;
+    --selo-atencao-texto: #fcd34d;
+    --selo-atencao-fundo: #3a2a0a;
+    --selo-problema-texto: #fca5a5;
+    --selo-problema-fundo: #3b1515;
+    --selo-neutro-texto: #cbd5e1;
+    --selo-neutro-fundo: #1e293b;
+  }
 }
 
 /* 3. Base
@@ -161,6 +203,12 @@ a {
   min-height: 44px;
   color: inherit;
   text-decoration: none;
+}
+
+/* O logo é um <path> com `fill` de atributo (a CSP não aceita style=); esta regra o sobrepõe
+ * para trocar o azul no tema escuro. O atributo fica como cor de reserva. */
+.marca svg path {
+  fill: var(--cor-logo);
 }
 
 .marca-nome {
@@ -268,7 +316,7 @@ a {
 /* Enviando: o botão avisa e não dispara uma segunda consulta (RF-02). */
 .botao:disabled {
   color: var(--cor-texto);
-  background: #94a3b8;
+  background: var(--cor-botao-desabilitado);
   cursor: progress;
 }
 
@@ -818,6 +866,6 @@ a {
   }
 
   .botao:hover:not(:disabled) {
-    background: var(--cor-marca-escura);
+    background: var(--cor-marca-hover);
   }
 }
