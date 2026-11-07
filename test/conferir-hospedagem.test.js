@@ -53,7 +53,7 @@ const REVALIDAR = "public, max-age=0, must-revalidate";
 /** @type {Record<string, { arquivo: string, tipo: string }>} */
 const ROTAS = {
   "/": { arquivo: "index.html", tipo: "text/html; charset=utf-8" },
-  "/js/pagina.js": { arquivo: "js/pagina.js", tipo: "text/javascript; charset=utf-8" },
+  "/js/entrada-pt.js": { arquivo: "js/entrada-pt.js", tipo: "text/javascript; charset=utf-8" },
   "/css/pagina.css": { arquivo: "css/pagina.css", tipo: "text/css; charset=utf-8" },
   [`/fonts/${FONTE}`]: { arquivo: `fonts/${FONTE}`, tipo: "font/woff2" },
   "/robots.txt": { arquivo: "robots.txt", tipo: "text/plain; charset=utf-8" },
@@ -272,7 +272,7 @@ describe("conferirHospedagem: o que derruba cada verificação", () => {
 
   it("JavaScript reescrito pela hospedagem (RF-06)", async () => {
     const resultado = await conferir(async (url) =>
-      url.pathname === "/js/pagina.js"
+      url.pathname === "/js/entrada-pt.js"
         ? resposta("export {};", 200, {
             "content-type": "text/javascript",
             "cache-control": REVALIDAR,
@@ -347,8 +347,8 @@ describe("conferirHospedagem: o que derruba cada verificação", () => {
 
   it("código JavaScript guardado sem revalidar (ADR-4)", async () => {
     const resultado = await conferir(async (url) =>
-      url.pathname === "/js/pagina.js"
-        ? resposta(await arquivo("js/pagina.js"), 200, {
+      url.pathname === "/js/entrada-pt.js"
+        ? resposta(await arquivo("js/entrada-pt.js"), 200, {
             "content-type": "text/javascript",
             "cache-control": "public, max-age=31536000, immutable",
           })
@@ -360,8 +360,8 @@ describe("conferirHospedagem: o que derruba cada verificação", () => {
 
   it("JavaScript com content-type de texto comum", async () => {
     const resultado = await conferir(async (url) =>
-      url.pathname === "/js/pagina.js"
-        ? resposta(await arquivo("js/pagina.js"), 200, {
+      url.pathname === "/js/entrada-pt.js"
+        ? resposta(await arquivo("js/entrada-pt.js"), 200, {
             "content-type": "text/plain",
             "cache-control": REVALIDAR,
           })

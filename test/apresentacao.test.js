@@ -39,6 +39,7 @@ import {
   REGISTRO_DKIM,
   verificando,
 } from "./ajudas/estados.js";
+import { textos } from "./ajudas/textos.js";
 
 const NOME_GOOGLE = "google._domainkey.exemplo.com.br";
 const DMARC_NONE = "v=DMARC1; p=none; rua=mailto:dmarc@exemplo.com.br";
@@ -122,18 +123,22 @@ describe("partirCodigo", () => {
 
 describe("lerSeletoresDigitados", () => {
   it("separa por vírgula, espaço e quebra de linha", () => {
-    const { validos, recusados } = lerSeletoresDigitados("k1, meuprovedor\nsel2   sel3,,\n");
+    const { validos, recusados } = lerSeletoresDigitados(
+      textos,
+      "k1, meuprovedor\nsel2   sel3,,\n",
+    );
 
     assert.deepEqual(validos, ["k1", "meuprovedor", "sel2", "sel3"]);
     assert.deepEqual(recusados, []);
   });
 
   it("passa para minúsculas e tira os repetidos", () => {
-    assert.deepEqual(lerSeletoresDigitados("K1, k1, K1").validos, ["k1"]);
+    assert.deepEqual(lerSeletoresDigitados(textos, "K1, k1, K1").validos, ["k1"]);
   });
 
   it("recusa o inválido com o motivo em português e segue com os demais", () => {
     const { validos, recusados } = lerSeletoresDigitados(
+      textos,
       "bom, google._domainkey.exemplo.com.br, a/b",
     );
 
@@ -145,11 +150,12 @@ describe("lerSeletoresDigitados", () => {
   });
 
   it("texto vazio não dá seletor nem recusa", () => {
-    assert.deepEqual(lerSeletoresDigitados("  \n , "), { validos: [], recusados: [] });
+    assert.deepEqual(lerSeletoresDigitados(textos, "  \n , "), { validos: [], recusados: [] });
   });
 
   it("texto hostil sai recusado, cortado e sem virar seletor", () => {
     const { validos, recusados } = lerSeletoresDigitados(
+      textos,
       `<script>alert(1)</script> ${"x".repeat(500)}`,
     );
 
@@ -165,14 +171,14 @@ describe("lerSeletoresDigitados", () => {
 
 describe("mensagemDeFalha", () => {
   it("usa a causa que a consulta devolveu e diz que não é defeito do registro", () => {
-    const mensagem = mensagemDeFalha(falha("spf", "resolvedores-indisponiveis"));
+    const mensagem = mensagemDeFalha(textos, falha("spf", "resolvedores-indisponiveis"));
 
     assert.match(mensagem, /nem pela Cloudflare nem pelo Google/);
     assert.match(mensagem, /Isso não diz nada sobre o seu SPF/);
   });
 
   it("outra causa, outra mensagem", () => {
-    const mensagem = mensagemDeFalha(falha("dkim", "nome-vazio"));
+    const mensagem = mensagemDeFalha(textos, falha("dkim", "nome-vazio"));
 
     assert.match(mensagem, /O nome da consulta está vazio\./);
     assert.match(mensagem, /seu DKIM/);
@@ -180,41 +186,44 @@ describe("mensagemDeFalha", () => {
   });
 
   it("encaixa o valor do motivo na frase", () => {
-    const mensagem = mensagemDeFalha(falha("dmarc", "resposta-status-dns", 2));
+    const mensagem = mensagemDeFalha(textos, falha("dmarc", "resposta-status-dns", 2));
 
     assert.match(mensagem, /\(Status 2\)\./);
   });
 
   it("código sem entrada usa o texto geral, nunca o código", () => {
     for (const motivo of ["  ", "", "codigo-que-ninguem-cadastrou", "constructor"]) {
-      const mensagem = mensagemDeFalha(falha("dmarc", motivo));
+      const mensagem = mensagemDeFalha(textos, falha("dmarc", motivo));
 
       assert.match(mensagem, /^Não consegui consultar o DNS agora\. Isso não diz/);
     }
   });
 
   it("parte que não falhou não tem mensagem de falha", () => {
-    assert.equal(mensagemDeFalha(verificando("spf")), "");
+    assert.equal(mensagemDeFalha(textos, verificando("spf")), "");
   });
 });
 
 describe("resumoConsultas", () => {
   it("diz N de 10", () => {
     assert.equal(
-      resumoConsultas({ total: 7, limite: 10, incompleta: false }),
+      resumoConsultas(textos, { total: 7, limite: 10, incompleta: false }),
       "7 de 10 consultas DNS, no pior caso.",
     );
   });
 
   it("diz pelo menos N quando a contagem ficou incompleta", () => {
-    const texto = resumoConsultas({ total: 4, limite: 10, incompleta: true });
+    const texto = resumoConsultas(textos, { total: 4, limite: 10, incompleta: true });
 
     assert.match(texto, /^Pelo menos 4 de 10 consultas DNS/);
     assert.match(texto, /pode ser maior/);
   });
 
   it("acima de 10 mostra o número real", () => {
-    assert.match(resumoConsultas({ total: 13, limite: 10, incompleta: false }), /^13 de 10/);
+    assert.match(
+      resumoConsultas(textos, { total: 13, limite: 10, incompleta: false }),
+      /^13 de 10/,
+    );
   });
 });
 
@@ -224,7 +233,7 @@ describe("resumoConsultas", () => {
 
 describe("apresentarDmarc", () => {
   it("válido: selo, registro cru e achados com texto; sem resumo repetido", () => {
-    const cartao = apresentarDmarc(estadoDmarc([DMARC_NONE]));
+    const cartao = apresentarDmarc(textos, estadoDmarc([DMARC_NONE]));
 
     assert.equal(cartao.id, "dmarc");
     assert.equal(cartao.titulo, "DMARC");
@@ -239,7 +248,7 @@ describe("apresentarDmarc", () => {
   });
 
   it("ausente: selo problema, texto do que a ausência causa e sem registro cru", () => {
-    const cartao = apresentarDmarc(estadoDmarc([]));
+    const cartao = apresentarDmarc(textos, estadoDmarc([]));
 
     assert.equal(cartao.selo.estado, "problema");
     assert.match(cartao.resumo, /não publica DMARC/);
@@ -248,7 +257,7 @@ describe("apresentarDmarc", () => {
   });
 
   it("inválido: mostra o registro e os achados, com o resumo de erro", () => {
-    const cartao = apresentarDmarc(estadoDmarc(["v=DMARC1; p=talvez"]));
+    const cartao = apresentarDmarc(textos, estadoDmarc(["v=DMARC1; p=talvez"]));
 
     assert.equal(cartao.selo.estado, "problema");
     assert.equal(cartao.registro?.texto, "v=DMARC1; p=talvez");
@@ -257,15 +266,15 @@ describe("apresentarDmarc", () => {
   });
 
   it("múltiplos: diz quantos registros há", () => {
-    const cartao = apresentarDmarc(estadoDmarc(["v=DMARC1; p=none", "v=DMARC1; p=reject"]));
+    const cartao = apresentarDmarc(textos, estadoDmarc(["v=DMARC1; p=none", "v=DMARC1; p=reject"]));
 
     assert.equal(cartao.selo.estado, "problema");
     assert.match(cartao.resumo, /2 registros DMARC/);
   });
 
   it("verificando e falha não têm registro nem achado", () => {
-    const espera = apresentarDmarc(verificando("dmarc"));
-    const caiu = apresentarDmarc(falha("dmarc"));
+    const espera = apresentarDmarc(textos, verificando("dmarc"));
+    const caiu = apresentarDmarc(textos, falha("dmarc"));
 
     assert.equal(espera.fase, "verificando");
     assert.match(espera.resumo, /Consultando/);
@@ -276,7 +285,7 @@ describe("apresentarDmarc", () => {
 
   it("registro hostil e enorme vira texto cortado, sem marcação", () => {
     const hostil = `v=DMARC1; p=none; <script>alert(1)</script> ${"a".repeat(3000)}`;
-    const cartao = apresentarDmarc(estadoDmarc([hostil]));
+    const cartao = apresentarDmarc(textos, estadoDmarc([hostil]));
 
     assert.equal(cartao.registro?.cortado, true);
     assert.ok((cartao.registro?.texto.length ?? 0) <= 1001);
@@ -284,7 +293,7 @@ describe("apresentarDmarc", () => {
   });
 
   it("rua aparece como texto no registro e nenhum campo do cartão é link mailto:", () => {
-    const cartao = apresentarDmarc(estadoDmarc([DMARC_NONE]));
+    const cartao = apresentarDmarc(textos, estadoDmarc([DMARC_NONE]));
     const json = JSON.stringify(cartao);
 
     assert.match(cartao.registro?.texto ?? "", /rua=mailto:dmarc@exemplo\.com\.br/);
@@ -299,7 +308,7 @@ describe("apresentarDmarc", () => {
       gravidade: "info",
       detalhe: /** @type {any} */ ("z".repeat(500)),
     });
-    const cartao = apresentarDmarc(estado);
+    const cartao = apresentarDmarc(textos, estado);
     const ultimo = cartao.achados.at(-1);
 
     assert.ok((ultimo?.detalhe?.length ?? 0) <= 121);
@@ -317,7 +326,7 @@ describe("apresentarDmarc", () => {
     );
 
     assert.deepEqual(
-      apresentarDmarc(estado).achados.map((achado) => achado.codigo),
+      apresentarDmarc(textos, estado).achados.map((achado) => achado.codigo),
       ["sem-relatorio-agregado", "caixa-fora-do-padrao", "tag-duplicada"],
     );
   });
@@ -329,7 +338,10 @@ describe("apresentarDmarc", () => {
 
 describe("apresentarSpf", () => {
   it("válido: contagem, terminação em português e registro cru", async () => {
-    const cartao = apresentarSpf(await estadoSpf({ [DOMINIO]: ["v=spf1 ip4:203.0.113.10 ~all"] }));
+    const cartao = apresentarSpf(
+      textos,
+      await estadoSpf({ [DOMINIO]: ["v=spf1 ip4:203.0.113.10 ~all"] }),
+    );
 
     assert.equal(cartao.selo.estado, "ok");
     assert.match(cartao.resumo, /^0 de 10 consultas DNS/);
@@ -339,14 +351,17 @@ describe("apresentarSpf", () => {
 
   it("cada terminação aparece com o seu sinal", async () => {
     for (const sinal of ["-", "~", "?", "+"]) {
-      const cartao = apresentarSpf(await estadoSpf({ [DOMINIO]: [`v=spf1 ${sinal}all`] }));
+      const cartao = apresentarSpf(textos, await estadoSpf({ [DOMINIO]: [`v=spf1 ${sinal}all`] }));
 
       assert.match(cartao.resumo, new RegExp(`Termina em \`\\${sinal}all\``));
     }
   });
 
   it("sem all: diz que não termina em all", async () => {
-    const cartao = apresentarSpf(await estadoSpf({ [DOMINIO]: ["v=spf1 ip4:203.0.113.10"] }));
+    const cartao = apresentarSpf(
+      textos,
+      await estadoSpf({ [DOMINIO]: ["v=spf1 ip4:203.0.113.10"] }),
+    );
 
     assert.match(cartao.resumo, /Não termina em `all`/);
   });
@@ -358,7 +373,7 @@ describe("apresentarSpf", () => {
     for (let i = 0; i < 11; i += 1) {
       mapa[`s${i}.exemplo.com.br`] = ["v=spf1 ip4:203.0.113.10 -all"];
     }
-    const cartao = apresentarSpf(await estadoSpf(mapa));
+    const cartao = apresentarSpf(textos, await estadoSpf(mapa));
 
     assert.equal(cartao.selo.estado, "problema");
     assert.match(cartao.resumo, /^11 de 10 consultas DNS/);
@@ -368,6 +383,7 @@ describe("apresentarSpf", () => {
 
   it("incompleta: diz pelo menos N", async () => {
     const cartao = apresentarSpf(
+      textos,
       await estadoSpf({
         [DOMINIO]: ["v=spf1 include:filho.exemplo.com.br -all"],
         "filho.exemplo.com.br": "FALHA",
@@ -379,9 +395,12 @@ describe("apresentarSpf", () => {
   });
 
   it("ausente, inválido e múltiplos têm o seu texto", async () => {
-    const ausente = apresentarSpf(await estadoSpf({}));
-    const invalido = apresentarSpf(await estadoSpf({ [DOMINIO]: ["v=spf1 foo:bar -all"] }));
-    const multiplos = apresentarSpf(await estadoSpf({ [DOMINIO]: ["v=spf1 -all", "v=spf1 ~all"] }));
+    const ausente = apresentarSpf(textos, await estadoSpf({}));
+    const invalido = apresentarSpf(textos, await estadoSpf({ [DOMINIO]: ["v=spf1 foo:bar -all"] }));
+    const multiplos = apresentarSpf(
+      textos,
+      await estadoSpf({ [DOMINIO]: ["v=spf1 -all", "v=spf1 ~all"] }),
+    );
 
     assert.match(ausente.resumo, /não publica SPF/);
     assert.equal(ausente.registro, undefined);
@@ -394,7 +413,7 @@ describe("apresentarSpf", () => {
   });
 
   it("falha da raiz: não verificado, com a causa", async () => {
-    const cartao = apresentarSpf(await estadoSpf({ [DOMINIO]: "FALHA" }));
+    const cartao = apresentarSpf(textos, await estadoSpf({ [DOMINIO]: "FALHA" }));
 
     assert.equal(cartao.fase, "falha");
     assert.equal(cartao.selo.estado, "nao-verificado");
@@ -409,6 +428,7 @@ describe("apresentarSpf", () => {
 describe("apresentarDkim", () => {
   it("encontrado: diz o seletor, o tipo e o tamanho da chave e quantos tentou", async () => {
     const cartao = apresentarDkim(
+      textos,
       await estadoDkim(["google", "selector1"], { [NOME_GOOGLE]: [REGISTRO_DKIM] }),
     );
 
@@ -420,6 +440,7 @@ describe("apresentarDkim", () => {
 
   it("encontrado em mais de um seletor cita todos", async () => {
     const cartao = apresentarDkim(
+      textos,
       await estadoDkim(["google", "selector1"], {
         [NOME_GOOGLE]: [REGISTRO_DKIM],
         "selector1._domainkey.exemplo.com.br": [REGISTRO_DKIM],
@@ -430,7 +451,7 @@ describe("apresentarDkim", () => {
   });
 
   it("não encontrado: 'não encontrei', nunca 'você não tem'; selo atenção", async () => {
-    const cartao = apresentarDkim(await estadoDkim(["google", "selector1", "s1"], {}));
+    const cartao = apresentarDkim(textos, await estadoDkim(["google", "selector1", "s1"], {}));
 
     assert.equal(cartao.selo.estado, "atencao");
     assert.match(cartao.resumo, /Não encontrei chave DKIM nesses 3 seletores/);
@@ -441,6 +462,7 @@ describe("apresentarDkim", () => {
 
   it("indeterminado: diz que a lista não foi toda verificada", async () => {
     const cartao = apresentarDkim(
+      textos,
       await estadoDkim(["a", "b", "c", "d"], {
         "a._domainkey.exemplo.com.br": "FALHA",
         "b._domainkey.exemplo.com.br": "FALHA",
@@ -455,7 +477,7 @@ describe("apresentarDkim", () => {
   });
 
   it("lista dos tentados com provedor e link só https; digitado não tem provedor", async () => {
-    const cartao = apresentarDkim(await estadoDkim(["google", "meu-seletor"], {}));
+    const cartao = apresentarDkim(textos, await estadoDkim(["google", "meu-seletor"], {}));
     const [comum, digitado] = cartao.extra?.tentados ?? [];
 
     assert.equal(comum?.provedor, "Google Workspace");
@@ -469,14 +491,14 @@ describe("apresentarDkim", () => {
 
   it("os links dos dados da lista comum passam todos pelo filtro https", async () => {
     const seletores = SELETORES_COMUNS.map((item) => item.seletor);
-    const cartao = apresentarDkim(await estadoDkim(seletores, {}));
+    const cartao = apresentarDkim(textos, await estadoDkim(seletores, {}));
 
     assert.equal(cartao.extra?.tentados.length, seletores.length);
     assert.ok(cartao.extra?.tentados.every((item) => item.documentacao?.startsWith("https://")));
   });
 
   it("as orientações dos provedores sem seletor fixo pedem para digitar o seletor", async () => {
-    const cartao = apresentarDkim(await estadoDkim(["google"], {}));
+    const cartao = apresentarDkim(textos, await estadoDkim(["google"], {}));
 
     assert.equal(cartao.extra?.orientacoes.length, ORIENTACOES.length);
     for (const orientacao of cartao.extra?.orientacoes ?? []) {
@@ -487,14 +509,14 @@ describe("apresentarDkim", () => {
   });
 
   it("as recusas do campo livre chegam com o texto e o motivo", async () => {
-    const { recusados } = lerSeletoresDigitados("a/b");
-    const cartao = apresentarDkim(await estadoDkim(["google"], {}), { recusados });
+    const { recusados } = lerSeletoresDigitados(textos, "a/b");
+    const cartao = apresentarDkim(textos, await estadoDkim(["google"], {}), { recusados });
 
     assert.match(cartao.extra?.recusados[0]?.texto ?? "", /Não aceitei `a\/b`: .*não aceita/);
   });
 
   it("verificando cita quantos seletores comuns procura", () => {
-    const cartao = apresentarDkim(verificando("dkim"), { totalSeletores: 18 });
+    const cartao = apresentarDkim(textos, verificando("dkim"), { totalSeletores: 18 });
 
     assert.equal(cartao.fase, "verificando");
     assert.match(cartao.resumo, /Procurando em 18 seletores/);
@@ -510,7 +532,10 @@ describe("apresentarDkim", () => {
     ];
 
     for (const [registro, esperado] of casos) {
-      const cartao = apresentarDkim(await estadoDkim(["google"], { [NOME_GOOGLE]: [registro] }));
+      const cartao = apresentarDkim(
+        textos,
+        await estadoDkim(["google"], { [NOME_GOOGLE]: [registro] }),
+      );
 
       assert.match(cartao.resumo, esperado);
     }
@@ -518,6 +543,7 @@ describe("apresentarDkim", () => {
 
   it("parte dos seletores sem verificar, mas com chave achada, cita as duas coisas", async () => {
     const cartao = apresentarDkim(
+      textos,
       await estadoDkim(["google", "a", "b", "c", "d"], {
         [NOME_GOOGLE]: [REGISTRO_DKIM],
         "a._domainkey.exemplo.com.br": "FALHA",
@@ -533,6 +559,7 @@ describe("apresentarDkim", () => {
   it("agrupa o mesmo achado de seletores diferentes num só, na ordem da primeira aparição", async () => {
     const revogado = "v=DKIM1; p=";
     const cartao = apresentarDkim(
+      textos,
       await estadoDkim(["google", "selector1", "s1"], {
         [NOME_GOOGLE]: [revogado],
         "selector1._domainkey.exemplo.com.br": [revogado],
@@ -548,6 +575,7 @@ describe("apresentarDkim", () => {
 
   it("não agrupa achados de seletores diferentes quando o detalhe é diferente", async () => {
     const cartao = apresentarDkim(
+      textos,
       await estadoDkim(["google", "selector1"], {
         [NOME_GOOGLE]: [`v=DKIM1; k=xyz; p=AAAAAAAA`],
         "selector1._domainkey.exemplo.com.br": [`v=DKIM1; k=abc; p=AAAAAAAA`],
@@ -565,7 +593,7 @@ describe("apresentarDkim", () => {
     const estado = await estadoDkim(["google"], {
       [NOME_GOOGLE]: [`v=DKIM1; k=rsa; t=y; p=${REGISTRO_DKIM.split("p=")[1]}`],
     });
-    const cartao = apresentarDkim(estado);
+    const cartao = apresentarDkim(textos, estado);
     const modo = cartao.achados.find((achado) => achado.codigo === "modo-de-teste");
 
     assert.equal(modo?.seletor, "google");
@@ -591,33 +619,36 @@ const verificacao = (spf, dkim, dmarc) => ({
 
 describe("anúncios para leitor de tela", () => {
   it("anuncia o início com o domínio", () => {
-    assert.equal(anunciarInicio("exemplo.com.br"), "Verificando exemplo.com.br.");
+    assert.equal(anunciarInicio(textos, "exemplo.com.br"), "Verificando exemplo.com.br.");
   });
 
   it("anuncia o domínio que não existe", () => {
-    assert.equal(anunciarInexistente("exmplo.com.br"), "Não encontrei o domínio exmplo.com.br.");
+    assert.equal(
+      anunciarInexistente(textos, "exmplo.com.br"),
+      "Não encontrei o domínio exmplo.com.br.",
+    );
   });
 
   it("o resumo falado usa só a palavra do selo de cada cartão", async () => {
     const cartoes = {
-      dmarc: apresentarDmarc(estadoDmarc([DMARC_NONE])),
-      spf: apresentarSpf(await estadoSpf({ [DOMINIO]: ["v=spf1 ip4:203.0.113.10 -all"] })),
-      dkim: apresentarDkim(await estadoDkim(["google"], {})),
+      dmarc: apresentarDmarc(textos, estadoDmarc([DMARC_NONE])),
+      spf: apresentarSpf(textos, await estadoSpf({ [DOMINIO]: ["v=spf1 ip4:203.0.113.10 -all"] })),
+      dkim: apresentarDkim(textos, await estadoDkim(["google"], {})),
     };
 
     assert.equal(
-      anunciarFim("exemplo.com.br", cartoes),
+      anunciarFim(textos, "exemplo.com.br", cartoes),
       "Resultado pronto para exemplo.com.br. DMARC: atenção. SPF: ok. DKIM: atenção.",
     );
   });
 
   it("não diz 'ok' de parte que falhou", async () => {
     const cartoes = {
-      dmarc: apresentarDmarc(falha("dmarc")),
-      spf: apresentarSpf(await estadoSpf({})),
-      dkim: apresentarDkim(falha("dkim")),
+      dmarc: apresentarDmarc(textos, falha("dmarc")),
+      spf: apresentarSpf(textos, await estadoSpf({})),
+      dkim: apresentarDkim(textos, falha("dkim")),
     };
-    const frase = anunciarFim("exemplo.com.br", cartoes);
+    const frase = anunciarFim(textos, "exemplo.com.br", cartoes);
 
     assert.doesNotMatch(frase, /: ok/);
     assert.match(frase, /DMARC: não verificado\. SPF: problema\. DKIM: não verificado\./);
@@ -632,7 +663,7 @@ describe("rodapeDosResolvedores", () => {
       estadoDmarc([DMARC_NONE]),
     );
 
-    assert.match(rodapeDosResolvedores(estado) ?? "", /DNS público da Cloudflare\./);
+    assert.match(rodapeDosResolvedores(textos, estado) ?? "", /DNS público da Cloudflare\./);
   });
 
   it("cita o Google quando só ele respondeu", async () => {
@@ -646,7 +677,7 @@ describe("rodapeDosResolvedores", () => {
       /** @type {any} */ (parte).resolvedores = ["google"];
     }
 
-    assert.match(rodapeDosResolvedores(estado) ?? "", /DNS público do Google\./);
+    assert.match(rodapeDosResolvedores(textos, estado) ?? "", /DNS público do Google\./);
   });
 
   it("cita os dois quando houve fallback no meio", async () => {
@@ -657,12 +688,12 @@ describe("rodapeDosResolvedores", () => {
     );
     /** @type {any} */ (estado.partes.dmarc).resolvedores = ["google"];
 
-    assert.match(rodapeDosResolvedores(estado) ?? "", /da Cloudflare e do Google/);
+    assert.match(rodapeDosResolvedores(textos, estado) ?? "", /da Cloudflare e do Google/);
   });
 
   it("não diz nada se nenhuma parte chegou a um resolvedor", () => {
     const estado = verificacao(falha("spf", "x"), falha("dkim", "x"), falha("dmarc", "x"));
 
-    assert.equal(rodapeDosResolvedores(estado), null);
+    assert.equal(rodapeDosResolvedores(textos, estado), null);
   });
 });

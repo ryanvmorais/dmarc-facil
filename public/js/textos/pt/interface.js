@@ -3,17 +3,18 @@
  * mensagens de falha, frases do `aria-live`).
  *
  * Os textos do HTML estático ficam no próprio HTML; os que o JavaScript escolhe ficam aqui,
- * fora da lógica, para se editar sem mexer em `selo.js`, `escada.js` e `apresentacao.js`. Em
- * texto com trecho de código, o trecho vai entre crases e a página o desenha em fonte
- * monoespaçada.
+ * fora da lógica, para se editar sem mexer em `selo.js`, `escada.js` e `apresentacao.js`, que
+ * recebem o catálogo como parâmetro (`textos.interface`). Em texto com trecho de código, o
+ * trecho vai entre crases e a página o desenha em fonte monoespaçada. Os motivos de recusa e
+ * falha e os achados têm catálogo próprio (`motivos.js`, `achados.js`).
  *
  * É dado puro: sem DOM, sem rede, sem lógica.
  */
 
 // @ts-check
 
-/** @typedef {{ texto: string }} TextoFixo */
-/** @typedef {{ titulo: string, resumo: string }} TextoDegrau */
+/** @typedef {import("../tipos.js").TextoFixo} TextoFixo */
+/** @typedef {import("../tipos.js").TextoDegrau} TextoDegrau */
 
 // ---------------------------------------------------------------------------
 // SELOS
@@ -22,7 +23,7 @@
 // As quatro palavras fixas do selo (RF-07). O ícone e a cor vêm do CSS; a palavra é o que
 // distingue os estados também para quem não vê a cor.
 /** @type {Record<"ok" | "atencao" | "problema" | "nao-verificado", TextoFixo>} */
-export const TEXTOS_SELO = {
+const selo = {
   ok: { texto: "OK" },
   atencao: { texto: "Atenção" },
   problema: { texto: "Problema" },
@@ -35,7 +36,7 @@ export const TEXTOS_SELO = {
 
 // O degrau fala do que a política faz; o que fazer para chegar nele está em `ACOES_PROXIMO`.
 /** @type {Record<"none" | "quarantine" | "reject", TextoDegrau>} */
-export const TEXTOS_DEGRAUS = {
+const degraus = {
   none: {
     titulo: "p=none",
     resumo: "Só monitora. Falsificação ainda chega à caixa de entrada.",
@@ -51,7 +52,7 @@ export const TEXTOS_DEGRAUS = {
 };
 
 /** @type {Record<"atual" | "proximo", TextoFixo>} */
-export const ETIQUETAS_DEGRAU = {
+const etiquetas = {
   atual: { texto: "você está aqui" },
   proximo: { texto: "Próximo passo" },
 };
@@ -64,7 +65,7 @@ export const ETIQUETAS_DEGRAU = {
  *   publicar: Record<"ausente" | "invalido" | "multiplos", TextoFixo>
  * }}
  */
-export const ACOES_PROXIMO = {
+const acoesProximo = {
   quarantine: {
     texto:
       "Leia os relatórios por 2 a 4 semanas, confirme que seus remetentes passam no SPF ou no DKIM e então troque o `p=none` por `p=quarantine`.",
@@ -90,7 +91,7 @@ export const ACOES_PROXIMO = {
 };
 
 /** @type {{ final: TextoFixo, semAtual: TextoFixo }} */
-export const TEXTOS_ESCADA = {
+const escada = {
   final: { texto: "Você já está no degrau final." },
   semAtual: {
     texto: "Nenhum degrau vale ainda: não há um registro DMARC em uso.",
@@ -100,7 +101,7 @@ export const TEXTOS_ESCADA = {
 // Ressalvas que o texto do degrau atual não pode calar (RF-03): a política vale para menos do
 // que parece.
 /** @type {Record<"subdominios-mais-fracos" | "aplicacao-parcial", TextoFixo>} */
-export const RESSALVAS_ESCADA = {
+const ressalvas = {
   "subdominios-mais-fracos": {
     texto: "Os subdomínios seguem uma regra mais fraca (`sp=`) do que a do domínio.",
   },
@@ -110,103 +111,32 @@ export const RESSALVAS_ESCADA = {
 };
 
 // ---------------------------------------------------------------------------
-// MOTIVOS DE RECUSA E FALHA
-// ---------------------------------------------------------------------------
-
-// Os módulos puros devolvem o motivo como código estável (`dominio-vazio`, `resolvedor-http`),
-// nunca como frase; aqui cada código vira a frase que a página mostra. `{valor}` marca o dado
-// que a recusa traz (o status HTTP, o `Status` do DNS). O código do seletor digitado
-// (`vazio`, `caractere-invalido`) divide a tabela com os demais, sem colisão de nome. Código
-// sem entrada cai em `sem-motivo` (`textoDoMotivo`), nunca aparece cru. O teste de cobertura
-// falha se um módulo emite um código que não está aqui, ou se sobra entrada que ninguém emite.
-/** @type {Record<string, TextoFixo>} */
-export const MOTIVOS = {
-  // dominio.js
-  "dominio-vazio": { texto: "Digite um domínio, por exemplo exemplo.com.br." },
-  "dominio-com-porta-ou-ipv6": { texto: "Digite só o domínio, sem porta nem endereço IPv6." },
-  "dominio-invalido": { texto: "Esse texto não é um domínio válido." },
-  "dominio-comprido-demais": {
-    texto: "O domínio é comprido demais (o limite é 253 caracteres).",
-  },
-  "dominio-incompleto": { texto: "Use o domínio completo, por exemplo exemplo.com.br." },
-  "dominio-e-ip": { texto: "Endereço IP não tem DMARC: digite o nome do domínio." },
-  "dominio-parte-comprida-demais": { texto: "Uma parte do domínio passa de 63 caracteres." },
-  "dominio-caractere-invalido": { texto: "O domínio só pode ter letras, números e hífen." },
-  // nome-dns.js
-  "nome-vazio": { texto: "O nome da consulta está vazio." },
-  "nome-comprido-demais": {
-    texto: "O nome da consulta é comprido demais (o limite é 253 caracteres).",
-  },
-  "nome-caractere-invalido": {
-    texto: "O nome da consulta tem um caractere que não é permitido.",
-  },
-  "nome-parte-vazia": {
-    texto: "O nome da consulta tem uma parte vazia (dois pontos seguidos).",
-  },
-  "nome-parte-comprida-demais": {
-    texto: "Uma parte do nome da consulta passa de 63 caracteres.",
-  },
-  // resposta-doh.js
-  "resposta-nao-objeto": { texto: "A resposta do resolvedor não é um objeto." },
-  "resposta-sem-status": { texto: "A resposta do resolvedor não traz o Status." },
-  "resposta-status-dns": {
-    texto: "O resolvedor não conseguiu resolver o nome (Status {valor}).",
-  },
-  "resposta-answer-invalido": { texto: "O Answer da resposta não é uma lista." },
-  // doh.js
-  "resolvedor-http": { texto: "O resolvedor respondeu HTTP {valor}." },
-  "consulta-falhou": {
-    texto: "A consulta ao resolvedor falhou (rede, tempo ou resposta inválida).",
-  },
-  // [provisório]
-  "resolvedores-indisponiveis": {
-    texto:
-      "Não consegui consultar o DNS agora, nem pela Cloudflare nem pelo Google. Confira sua conexão e tente de novo.",
-  },
-  // dkim-busca.js
-  "sem-seletores": { texto: "Não há seletor para procurar." },
-  // verificador.js e a guarda de `textoDoMotivo`
-  "sem-motivo": { texto: "Não consegui consultar o DNS agora." },
-  // seletor-dkim.js: o motivo vem depois de "Não aceitei `{texto}`:"
-  vazio: { texto: "está vazio" },
-  "parece-nome-completo": {
-    texto: "parece o nome completo; digite só o seletor, que eu monto o resto",
-  },
-  "grande-demais": { texto: "é grande demais" },
-  "componente-vazio": { texto: "tem um ponto sobrando" },
-  "componente-grande-demais": { texto: "tem uma parte grande demais" },
-  "caractere-invalido": {
-    texto: "tem caractere que um seletor não aceita (use letras, números, hífen e sublinhado)",
-  },
-};
-
-// ---------------------------------------------------------------------------
 // CARTÕES
 // ---------------------------------------------------------------------------
 
 // `{nome}` marca o lugar de um valor; quem monta a frase troca com `preencher`
-// (apresentacao.js). A frase inteira fica aqui, para quem revisa o texto lê-lo por inteiro.
+// (`apresentacao.js`). A frase inteira fica aqui, para quem revisa o texto lê-lo por inteiro.
 /** @type {Record<"dmarc" | "spf" | "dkim", TextoFixo>} */
-export const TITULOS_CARTAO = {
+const titulosCartao = {
   dmarc: { texto: "DMARC" },
   spf: { texto: "SPF" },
   dkim: { texto: "DKIM" },
 };
 
 /** @type {Record<"dmarc" | "spf" | "dkim", TextoFixo>} */
-export const TEXTOS_VERIFICANDO = {
+const verificando = {
   dmarc: { texto: "Consultando o registro DMARC…" },
   spf: { texto: "Seguindo os `include` e contando as consultas…" },
   dkim: { texto: "Procurando em {total} seletores comuns…" },
 };
 
 /** @type {{ naoDiz: TextoFixo }} */
-export const TEXTOS_FALHA = {
+const falha = {
   naoDiz: { texto: "Isso não diz nada sobre o seu {parte}." },
 };
 
 /** @type {Record<"ausente" | "invalido" | "multiplos", TextoFixo>} */
-export const TEXTOS_DMARC = {
+const dmarc = {
   ausente: {
     texto:
       "Este domínio não publica DMARC. Quem recebe não tem instrução do dono do domínio sobre mensagens falsificadas, e cada um decide por conta própria.",
@@ -227,7 +157,7 @@ export const TEXTOS_DMARC = {
  *   terminaEm: TextoFixo, semAll: TextoFixo, redirecionado: TextoFixo
  * }}
  */
-export const TEXTOS_SPF = {
+const spf = {
   ausente: {
     texto:
       "Este domínio não publica SPF. Quem recebe não sabe quais servidores podem enviar e-mail em nome dele.",
@@ -263,7 +193,7 @@ export const TEXTOS_SPF = {
  *   orientacao: TextoFixo, recusado: TextoFixo
  * }}
  */
-export const TEXTOS_DKIM = {
+const dkim = {
   encontrado: {
     texto: "Encontrei a chave no seletor `{seletor}` ({chave}). Procurei em {total} seletores.",
   },
@@ -303,7 +233,7 @@ export const TEXTOS_DKIM = {
 
 // A gravidade em texto: a cor do achado nunca é a única diferença (RF-08).
 /** @type {Record<"erro" | "aviso" | "info", TextoFixo>} */
-export const ROTULOS_GRAVIDADE = {
+const gravidade = {
   erro: { texto: "Erro" },
   aviso: { texto: "Aviso" },
   info: { texto: "Informação" },
@@ -311,7 +241,7 @@ export const ROTULOS_GRAVIDADE = {
 
 // Os rótulos das linhas de dado que acompanham um achado (onde ele foi achado).
 /** @type {Record<"seletor" | "seletores" | "dominio" | "tag" | "detalhe", TextoFixo>} */
-export const ROTULOS_DADO_DO_ACHADO = {
+const dadoDoAchado = {
   seletor: { texto: "Seletor" },
   seletores: { texto: "Seletores" },
   dominio: { texto: "Domínio" },
@@ -324,7 +254,7 @@ export const ROTULOS_DADO_DO_ACHADO = {
 // ---------------------------------------------------------------------------
 
 /** @type {Record<"titulo" | "escada" | "inexistenteTitulo" | "inexistenteTexto" | "resolvedores" | "resolvedorCloudflare" | "resolvedorGoogle" | "resolvedorAmbos" | "mailvigilTitulo" | "mailvigilTexto" | "mailvigilBotao", TextoFixo>} */
-export const TEXTOS_RESULTADO = {
+const resultado = {
   titulo: { texto: "Resultado para {dominio}" },
   escada: { texto: "Em que degrau do DMARC você está" },
   inexistenteTitulo: { texto: "Não encontrei esse domínio" },
@@ -343,7 +273,7 @@ export const TEXTOS_RESULTADO = {
 };
 
 /** @type {Record<"botao" | "botaoOcupado" | "tentarDeNovo" | "seletoresRotulo" | "seletoresExemplo" | "seletoresAjuda" | "seletoresBotao", TextoFixo>} */
-export const TEXTOS_FORMULARIO = {
+const formulario = {
   botao: { texto: "Verificar" },
   botaoOcupado: { texto: "Verificando…" },
   tentarDeNovo: { texto: "Tentar de novo" },
@@ -363,10 +293,37 @@ export const TEXTOS_FORMULARIO = {
 // Frases curtas da região `aria-live` (ADR-12). O resumo falado usa só a palavra do selo, para
 // não afirmar mais do que ele.
 /** @type {Record<"inicio" | "fim" | "inexistente", TextoFixo>} */
-export const TEXTOS_ANUNCIO = {
+const anuncio = {
   inicio: { texto: "Verificando {dominio}." },
   fim: {
     texto: "Resultado pronto para {dominio}. DMARC: {dmarc}. SPF: {spf}. DKIM: {dkim}.",
   },
   inexistente: { texto: "Não encontrei o domínio {dominio}." },
+};
+
+// ---------------------------------------------------------------------------
+// CATÁLOGO
+// ---------------------------------------------------------------------------
+
+// As chaves são as que `selo.js`, `escada.js`, `apresentacao.js` e `pagina.js` leem; o inglês
+// (`textos/en/`) tem de ter as mesmas, e o `tsc` e o teste de paridade o conferem.
+// `interface` é palavra reservada, por isso o nome da constante é outro.
+export const interfacePagina = {
+  selo,
+  degraus,
+  etiquetas,
+  acoesProximo,
+  escada,
+  ressalvas,
+  titulosCartao,
+  verificando,
+  falha,
+  dmarc,
+  spf,
+  dkim,
+  gravidade,
+  dadoDoAchado,
+  resultado,
+  formulario,
+  anuncio,
 };

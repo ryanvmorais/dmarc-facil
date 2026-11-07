@@ -15,7 +15,11 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 
-import { TEXTOS_ACHADOS, textoDoAchado } from "../public/js/textos-achados.js";
+import { textoDoAchado } from "../public/js/textos/resolver.js";
+import { textos } from "./ajudas/textos.js";
+
+// Os achados do catálogo em português, o idioma de referência, por código.
+const TEXTOS_ACHADOS = textos.achados.porCodigo;
 
 // ---------------------------------------------------------------------------
 // VARREDURA DOS MÓDULOS
@@ -133,7 +137,7 @@ describe("catálogo de textos: conteúdo", () => {
 
 describe("textoDoAchado", () => {
   it("junta o achado ao texto do catálogo e guarda gravidade, tag e detalhe", () => {
-    const visivel = textoDoAchado({
+    const visivel = textoDoAchado(textos, {
       codigo: "aplicacao-parcial",
       gravidade: "aviso",
       tag: "pct",
@@ -147,7 +151,7 @@ describe("textoDoAchado", () => {
   });
 
   it("não inventa campos que o achado não tem", () => {
-    const visivel = textoDoAchado({ codigo: "sem-all", gravidade: "aviso" });
+    const visivel = textoDoAchado(textos, { codigo: "sem-all", gravidade: "aviso" });
 
     assert.deepEqual(Object.keys(visivel).sort(), [
       "acao",
@@ -159,7 +163,7 @@ describe("textoDoAchado", () => {
   });
 
   it("código desconhecido vira texto genérico com o código, sem quebrar", () => {
-    const visivel = textoDoAchado({ codigo: "codigo-que-nao-existe", gravidade: "info" });
+    const visivel = textoDoAchado(textos, { codigo: "codigo-que-nao-existe", gravidade: "info" });
 
     assert.match(visivel.explicacao, /`codigo-que-nao-existe`/);
     assert.equal(visivel.gravidade, "info");
@@ -168,14 +172,14 @@ describe("textoDoAchado", () => {
 
   it("nomes que existem em todo objeto não contam como código do catálogo", () => {
     for (const codigo of ["constructor", "__proto__", "toString", "hasOwnProperty"]) {
-      const visivel = textoDoAchado({ codigo, gravidade: "info" });
+      const visivel = textoDoAchado(textos, { codigo, gravidade: "info" });
 
       assert.match(visivel.explicacao, /Código:/);
     }
   });
 
   it("traduz o motivo do seletor digitado recusado", () => {
-    const visivel = textoDoAchado({
+    const visivel = textoDoAchado(textos, {
       codigo: "seletor-invalido",
       gravidade: "info",
       detalhe: "caractere-invalido",
@@ -186,7 +190,7 @@ describe("textoDoAchado", () => {
   });
 
   it("deixa passar o detalhe de motivo desconhecido como texto", () => {
-    const visivel = textoDoAchado({
+    const visivel = textoDoAchado(textos, {
       codigo: "seletor-invalido",
       gravidade: "info",
       detalhe: "<b>x</b>",

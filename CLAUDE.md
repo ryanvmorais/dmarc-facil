@@ -82,15 +82,18 @@ public/                  # o site: é o que vai para a hospedagem, sem build
     tipos.js             # só typedef: a recusa (motivo em código + valor), o estado de cada parte (verificando, pronto, falha) e da verificação
     selo.js              # calcularSelo: a regra única do selo dos três cartões (puro)
     escada.js            # montarEscada: degraus none/quarantine/reject, próximo passo e ressalvas (puro)
-    textos-achados.js    # dados: o português de cada código de achado; textoDoAchado e textoDoMotivo (o código de recusa vira frase)
-    textos-interface.js  # dados: selos, degraus, MOTIVOS (a frase de cada código de recusa e falha), anúncios e demais frases montadas por script
+    textos/              # o catálogo de textos: dado puro por idioma, mais o código que escolhe a frase
+      pt/                # o português: index.js (`textos = { achados, interface, motivos }`), achados.js (um texto por código de achado, mais o `generico`), interface.js (selos, degraus, anúncios e demais frases montadas por script), motivos.js (a frase de cada código de recusa e falha)
+      resolver.js        # textoDoAchado(textos, achado) e textoDoMotivo(textos, recusa): o código vira frase, com a guarda de código sem entrada
+      tipos.js           # só typedef: `Textos` (o tipo do catálogo vem do português) e a forma de cada texto
     preencher.js         # preencher: troca {nome} pelo valor nos textos do catálogo (puro)
     apresentacao.js      # cartões de DMARC, SPF e DKIM prontos para desenhar, seletores digitados, anúncios (puro)
     endereco.js          # ?dominio= do endereço compartilhável (puro: preenche o campo, não verifica)
     verificador.js       # criarVerificador: as três partes em paralelo, descarta a verificação anterior (consulta injetada)
     dom.js               # criar, urlHttps: o único jeito de um texto virar nó (lista fixa de tags e atributos)
-    pagina.js            # o único módulo com document/history: liga o formulário e desenha o resultado
-test/                    # testes com o runner nativo do Node (node:test); ajudas/ monta chaves, estados e um documento falso
+    pagina.js            # o único módulo com document/history: `iniciarPagina(textos)` liga o formulário e desenha o resultado; não faz nada ao ser importado
+    entrada-pt.js        # a entrada do index.html: chama iniciarPagina com o catálogo em português (três linhas; um idioma, uma entrada)
+test/                    # testes com o runner nativo do Node (node:test); ajudas/ monta chaves, estados, o catálogo (textos.js), a linha de base dos textos e um documento falso
 scripts/                 # scripts em Node (conferir-links-dkim.mjs: links dos provedores; conferir-hospedagem.mjs: o que está no ar)
 docs/                    # documentação do projeto
   stack.md               # mapa de cada tecnologia: o que faz, por que, o que estudar
@@ -101,7 +104,7 @@ specs/                   # specs de cada marco (requirements, design, tasks)
 .github/                 # workflows (ci, codeql, dependency-review, links-dkim, lighthouse, deploy), Dependabot, templates; lighthouse/ tem os limites (producao-*.json medem o endereço real)
 ```
 
-Camadas: a lógica de parsing (DMARC, SPF, DKIM) e de validação mora em módulos puros de `public/js/`, sem DOM nem rede, para rodar igual no navegador e nos testes. O que toca o DOM e a rede fica em módulos separados, finos. Detalhe da stack em [docs/stack.md](docs/stack.md); o porquê de cada decisão, nas specs de [specs/](specs/).
+Camadas: a lógica de parsing (DMARC, SPF, DKIM) e de validação mora em módulos puros de `public/js/`, sem DOM nem rede, para rodar igual no navegador e nos testes. O que toca o DOM e a rede fica em módulos separados, finos. **Módulo puro não carrega frase:** os módulos devolvem códigos e dados, e a frase mora no catálogo de `textos/<idioma>/`, que `selo.js`, `escada.js` e `apresentacao.js` recebem como primeiro parâmetro (`textos`); só a entrada do idioma importa o catálogo (`test/textos-injecao.test.js`). Detalhe da stack em [docs/stack.md](docs/stack.md); o porquê de cada decisão, nas specs de [specs/](specs/).
 
 > ⚠️ **Não regredir: conteúdo de registro TXT é dado de terceiros.** Todo texto vindo de DNS entra na página só com `textContent`, nunca `innerHTML`. Um registro TXT pode conter `<script>`. Duas camadas: a regra de lint de `public/**` (`innerHTML`, `outerHTML`, `insertAdjacentHTML`, `document.write`, `eval`, `new Function`; `test/lint-dom.test.js`) e `criar` de `dom.js`, que recusa tag, atributo e `href` fora da lista (`test/dom.test.js`).
 

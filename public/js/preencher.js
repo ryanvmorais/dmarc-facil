@@ -1,9 +1,9 @@
 /**
  * @file Encaixe de valores nos textos do catálogo (`{nome}` vira o valor).
  *
- * Mora num módulo próprio porque dois lados precisam dele: `textos-achados.js` (a frase de cada
+ * Mora num módulo próprio porque dois lados precisam dele: `textos/resolver.js` (a frase de cada
  * motivo de recusa, com o `{valor}`) e `apresentacao.js` (as frases dos cartões). Se ficasse em
- * `apresentacao.js`, que já importa `textos-achados.js`, os dois se importariam em círculo.
+ * `apresentacao.js`, que já importa `textos/resolver.js`, os dois se importariam em círculo.
  *
  * É puro: sem DOM, sem rede.
  */

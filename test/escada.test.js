@@ -13,6 +13,7 @@ import { describe, it } from "node:test";
 
 import { lerDmarc } from "../public/js/dmarc.js";
 import { montarEscada, textoDoFim } from "../public/js/escada.js";
+import { textos } from "./ajudas/textos.js";
 
 const RUA = "rua=mailto:dmarc@exemplo.com.br";
 
@@ -20,7 +21,7 @@ const RUA = "rua=mailto:dmarc@exemplo.com.br";
  * @param {string[]} registros - Textos TXT de `_dmarc.exemplo.com.br`.
  * @returns {import("../public/js/escada.js").Escada} A escada do registro.
  */
-const escadaDe = (registros) => montarEscada(lerDmarc(registros));
+const escadaDe = (registros) => montarEscada(textos, lerDmarc(registros));
 
 /**
  * @param {import("../public/js/escada.js").Escada} escada - A escada.
@@ -54,7 +55,7 @@ describe("montarEscada: registro válido", () => {
     assert.deepEqual(papeis(escada), ["outro", "outro", "atual"]);
     assert.equal(escada.proximo, null);
     assert.ok(escada.degraus.every((degrau) => degrau.acao === undefined));
-    assert.match(textoDoFim(escada) ?? "", /degrau final/);
+    assert.match(textoDoFim(textos, escada) ?? "", /degrau final/);
   });
 
   it("os degraus vêm na ordem none, quarantine, reject", () => {
@@ -79,8 +80,8 @@ describe("montarEscada: registro válido", () => {
   });
 
   it("textoDoFim só existe no degrau final", () => {
-    assert.equal(textoDoFim(escadaDe([`v=DMARC1; p=none; ${RUA}`])), null);
-    assert.equal(textoDoFim(escadaDe([])), null);
+    assert.equal(textoDoFim(textos, escadaDe([`v=DMARC1; p=none; ${RUA}`])), null);
+    assert.equal(textoDoFim(textos, escadaDe([])), null);
   });
 });
 

@@ -21,6 +21,7 @@ import {
   REGISTRO_DKIM,
   verificando,
 } from "./ajudas/estados.js";
+import { textos } from "./ajudas/textos.js";
 
 const DMARC_REJECT = "v=DMARC1; p=reject; rua=mailto:dmarc@exemplo.com.br";
 const NOME_GOOGLE = "google._domainkey.exemplo.com.br";
@@ -32,14 +33,14 @@ const NOME_GOOGLE = "google._domainkey.exemplo.com.br";
 describe("calcularSelo: consulta que falhou ou não terminou", () => {
   for (const parte of /** @type {const} */ (["dmarc", "spf", "dkim"])) {
     it(`${parte} com falha é "Não verificado"`, () => {
-      assert.deepEqual(calcularSelo(parte, falha(parte)), {
+      assert.deepEqual(calcularSelo(textos, parte, falha(parte)), {
         estado: "nao-verificado",
         texto: "Não verificado",
       });
     });
 
     it(`${parte} ainda verificando é "Não verificado"`, () => {
-      assert.equal(calcularSelo(parte, verificando(parte)).estado, "nao-verificado");
+      assert.equal(calcularSelo(textos, parte, verificando(parte)).estado, "nao-verificado");
     });
   }
 });
@@ -50,30 +51,36 @@ describe("calcularSelo: consulta que falhou ou não terminou", () => {
 
 describe("calcularSelo: DMARC", () => {
   it("registro ausente é problema", () => {
-    assert.deepEqual(calcularSelo("dmarc", estadoDmarc([])), {
+    assert.deepEqual(calcularSelo(textos, "dmarc", estadoDmarc([])), {
       estado: "problema",
       texto: "Problema",
     });
   });
 
   it("registro inválido é problema", () => {
-    assert.equal(calcularSelo("dmarc", estadoDmarc(["v=DMARC1; p=talvez"])).estado, "problema");
+    assert.equal(
+      calcularSelo(textos, "dmarc", estadoDmarc(["v=DMARC1; p=talvez"])).estado,
+      "problema",
+    );
   });
 
   it("dois registros são problema", () => {
     const dois = ["v=DMARC1; p=none", "v=DMARC1; p=reject"];
 
-    assert.equal(calcularSelo("dmarc", estadoDmarc(dois)).estado, "problema");
+    assert.equal(calcularSelo(textos, "dmarc", estadoDmarc(dois)).estado, "problema");
   });
 
   it("válido com pior achado aviso (p=none) é atenção", () => {
     const estado = estadoDmarc(["v=DMARC1; p=none; rua=mailto:dmarc@exemplo.com.br"]);
 
-    assert.deepEqual(calcularSelo("dmarc", estado), { estado: "atencao", texto: "Atenção" });
+    assert.deepEqual(calcularSelo(textos, "dmarc", estado), {
+      estado: "atencao",
+      texto: "Atenção",
+    });
   });
 
   it("válido sem achado nenhum é OK", () => {
-    assert.deepEqual(calcularSelo("dmarc", estadoDmarc([DMARC_REJECT])), {
+    assert.deepEqual(calcularSelo(textos, "dmarc", estadoDmarc([DMARC_REJECT])), {
       estado: "ok",
       texto: "OK",
     });
@@ -85,7 +92,7 @@ describe("calcularSelo: DMARC", () => {
     assert.ok(estado.resultado.situacao === "valido");
     assert.ok(estado.resultado.achados.length > 0);
     assert.ok(estado.resultado.achados.every((achado) => achado.gravidade === "info"));
-    assert.equal(calcularSelo("dmarc", estado).estado, "ok");
+    assert.equal(calcularSelo(textos, "dmarc", estado).estado, "ok");
   });
 
   it("achado de erro num registro válido é problema", () => {
@@ -93,7 +100,7 @@ describe("calcularSelo: DMARC", () => {
     assert.ok(estado.resultado.situacao === "valido");
     estado.resultado.achados.push({ codigo: "x", gravidade: "erro" });
 
-    assert.equal(calcularSelo("dmarc", estado).estado, "problema");
+    assert.equal(calcularSelo(textos, "dmarc", estado).estado, "problema");
   });
 });
 
@@ -103,37 +110,37 @@ describe("calcularSelo: DMARC", () => {
 
 describe("calcularSelo: SPF", () => {
   it("registro ausente é problema", async () => {
-    assert.equal(calcularSelo("spf", await estadoSpf({})).estado, "problema");
+    assert.equal(calcularSelo(textos, "spf", await estadoSpf({})).estado, "problema");
   });
 
   it("registro inválido é problema", async () => {
     const estado = await estadoSpf({ [DOMINIO]: ["v=spf1 foo:bar -all"] });
 
-    assert.equal(calcularSelo("spf", estado).estado, "problema");
+    assert.equal(calcularSelo(textos, "spf", estado).estado, "problema");
   });
 
   it("dois registros são problema", async () => {
     const estado = await estadoSpf({ [DOMINIO]: ["v=spf1 -all", "v=spf1 ~all"] });
 
-    assert.equal(calcularSelo("spf", estado).estado, "problema");
+    assert.equal(calcularSelo(textos, "spf", estado).estado, "problema");
   });
 
   it("-all sem achado de gravidade é OK", async () => {
     const estado = await estadoSpf({ [DOMINIO]: ["v=spf1 ip4:203.0.113.10 -all"] });
 
-    assert.equal(calcularSelo("spf", estado).estado, "ok");
+    assert.equal(calcularSelo(textos, "spf", estado).estado, "ok");
   });
 
   it("sem all (aviso) é atenção", async () => {
     const estado = await estadoSpf({ [DOMINIO]: ["v=spf1 ip4:203.0.113.10"] });
 
-    assert.equal(calcularSelo("spf", estado).estado, "atencao");
+    assert.equal(calcularSelo(textos, "spf", estado).estado, "atencao");
   });
 
   it("+all (erro) é problema", async () => {
     const estado = await estadoSpf({ [DOMINIO]: ["v=spf1 +all"] });
 
-    assert.equal(calcularSelo("spf", estado).estado, "problema");
+    assert.equal(calcularSelo(textos, "spf", estado).estado, "problema");
   });
 
   it("passar de 10 consultas é problema", async () => {
@@ -147,7 +154,7 @@ describe("calcularSelo: SPF", () => {
     assert.ok(estado.fase === "pronto");
     assert.equal(estado.resultado.consultas.passouDoLimite, true);
 
-    assert.equal(calcularSelo("spf", estado).estado, "problema");
+    assert.equal(calcularSelo(textos, "spf", estado).estado, "problema");
   });
 
   it("leitura incompleta nunca fica OK: sobe para atenção", async () => {
@@ -158,7 +165,7 @@ describe("calcularSelo: SPF", () => {
     assert.ok(estado.fase === "pronto");
     assert.equal(estado.resultado.consultas.incompleta, true);
 
-    assert.equal(calcularSelo("spf", estado).estado, "atencao");
+    assert.equal(calcularSelo(textos, "spf", estado).estado, "atencao");
   });
 });
 
@@ -170,7 +177,7 @@ describe("calcularSelo: DKIM", () => {
   it("encontrado sem achado pior que info é OK", async () => {
     const estado = await estadoDkim(["google"], { [NOME_GOOGLE]: [REGISTRO_DKIM] });
 
-    assert.equal(calcularSelo("dkim", estado).estado, "ok");
+    assert.equal(calcularSelo(textos, "dkim", estado).estado, "ok");
   });
 
   it("encontrado com achado de aviso é atenção", async () => {
@@ -178,7 +185,7 @@ describe("calcularSelo: DKIM", () => {
     assert.ok(estado.fase === "pronto");
     estado.resultado.achados.push({ codigo: "chave-abaixo-do-recomendado", gravidade: "aviso" });
 
-    assert.equal(calcularSelo("dkim", estado).estado, "atencao");
+    assert.equal(calcularSelo(textos, "dkim", estado).estado, "atencao");
   });
 
   it("encontrado com achado de erro é problema", async () => {
@@ -186,7 +193,7 @@ describe("calcularSelo: DKIM", () => {
     assert.ok(estado.fase === "pronto");
     estado.resultado.achados.push({ codigo: "chave-fraca", gravidade: "erro" });
 
-    assert.equal(calcularSelo("dkim", estado).estado, "problema");
+    assert.equal(calcularSelo(textos, "dkim", estado).estado, "problema");
   });
 
   it("regra de produto: nao-encontrado é atenção, nem problema nem OK", async () => {
@@ -194,7 +201,7 @@ describe("calcularSelo: DKIM", () => {
     assert.ok(estado.fase === "pronto");
     assert.equal(estado.resultado.situacao, "nao-encontrado");
 
-    assert.deepEqual(calcularSelo("dkim", estado), { estado: "atencao", texto: "Atenção" });
+    assert.deepEqual(calcularSelo(textos, "dkim", estado), { estado: "atencao", texto: "Atenção" });
   });
 
   it("indeterminado (consultas falharam) é não verificado", async () => {
@@ -207,7 +214,7 @@ describe("calcularSelo: DKIM", () => {
     assert.ok(estado.fase === "pronto");
     assert.equal(estado.resultado.situacao, "indeterminado");
 
-    assert.equal(calcularSelo("dkim", estado).estado, "nao-verificado");
+    assert.equal(calcularSelo(textos, "dkim", estado).estado, "nao-verificado");
   });
 
   it("encontrado com parte dos seletores sem verificar nunca é OK", async () => {
@@ -221,6 +228,6 @@ describe("calcularSelo: DKIM", () => {
     assert.equal(estado.resultado.situacao, "encontrado");
     assert.equal(estado.resultado.incompleta, true);
 
-    assert.notEqual(calcularSelo("dkim", estado).estado, "ok");
+    assert.notEqual(calcularSelo(textos, "dkim", estado).estado, "ok");
   });
 });

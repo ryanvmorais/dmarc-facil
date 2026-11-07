@@ -1,0 +1,928 @@
+{
+  "cartoes": {
+    "dmarc": {
+      "id": "dmarc",
+      "titulo": "DMARC",
+      "fase": "pronto",
+      "selo": {
+        "estado": "atencao",
+        "texto": "Atenção"
+      },
+      "resumo": "",
+      "achados": [
+        {
+          "codigo": "aplicacao-parcial",
+          "gravidade": "aviso",
+          "titulo": "A política vale só para parte das mensagens",
+          "explicacao": "O `pct=` está abaixo de 100: só essa porcentagem das mensagens que falham recebe a política. O resto recebe um tratamento mais leve.",
+          "acao": "Quando os relatórios mostrarem que seus remetentes legítimos passam, suba o `pct` até 100 ou apague a tag.",
+          "tag": "pct",
+          "detalhe": "50"
+        },
+        {
+          "codigo": "subdominios-mais-fracos",
+          "gravidade": "aviso",
+          "titulo": "Subdomínios com regra mais fraca",
+          "explicacao": "O `sp=` define uma política mais fraca para os subdomínios do que a de `p=`. Um subdomínio do seu domínio pode ser falsificado com menos barreira.",
+          "acao": "Apague o `sp=` (os subdomínios passam a seguir o `p=`) ou iguale os dois.",
+          "tag": "sp"
+        }
+      ],
+      "registro": {
+        "texto": "v=DMARC1; p=quarantine; pct=50; sp=none; rua=mailto:dmarc@exemplo.com.br",
+        "cortado": false
+      }
+    },
+    "spf": {
+      "id": "spf",
+      "titulo": "SPF",
+      "fase": "pronto",
+      "selo": {
+        "estado": "ok",
+        "texto": "OK"
+      },
+      "resumo": "1 de 10 consultas DNS, no pior caso. Termina em `~all`.",
+      "achados": [
+        {
+          "codigo": "all-suave",
+          "gravidade": "info",
+          "titulo": "`~all`: o resto é suspeito",
+          "explicacao": "Quem não está na lista é marcado como suspeito, mas a mensagem costuma ser aceita.",
+          "acao": "É um bom ponto de partida. Passe para `-all` quando tiver certeza de que todos os remetentes estão na lista.",
+          "tag": "all",
+          "dominio": "exemplo.com.br"
+        }
+      ],
+      "registro": {
+        "texto": "v=spf1 include:_spf.exemplo.net ~all",
+        "cortado": false
+      }
+    },
+    "dkim": {
+      "id": "dkim",
+      "titulo": "DKIM",
+      "fase": "pronto",
+      "selo": {
+        "estado": "atencao",
+        "texto": "Atenção"
+      },
+      "resumo": "Encontrei a chave no seletor `google` (RSA de 1024 bits). Procurei em 2 seletores.",
+      "achados": [
+        {
+          "codigo": "chave-abaixo-do-recomendado",
+          "gravidade": "aviso",
+          "titulo": "Chave com menos de 2048 bits",
+          "explicacao": "Chaves RSA de 1024 bits ainda funcionam, mas a recomendação atual é 2048 bits ou mais.",
+          "acao": "Gere uma chave de 2048 bits no painel do seu provedor de e-mail e publique o registro novo.",
+          "tag": "p",
+          "detalhe": "1024",
+          "seletor": "google"
+        }
+      ],
+      "extra": {
+        "total": 2,
+        "tentados": [
+          {
+            "seletor": "google",
+            "estado": "valido",
+            "provedor": "Google Workspace",
+            "documentacao": "https://knowledge.workspace.google.com/admin/security/set-up-dkim"
+          },
+          {
+            "seletor": "k1",
+            "estado": "ausente"
+          }
+        ],
+        "encontrados": [
+          {
+            "seletor": "google",
+            "chave": "RSA de 1024 bits",
+            "provedor": "Google Workspace"
+          }
+        ],
+        "orientacoes": [
+          {
+            "provedor": "Mailgun",
+            "texto": "Mailgun: digite o seletor que o painel do provedor mostra.",
+            "documentacao": "https://documentation.mailgun.com/docs/mailgun/user-manual/domains/domains-verify"
+          },
+          {
+            "provedor": "Mailchimp (marketing)",
+            "texto": "Mailchimp (marketing): digite o seletor que o painel do provedor mostra.",
+            "documentacao": "https://mailchimp.com/help/set-up-email-domain-authentication/"
+          },
+          {
+            "provedor": "HubSpot",
+            "texto": "HubSpot: digite o seletor que o painel do provedor mostra.",
+            "documentacao": "https://knowledge.hubspot.com/email/overview-of-email-authentication"
+          }
+        ],
+        "recusados": [
+          {
+            "texto": "Não aceitei `a/b`: tem caractere que um seletor não aceita (use letras, números, hífen e sublinhado)."
+          },
+          {
+            "texto": "Não aceitei `google._domainkey.exemplo.com.br`: parece o nome completo; digite só o seletor, que eu monto o resto."
+          },
+          {
+            "texto": "Não aceitei `.x`: tem um ponto sobrando."
+          },
+          {
+            "texto": "Não aceitei `é`: tem caractere que um seletor não aceita (use letras, números, hífen e sublinhado)."
+          }
+        ],
+        "mostrarCampo": true
+      }
+    }
+  },
+  "dmarcs": [
+    {
+      "nome": "none",
+      "cartao": {
+        "id": "dmarc",
+        "titulo": "DMARC",
+        "fase": "pronto",
+        "selo": {
+          "estado": "atencao",
+          "texto": "Atenção"
+        },
+        "resumo": "",
+        "achados": [
+          {
+            "codigo": "monitoramento-apenas",
+            "gravidade": "aviso",
+            "titulo": "O DMARC só monitora",
+            "explicacao": "Com `p=none`, o DMARC apenas observa. Mensagens falsificadas com o seu domínio continuam sendo entregues como antes.",
+            "acao": "Use os relatórios para descobrir quem envia em nome do domínio e depois suba a política, como mostra a escada acima.",
+            "tag": "p"
+          }
+        ],
+        "registro": {
+          "texto": "v=DMARC1; p=none; rua=mailto:dmarc@exemplo.com.br",
+          "cortado": false
+        }
+      },
+      "escada": {
+        "degraus": [
+          {
+            "politica": "none",
+            "papel": "atual",
+            "titulo": "p=none",
+            "resumo": "Só monitora. Falsificação ainda chega à caixa de entrada.",
+            "etiqueta": "você está aqui"
+          },
+          {
+            "politica": "quarantine",
+            "papel": "proximo",
+            "titulo": "p=quarantine",
+            "resumo": "Falsificação vai para o spam.",
+            "etiqueta": "Próximo passo",
+            "acao": "Leia os relatórios por 2 a 4 semanas, confirme que seus remetentes passam no SPF ou no DKIM e então troque o `p=none` por `p=quarantine`."
+          },
+          {
+            "politica": "reject",
+            "papel": "outro",
+            "titulo": "p=reject",
+            "resumo": "Falsificação é recusada. Proteção completa."
+          }
+        ],
+        "semAtual": false,
+        "proximo": "quarantine",
+        "ressalvas": []
+      },
+      "fimDaEscada": null
+    },
+    {
+      "nome": "quarantineComRessalvas",
+      "cartao": {
+        "id": "dmarc",
+        "titulo": "DMARC",
+        "fase": "pronto",
+        "selo": {
+          "estado": "atencao",
+          "texto": "Atenção"
+        },
+        "resumo": "",
+        "achados": [
+          {
+            "codigo": "aplicacao-parcial",
+            "gravidade": "aviso",
+            "titulo": "A política vale só para parte das mensagens",
+            "explicacao": "O `pct=` está abaixo de 100: só essa porcentagem das mensagens que falham recebe a política. O resto recebe um tratamento mais leve.",
+            "acao": "Quando os relatórios mostrarem que seus remetentes legítimos passam, suba o `pct` até 100 ou apague a tag.",
+            "tag": "pct",
+            "detalhe": "50"
+          },
+          {
+            "codigo": "subdominios-mais-fracos",
+            "gravidade": "aviso",
+            "titulo": "Subdomínios com regra mais fraca",
+            "explicacao": "O `sp=` define uma política mais fraca para os subdomínios do que a de `p=`. Um subdomínio do seu domínio pode ser falsificado com menos barreira.",
+            "acao": "Apague o `sp=` (os subdomínios passam a seguir o `p=`) ou iguale os dois.",
+            "tag": "sp"
+          }
+        ],
+        "registro": {
+          "texto": "v=DMARC1; p=quarantine; pct=50; sp=none; rua=mailto:dmarc@exemplo.com.br",
+          "cortado": false
+        }
+      },
+      "escada": {
+        "degraus": [
+          {
+            "politica": "none",
+            "papel": "outro",
+            "titulo": "p=none",
+            "resumo": "Só monitora. Falsificação ainda chega à caixa de entrada."
+          },
+          {
+            "politica": "quarantine",
+            "papel": "atual",
+            "titulo": "p=quarantine",
+            "resumo": "Falsificação vai para o spam.",
+            "etiqueta": "você está aqui"
+          },
+          {
+            "politica": "reject",
+            "papel": "proximo",
+            "titulo": "p=reject",
+            "resumo": "Falsificação é recusada. Proteção completa.",
+            "etiqueta": "Próximo passo",
+            "acao": "Continue lendo os relatórios por mais 2 a 4 semanas e confira se nenhum remetente seu está indo para o spam. Estando tudo certo, troque o `p=quarantine` por `p=reject`."
+          }
+        ],
+        "semAtual": false,
+        "proximo": "reject",
+        "ressalvas": ["subdominios-mais-fracos", "aplicacao-parcial"]
+      },
+      "fimDaEscada": null
+    },
+    {
+      "nome": "reject",
+      "cartao": {
+        "id": "dmarc",
+        "titulo": "DMARC",
+        "fase": "pronto",
+        "selo": {
+          "estado": "ok",
+          "texto": "OK"
+        },
+        "resumo": "",
+        "achados": [],
+        "registro": {
+          "texto": "v=DMARC1; p=reject; rua=mailto:dmarc@exemplo.com.br",
+          "cortado": false
+        }
+      },
+      "escada": {
+        "degraus": [
+          {
+            "politica": "none",
+            "papel": "outro",
+            "titulo": "p=none",
+            "resumo": "Só monitora. Falsificação ainda chega à caixa de entrada."
+          },
+          {
+            "politica": "quarantine",
+            "papel": "outro",
+            "titulo": "p=quarantine",
+            "resumo": "Falsificação vai para o spam."
+          },
+          {
+            "politica": "reject",
+            "papel": "atual",
+            "titulo": "p=reject",
+            "resumo": "Falsificação é recusada. Proteção completa.",
+            "etiqueta": "você está aqui"
+          }
+        ],
+        "semAtual": false,
+        "proximo": null,
+        "ressalvas": []
+      },
+      "fimDaEscada": "Você já está no degrau final."
+    },
+    {
+      "nome": "ausente",
+      "cartao": {
+        "id": "dmarc",
+        "titulo": "DMARC",
+        "fase": "pronto",
+        "selo": {
+          "estado": "problema",
+          "texto": "Problema"
+        },
+        "resumo": "Este domínio não publica DMARC. Quem recebe não tem instrução do dono do domínio sobre mensagens falsificadas, e cada um decide por conta própria.",
+        "achados": []
+      },
+      "escada": {
+        "degraus": [
+          {
+            "politica": "none",
+            "papel": "proximo",
+            "titulo": "p=none",
+            "resumo": "Só monitora. Falsificação ainda chega à caixa de entrada.",
+            "etiqueta": "Próximo passo",
+            "acao": "Crie um registro TXT no nome `_dmarc` do seu domínio, com `v=DMARC1; p=none; rua=mailto:dmarc@seudominio.com.br`. Com `p=none` nada muda na entrega dos seus e-mails: você só passa a receber os relatórios."
+          },
+          {
+            "politica": "quarantine",
+            "papel": "outro",
+            "titulo": "p=quarantine",
+            "resumo": "Falsificação vai para o spam."
+          },
+          {
+            "politica": "reject",
+            "papel": "outro",
+            "titulo": "p=reject",
+            "resumo": "Falsificação é recusada. Proteção completa."
+          }
+        ],
+        "semAtual": true,
+        "proximo": "publicar",
+        "ressalvas": []
+      },
+      "fimDaEscada": null
+    },
+    {
+      "nome": "invalido",
+      "cartao": {
+        "id": "dmarc",
+        "titulo": "DMARC",
+        "fase": "pronto",
+        "selo": {
+          "estado": "problema",
+          "texto": "Problema"
+        },
+        "resumo": "Há um registro DMARC, mas ele tem erro e quem recebe o ignora.",
+        "achados": [
+          {
+            "codigo": "politica-invalida",
+            "gravidade": "erro",
+            "titulo": "Política que o DMARC não conhece",
+            "explicacao": "O valor de `p=` não é `none`, `quarantine` nem `reject`, e por isso quem recebe ignora o registro.",
+            "acao": "Troque o valor por um dos três. Para começar, `p=none`.",
+            "tag": "p"
+          }
+        ],
+        "registro": {
+          "texto": "v=DMARC1; p=talvez",
+          "cortado": false
+        }
+      },
+      "escada": {
+        "degraus": [
+          {
+            "politica": "none",
+            "papel": "proximo",
+            "titulo": "p=none",
+            "resumo": "Só monitora. Falsificação ainda chega à caixa de entrada.",
+            "etiqueta": "Próximo passo",
+            "acao": "O registro existe, mas está escrito de um jeito que quem recebe ignora. Corrija o registro do nome `_dmarc` (os achados abaixo dizem o quê) e comece por `p=none`."
+          },
+          {
+            "politica": "quarantine",
+            "papel": "outro",
+            "titulo": "p=quarantine",
+            "resumo": "Falsificação vai para o spam."
+          },
+          {
+            "politica": "reject",
+            "papel": "outro",
+            "titulo": "p=reject",
+            "resumo": "Falsificação é recusada. Proteção completa."
+          }
+        ],
+        "semAtual": true,
+        "proximo": "publicar",
+        "ressalvas": []
+      },
+      "fimDaEscada": null
+    },
+    {
+      "nome": "multiplos",
+      "cartao": {
+        "id": "dmarc",
+        "titulo": "DMARC",
+        "fase": "pronto",
+        "selo": {
+          "estado": "problema",
+          "texto": "Problema"
+        },
+        "resumo": "Há 2 registros DMARC no mesmo nome. Quem recebe ignora todos, e é como se não houvesse nenhum.",
+        "achados": []
+      },
+      "escada": {
+        "degraus": [
+          {
+            "politica": "none",
+            "papel": "proximo",
+            "titulo": "p=none",
+            "resumo": "Só monitora. Falsificação ainda chega à caixa de entrada.",
+            "etiqueta": "Próximo passo",
+            "acao": "Há mais de um registro DMARC no nome `_dmarc`, e quem recebe ignora todos. Apague os extras e deixe um só, que comece por `v=DMARC1; p=none`."
+          },
+          {
+            "politica": "quarantine",
+            "papel": "outro",
+            "titulo": "p=quarantine",
+            "resumo": "Falsificação vai para o spam."
+          },
+          {
+            "politica": "reject",
+            "papel": "outro",
+            "titulo": "p=reject",
+            "resumo": "Falsificação é recusada. Proteção completa."
+          }
+        ],
+        "semAtual": true,
+        "proximo": "publicar",
+        "ressalvas": []
+      },
+      "fimDaEscada": null
+    }
+  ],
+  "dkimComFalha": {
+    "id": "dkim",
+    "titulo": "DKIM",
+    "fase": "pronto",
+    "selo": {
+      "estado": "atencao",
+      "texto": "Atenção"
+    },
+    "resumo": "Encontrei a chave no seletor `google` (RSA de 1024 bits). Procurei em 2 seletores. Parte das consultas falhou e a lista não foi toda verificada: consegui olhar 1 de 2 seletores.",
+    "achados": [
+      {
+        "codigo": "chave-abaixo-do-recomendado",
+        "gravidade": "aviso",
+        "titulo": "Chave com menos de 2048 bits",
+        "explicacao": "Chaves RSA de 1024 bits ainda funcionam, mas a recomendação atual é 2048 bits ou mais.",
+        "acao": "Gere uma chave de 2048 bits no painel do seu provedor de e-mail e publique o registro novo.",
+        "tag": "p",
+        "detalhe": "1024",
+        "seletor": "google"
+      }
+    ],
+    "extra": {
+      "total": 2,
+      "tentados": [
+        {
+          "seletor": "google",
+          "estado": "valido",
+          "provedor": "Google Workspace",
+          "documentacao": "https://knowledge.workspace.google.com/admin/security/set-up-dkim"
+        },
+        {
+          "seletor": "k1",
+          "estado": "nao-verificado"
+        }
+      ],
+      "encontrados": [
+        {
+          "seletor": "google",
+          "chave": "RSA de 1024 bits",
+          "provedor": "Google Workspace"
+        }
+      ],
+      "orientacoes": [
+        {
+          "provedor": "Mailgun",
+          "texto": "Mailgun: digite o seletor que o painel do provedor mostra.",
+          "documentacao": "https://documentation.mailgun.com/docs/mailgun/user-manual/domains/domains-verify"
+        },
+        {
+          "provedor": "Mailchimp (marketing)",
+          "texto": "Mailchimp (marketing): digite o seletor que o painel do provedor mostra.",
+          "documentacao": "https://mailchimp.com/help/set-up-email-domain-authentication/"
+        },
+        {
+          "provedor": "HubSpot",
+          "texto": "HubSpot: digite o seletor que o painel do provedor mostra.",
+          "documentacao": "https://knowledge.hubspot.com/email/overview-of-email-authentication"
+        }
+      ],
+      "recusados": [],
+      "mostrarCampo": true
+    }
+  },
+  "digitados": {
+    "validos": ["k1"],
+    "recusados": [
+      {
+        "texto": "a/b",
+        "motivo": "tem caractere que um seletor não aceita (use letras, números, hífen e sublinhado)"
+      },
+      {
+        "texto": "google._domainkey.exemplo.com.br",
+        "motivo": "parece o nome completo; digite só o seletor, que eu monto o resto"
+      },
+      {
+        "texto": ".x",
+        "motivo": "tem um ponto sobrando"
+      },
+      {
+        "texto": "é",
+        "motivo": "tem caractere que um seletor não aceita (use letras, números, hífen e sublinhado)"
+      }
+    ]
+  },
+  "falhas": {
+    "http": "O resolvedor respondeu HTTP 503. Isso não diz nada sobre o seu SPF.",
+    "dnsStatus": "O resolvedor não conseguiu resolver o nome (Status 2). Isso não diz nada sobre o seu DMARC.",
+    "semMotivo": "Não consegui consultar o DNS agora. Isso não diz nada sobre o seu DKIM.",
+    "cartaoFalha": {
+      "id": "spf",
+      "titulo": "SPF",
+      "fase": "falha",
+      "selo": {
+        "estado": "nao-verificado",
+        "texto": "Não verificado"
+      },
+      "resumo": "Não consegui consultar o DNS agora, nem pela Cloudflare nem pelo Google. Confira sua conexão e tente de novo. Isso não diz nada sobre o seu SPF.",
+      "achados": []
+    },
+    "cartaoVerificando": [
+      {
+        "id": "dmarc",
+        "titulo": "DMARC",
+        "fase": "verificando",
+        "selo": {
+          "estado": "nao-verificado",
+          "texto": "Não verificado"
+        },
+        "resumo": "Consultando o registro DMARC…",
+        "achados": []
+      },
+      {
+        "id": "spf",
+        "titulo": "SPF",
+        "fase": "verificando",
+        "selo": {
+          "estado": "nao-verificado",
+          "texto": "Não verificado"
+        },
+        "resumo": "Seguindo os `include` e contando as consultas…",
+        "achados": []
+      },
+      {
+        "id": "dkim",
+        "titulo": "DKIM",
+        "fase": "verificando",
+        "selo": {
+          "estado": "nao-verificado",
+          "texto": "Não verificado"
+        },
+        "resumo": "Procurando em 17 seletores comuns…",
+        "achados": []
+      }
+    ]
+  },
+  "consultas": [
+    "3 de 10 consultas DNS, no pior caso.",
+    "Pelo menos 5 de 10 consultas DNS. Não consegui seguir tudo, então o número pode ser maior.",
+    "13 de 10 consultas DNS, no pior caso."
+  ],
+  "resolvedores": [
+    "Quem viu o domínio nesta verificação: DNS público da Cloudflare.",
+    "Quem viu o domínio nesta verificação: DNS público do Google.",
+    "Quem viu o domínio nesta verificação: DNS público da Cloudflare e do Google.",
+    null
+  ],
+  "anuncios": {
+    "inicio": "Verificando exemplo.com.br.",
+    "fim": "Resultado pronto para exemplo.com.br. DMARC: atenção. SPF: ok. DKIM: atenção.",
+    "inexistente": "Não encontrei o domínio exemplo.com.br."
+  },
+  "achadosSoltos": {
+    "generico": {
+      "codigo": "codigo-que-nao-existe",
+      "gravidade": "info",
+      "titulo": "Achado sem explicação ainda",
+      "explicacao": "A ferramenta apontou algo no registro que ainda não tem texto em português. Código: `codigo-que-nao-existe`.",
+      "acao": "Confira o registro no painel do seu DNS."
+    },
+    "seletorInvalido": {
+      "codigo": "seletor-invalido",
+      "gravidade": "aviso",
+      "titulo": "Seletor que não foi aceito",
+      "explicacao": "Um dos seletores que você digitou não é válido e foi deixado de fora.",
+      "acao": "Digite só o seletor (por exemplo `google`), sem `._domainkey` e sem o domínio.",
+      "detalhe": "tem caractere que um seletor não aceita (use letras, números, hífen e sublinhado)",
+      "seletor": "a/b"
+    },
+    "comDetalhe": {
+      "codigo": "termo-invalido",
+      "gravidade": "erro",
+      "titulo": "Termo que o SPF não entende",
+      "explicacao": "Um termo do registro (o que aparece ao lado) não segue a sintaxe do SPF. Quem recebe devolve erro e o SPF inteiro deixa de valer.",
+      "acao": "Corrija ou apague esse termo.",
+      "detalhe": "ip4:999.0.0.1"
+    }
+  },
+  "motivos": {
+    "dominio-vazio": "Digite um domínio, por exemplo exemplo.com.br.",
+    "dominio-com-porta-ou-ipv6": "Digite só o domínio, sem porta nem endereço IPv6.",
+    "dominio-invalido": "Esse texto não é um domínio válido.",
+    "dominio-comprido-demais": "O domínio é comprido demais (o limite é 253 caracteres).",
+    "dominio-incompleto": "Use o domínio completo, por exemplo exemplo.com.br.",
+    "dominio-e-ip": "Endereço IP não tem DMARC: digite o nome do domínio.",
+    "dominio-parte-comprida-demais": "Uma parte do domínio passa de 63 caracteres.",
+    "dominio-caractere-invalido": "O domínio só pode ter letras, números e hífen.",
+    "nome-vazio": "O nome da consulta está vazio.",
+    "nome-comprido-demais": "O nome da consulta é comprido demais (o limite é 253 caracteres).",
+    "nome-caractere-invalido": "O nome da consulta tem um caractere que não é permitido.",
+    "nome-parte-vazia": "O nome da consulta tem uma parte vazia (dois pontos seguidos).",
+    "nome-parte-comprida-demais": "Uma parte do nome da consulta passa de 63 caracteres.",
+    "resposta-nao-objeto": "A resposta do resolvedor não é um objeto.",
+    "resposta-sem-status": "A resposta do resolvedor não traz o Status.",
+    "resposta-status-dns": "O resolvedor não conseguiu resolver o nome (Status 503).",
+    "resposta-answer-invalido": "O Answer da resposta não é uma lista.",
+    "resolvedor-http": "O resolvedor respondeu HTTP 503.",
+    "consulta-falhou": "A consulta ao resolvedor falhou (rede, tempo ou resposta inválida).",
+    "resolvedores-indisponiveis": "Não consegui consultar o DNS agora, nem pela Cloudflare nem pelo Google. Confira sua conexão e tente de novo.",
+    "sem-seletores": "Não há seletor para procurar.",
+    "sem-motivo": "Não consegui consultar o DNS agora.",
+    "vazio": "está vazio",
+    "parece-nome-completo": "parece o nome completo; digite só o seletor, que eu monto o resto",
+    "grande-demais": "é grande demais",
+    "componente-vazio": "tem um ponto sobrando",
+    "componente-grande-demais": "tem uma parte grande demais",
+    "caractere-invalido": "tem caractere que um seletor não aceita (use letras, números, hífen e sublinhado)"
+  },
+  "frases": [
+    "A busca parou no meio",
+    "A consulta ao resolvedor falhou (rede, tempo ou resposta inválida).",
+    "A consulta de um registro apontado por `include` ou `redirect` falhou, então a contagem pode estar maior do que a mostrada.",
+    "A contagem parou no meio",
+    "A lista passou do máximo de 40 seletores, e os últimos ficaram de fora.",
+    "A mesma tag aparece mais de uma vez no registro. Esta ferramenta leu a primeira e ignorou as outras, mas nem todo receptor faz o mesmo.",
+    "A mesma tag aparece mais de uma vez, e a norma manda ignorar um registro assim.",
+    "A norma do SPF desaconselha o `ptr`: é lento, gasta consultas e nem todo receptor o avalia.",
+    "A política vale só para parte das mensagens",
+    "A política vale só para parte das mensagens (`pct=` abaixo de 100).",
+    "A resposta do resolvedor não traz o Status.",
+    "A resposta do resolvedor não é um objeto.",
+    "A tag `h=` lista só `sha1`, um método fraco que a norma atual não aceita mais.",
+    "A tag `s=` limita a chave a um serviço que não é `email`, então ela não vale para validar mensagens.",
+    "A tag `v=` precisa ser `DKIM1` e vir primeiro. Senão, quem recebe descarta o registro.",
+    "Abra o painel do seu DNS, confira se o registro foi colado errado e deixe só o necessário.",
+    "Acrescente `p=none` ao registro. Depois, suba para `quarantine` e `reject`.",
+    "Acrescente `rua=mailto:dmarc@seudominio.com.br`, com uma caixa que você leia ou um serviço que leia os relatórios por você.",
+    "Alguns endereços de `rua=` ou `ruf=` não têm o formato `mailto:nome@dominio`, e quem recebe os ignora.",
+    "Antes de incluir mais um serviço, tire um que você não usa mais.",
+    "Apague as repetições.",
+    "Apague o `h=` ou inclua `sha256`.",
+    "Apague o `redirect` ou o `all`, conforme o que você quer que valha.",
+    "Apague o `s=` ou troque por `s=email`.",
+    "Apague o `sp=` (os subdomínios passam a seguir o `p=`) ou iguale os dois.",
+    "Apague os `include`, `a`, `mx` e `exists` que apontam para nomes sem registro.",
+    "Atenção",
+    "Aviso",
+    "Chave com menos de 2048 bits",
+    "Chave em modo de teste",
+    "Chave fraca demais",
+    "Chave maior que 4096 bits",
+    "Chave que não vale para e-mail",
+    "Chave revogada",
+    "Chaves RSA com menos de 1024 bits são consideradas fracas, e quem recebe pode recusar a assinatura.",
+    "Chaves RSA de 1024 bits ainda funcionam, mas a recomendação atual é 2048 bits ou mais.",
+    "Com `?all`, o SPF não diz se um servidor é permitido ou não, então não ajuda a barrar falsificação.",
+    "Com `p=none`, o DMARC apenas observa. Mensagens falsificadas com o seu domínio continuam sendo entregues como antes.",
+    "Comece o registro com `v=DKIM1`.",
+    "Confira o valor no painel do seu DNS e deixe só uma cópia.",
+    "Confira se o `k=` foi digitado certo.",
+    "Conhecer o MailVigil",
+    "Consultando o registro DMARC…",
+    "Consultas demais: o SPF vai falhar",
+    "Continue lendo os relatórios por mais 2 a 4 semanas e confira se nenhum remetente seu está indo para o spam. Estando tudo certo, troque o `p=quarantine` por `p=reject`.",
+    "Copie de novo a chave que o painel do provedor mostra, sem aspas e sem espaços a mais.",
+    "Copie de novo o registro completo que o painel do seu provedor mostra.",
+    "Corrija o nome do domínio ou apague esse `include`.",
+    "Corrija o nome do domínio ou apague o `redirect`.",
+    "Corrija o valor ou apague a tag.",
+    "Corrija ou apague esse termo.",
+    "Corrija ou apague esses endereços. Cada um começa com `mailto:`.",
+    "Crie um registro TXT no nome `_dmarc` do seu domínio, com `v=DMARC1; p=none; rua=mailto:dmarc@seudominio.com.br`. Com `p=none` nada muda na entrega dos seus e-mails: você só passa a receber os relatórios.",
+    "DKIM",
+    "DMARC",
+    "Deixe cada tag uma vez só, com o valor que você quer.",
+    "Deixe cada tag uma vez só.",
+    "Deixe só um de cada.",
+    "Deixe um registro só por seletor.",
+    "Desfaça o ciclo: um dos dois deixa de incluir o outro.",
+    "Detalhe",
+    "Digite só o domínio, sem porta nem endereço IPv6.",
+    "Digite só o seletor (por exemplo `google`), sem `._domainkey` e sem o domínio.",
+    "Digite um domínio, por exemplo exemplo.com.br.",
+    "Domínio",
+    "Ed25519",
+    "Em que degrau do DMARC você está",
+    "Encontrei a chave no seletor `{seletor}` ({chave}). Procurei em {total} seletores.",
+    "Encontrei chaves em {quantidade} seletores: {seletores}. Procurei em {total} seletores.",
+    "Endereço IP não tem DMARC: digite o nome do domínio.",
+    "Endereço de relatório que não vale",
+    "Enxugue o registro: tire serviços que você não usa mais e troque faixas de IP repetidas por uma só.",
+    "Erro",
+    "Esse texto não é um domínio válido.",
+    "Este domínio não publica DMARC. Quem recebe não tem instrução do dono do domínio sobre mensagens falsificadas, e cada um decide por conta própria.",
+    "Este domínio não publica SPF. Quem recebe não sabe quais servidores podem enviar e-mail em nome dele.",
+    "Falsificação vai para o spam.",
+    "Falsificação é recusada. Proteção completa.",
+    "Falta a tag `p=`. Se o registro tem `rua=`, quem recebe trata como `p=none` (só monitorar); sem `rua=`, ignora o registro inteiro.",
+    "Gere uma chave de 2048 bits no painel do seu provedor de e-mail e publique o registro novo.",
+    "Há mais de um registro DMARC no nome `_dmarc`, e quem recebe ignora todos. Apague os extras e deixe um só, que comece por `v=DMARC1; p=none`.",
+    "Há um registro DMARC, mas ele tem erro e quem recebe o ignora.",
+    "Há um registro SPF, mas ele tem erro e, por isso, o SPF deixa de valer.",
+    "Há {quantidade} registros DMARC no mesmo nome. Quem recebe ignora todos, e é como se não houvesse nenhum.",
+    "Há {quantidade} registros SPF no mesmo nome. Isso é erro: quem recebe devolve `permerror` e o SPF deixa de valer.",
+    "Informação",
+    "Isso não diz nada sobre o seu {parte}.",
+    "Leia os relatórios por 2 a 4 semanas, confirme que seus remetentes passam no SPF ou no DKIM e então troque o `p=none` por `p=quarantine`.",
+    "Macro que esta ferramenta não avalia",
+    "Mais de dois termos do SPF apontam para nomes que não existem ou não têm registro. A norma trata isso como erro.",
+    "Mais de um registro no mesmo seletor",
+    "Maiúsculas onde o padrão usa minúsculas",
+    "Mantenha assim e confira que todo serviço que envia por você está na lista.",
+    "Mova esses termos para antes do `all` ou apague-os.",
+    "Nada a corrigir. Só saiba que o total pode ser maior do que o mostrado.",
+    "Nenhum degrau vale ainda: não há um registro DMARC em uso.",
+    "Ninguém recebe os relatórios",
+    "Não aceitei `{texto}`: {motivo}.",
+    "Não achei chave DKIM nos seletores que tentei. Isso não quer dizer que o domínio não tenha: quem envia o e-mail escolhe o nome do seletor.",
+    "Não consegui consultar o DNS agora, nem pela Cloudflare nem pelo Google. Confira sua conexão e tente de novo.",
+    "Não consegui consultar o DNS agora.",
+    "Não consegui consultar um registro incluído",
+    "Não consegui ler a chave",
+    "Não encontrei chave DKIM nesses {total} seletores. Isso não quer dizer que o domínio não tenha: quem envia o e-mail escolhe o nome do seletor.",
+    "Não encontrei esse domínio",
+    "Não encontrei nesses seletores",
+    "Não encontrei o domínio {dominio}.",
+    "Não há seletor para procurar.",
+    "Não termina em `all`.",
+    "Não verificado",
+    "O Answer da resposta não é uma lista.",
+    "O DMARC só monitora",
+    "O DNS não conhece `{dominio}`. Confira se digitou certo e tente de novo.",
+    "O MailVigil lê os relatórios por você.",
+    "O SPF já usa 8 ou 9 das 10 consultas permitidas. Um `include` novo pode fazê-lo passar do limite.",
+    "O SPF vai falhar por passar do limite de consultas, e não por erro de sintaxe.",
+    "O `k=` não é `rsa` nem `ed25519`, então não medi a chave.",
+    "O `p=` está vazio: o dono retirou a chave de propósito. Mensagens assinadas com esse seletor deixam de passar no DKIM.",
+    "O `pct=` está abaixo de 100: só essa porcentagem das mensagens que falham recebe a política. O resto recebe um tratamento mais leve.",
+    "O `redirect` aponta para um nome sem registro SPF, e isso faz o SPF inteiro dar erro.",
+    "O `redirect` e o `exp` só podem aparecer uma vez. Repetidos, quem recebe devolve erro e o SPF inteiro deixa de valer.",
+    "O `redirect` só vale quando o registro não tem `all`. Como este tem, quem recebe ignora o `redirect`.",
+    "O `sp=` define uma política mais fraca para os subdomínios do que a de `p=`. Um subdomínio do seu domínio pode ser falsificado com menos barreira.",
+    "O conteúdo de `p=` não é uma chave pública válida do tipo informado. É comum quando a chave é colada cortada ou com caracteres a mais.",
+    "O destino de um `include` ou `redirect` usa uma macro (`%{...}`), cujo valor muda a cada mensagem. Não dá para contar quantas consultas ele gasta.",
+    "O domínio de um `include` não tem SPF",
+    "O domínio de um `include` tem mais de um SPF",
+    "O domínio do `redirect` não tem SPF",
+    "O domínio do `redirect` tem mais de um SPF",
+    "O domínio só pode ter letras, números e hífen.",
+    "O domínio é comprido demais (o limite é 253 caracteres).",
+    "O limite é 10 consultas DNS. Passando disso, quem recebe trata o SPF como erro, mesmo com o registro bem escrito.",
+    "O mesmo termo aparece mais de uma vez. A repetição ocupa espaço no registro e, em `include`, `a` e `mx`, gasta consultas à toa.",
+    "O nome apontado pelo `redirect` publica mais de um registro SPF, e isso faz o SPF inteiro dar erro.",
+    "O nome apontado por um `include` publica mais de um registro SPF, e isso faz o SPF inteiro dar erro.",
+    "O nome da consulta está vazio.",
+    "O nome da consulta tem um caractere que não é permitido.",
+    "O nome da consulta tem uma parte vazia (dois pontos seguidos).",
+    "O nome da consulta é comprido demais (o limite é 253 caracteres).",
+    "O que vem depois do `all` nunca é avaliado.",
+    "O registro DKIM não tem a tag `p=`, que guarda a chave pública. Sem ela, o DKIM não valida nada.",
+    "O registro SPF do domínio apontado pelo `redirect` tem erro de sintaxe, e isso faz o seu SPF dar erro também.",
+    "O registro SPF do domínio incluído tem erro de sintaxe, e isso faz o seu SPF dar erro também.",
+    "O registro de um `include` está inválido",
+    "O registro do `redirect` está inválido",
+    "O registro existe, mas está escrito de um jeito que quem recebe ignora. Corrija o registro do nome `_dmarc` (os achados abaixo dizem o quê) e comece por `p=none`.",
+    "O registro não diz a política (`p=`)",
+    "O registro passa de 512 caracteres, o tamanho que a norma recomenda para caber numa resposta DNS comum. Alguns receptores falham com registros maiores.",
+    "O registro tem `t=y`, que marca o DKIM como teste. Alguns receptores tratam a assinatura como se ela não existisse.",
+    "O registro termina com `+all`, que autoriza qualquer servidor do mundo a enviar e-mail em nome do domínio. Na prática, é como não ter SPF.",
+    "O registro é maior do que esta ferramenta analisa, então não li as tags. Um registro assim costuma ser texto colado em dobro.",
+    "O resolvedor não conseguiu resolver o nome (Status {valor}).",
+    "O resolvedor respondeu HTTP {valor}.",
+    "O seletor publica mais de um registro DKIM, e a norma deixa o resultado indefinido. Por isso não li nenhum.",
+    "O valor de `p=` não é `none`, `quarantine` nem `reject`, e por isso quem recebe ignora o registro.",
+    "O valor de uma tag opcional (a que aparece ao lado) não segue o formato esperado, então vale o padrão dela.",
+    "O valor de uma tag passa do tamanho que esta ferramenta lê. É comum quando o valor foi colado em dobro.",
+    "OK",
+    "Os subdomínios seguem uma regra mais fraca (`sp=`) do que a do domínio.",
+    "Parei de consultar depois de várias falhas seguidas, então parte dos seletores não foi verificada.",
+    "Parei de seguir os `include` antes de terminar (falhas de rede ou muitos termos), então o total é de pelo menos esse número.",
+    "Parte das consultas falhou e a lista não foi toda verificada: consegui olhar {verificados} de {total} seletores.",
+    "Pelo menos {total} de {limite} consultas DNS. Não consegui seguir tudo, então o número pode ser maior.",
+    "Perto do limite de consultas",
+    "Política que o DMARC não conhece",
+    "Problema",
+    "Procurando em {total} seletores comuns…",
+    "Procurar nesses seletores",
+    "Procure por menos seletores de cada vez, os mais prováveis primeiro.",
+    "Provedores em que o seletor depende da sua conta",
+    "Próximo passo",
+    "Quando os relatórios mostrarem que seus remetentes legítimos passam, suba o `pct` até 100 ou apague a tag.",
+    "Quando tudo estiver funcionando, apague o `t=y`.",
+    "Quem não está na lista falha no SPF, e quem recebe pode recusar a mensagem.",
+    "Quem não está na lista é marcado como suspeito, mas a mensagem costuma ser aceita.",
+    "Quem recebe só precisa validar chaves de até 4096 bits. Chaves maiores podem ser ignoradas ou deixar a validação lenta.",
+    "Quem viu o domínio nesta verificação: DNS público {quem}.",
+    "Quer ler esses relatórios sem abrir XML?",
+    "RSA de {bits} bits",
+    "RSA, tamanho não lido",
+    "Reescreva o registro no padrão, para não depender de como cada receptor o lê.",
+    "Registro SPF longo",
+    "Registro grande demais para ler",
+    "Registro sem `all` no fim",
+    "Registro sem a chave (`p=`)",
+    "Registros que se incluem em círculo",
+    "Resultado para {dominio}",
+    "Resultado pronto para {dominio}. DMARC: {dmarc}. SPF: {spf}. DKIM: {dkim}.",
+    "SPF",
+    "Se foi de propósito, está certo. Se não foi, publique a chave de novo.",
+    "Se o domínio é seu, corrija o registro dele. Se é de um serviço, avise o serviço ou tire o `include`.",
+    "Se o domínio é seu, corrija o registro dele. Se é de um serviço, avise o serviço ou tire o `redirect`.",
+    "Se o domínio é seu, deixe um registro só. Se é de um serviço, avise o serviço ou tire o `include`.",
+    "Se o domínio é seu, deixe um registro só. Se é de um serviço, avise o serviço ou tire o `redirect`.",
+    "Segue o `redirect` para outro domínio.",
+    "Seguindo os `include` e contando as consultas…",
+    "Seletor",
+    "Seletor que não foi aceito",
+    "Seletores",
+    "Seletores demais",
+    "Seletores extras (separe por vírgula)",
+    "Sem `all` (e sem `redirect`), o SPF não diz o que fazer com os servidores que não estão na lista.",
+    "Sem `rua=`, nenhum endereço recebe os relatórios que mostram quem envia e-mail em nome do seu domínio, e sem eles não há como subir a política com segurança.",
+    "Seu provedor de e-mail mostra o nome do seletor no painel dele. Mailgun, Mailchimp e HubSpot usam nomes por conta.",
+    "Subdomínios com regra mais fraca",
+    "Só aceita assinatura SHA-1",
+    "Só monitora. Falsificação ainda chega à caixa de entrada.",
+    "Tag",
+    "Tag repetida",
+    "Tag repetida no registro DKIM",
+    "Tentar de novo",
+    "Tente de novo daqui a pouco.",
+    "Tente de novo. Isso não diz nada sobre o seu registro.",
+    "Tente de novo. Se o total já passou de 10, reduza os `include`.",
+    "Termina em `{all}`.",
+    "Termine o registro com `~all` ou `-all`.",
+    "Termo que o SPF não entende",
+    "Termo repetido",
+    "Termos depois do `all`",
+    "Termos que apontam para nomes sem resposta",
+    "Tipo de chave que não conheço",
+    "Tire os `include` de serviços que você não usa mais.",
+    "Troque o valor por um dos três. Para começar, `p=none`.",
+    "Troque por `ip4`, `ip6` ou `include`.",
+    "Troque por `~all` ou por `-all`.",
+    "Troque por `~all` ou, quando souber todos os seus remetentes, por `-all`.",
+    "Troque por uma chave de 2048 bits no painel do seu provedor de e-mail.",
+    "Um `include` aponta para um nome sem registro SPF, e isso faz o SPF inteiro dar erro.",
+    "Um dos seletores que você digitou não é válido e foi deixado de fora.",
+    "Um registro inclui outro que, mais adiante, inclui o primeiro de volta. Quem recebe devolve erro.",
+    "Um termo do registro (o que aparece ao lado) não segue a sintaxe do SPF. Quem recebe devolve erro e o SPF inteiro deixa de valer.",
+    "Uma parte do domínio passa de 63 caracteres.",
+    "Uma parte do nome da consulta passa de 63 caracteres.",
+    "Uma parte do registro está escrita em caixa diferente da do padrão (por exemplo `P=` no lugar de `p=`). Muitos receptores aceitam, mas nem todos leem do mesmo jeito.",
+    "Use o domínio completo, por exemplo exemplo.com.br.",
+    "Use os relatórios para descobrir quem envia em nome do domínio e depois suba a política, como mostra a escada acima.",
+    "Use uma chave de 2048 bits (ou, no máximo, 4096).",
+    "Valor grande demais numa tag",
+    "Valor que não segue o formato",
+    "Veja no painel do seu provedor de e-mail qual é o seletor dele e procure por ele no campo abaixo.",
+    "Ver os {total} seletores tentados",
+    "Verificando {dominio}.",
+    "Verificando…",
+    "Verificar",
+    "Versão do DKIM inválida",
+    "Você já está no degrau final.",
+    "`+all`: qualquer servidor pode enviar",
+    "`-all`: só os servidores listados",
+    "`?all`: o SPF não decide nada",
+    "`ptr` está em desuso",
+    "`redirect` ou `exp` repetido",
+    "`redirect` sem efeito",
+    "`~all`: o resto é suspeito",
+    "da Cloudflare",
+    "da Cloudflare e do Google",
+    "digitado por você",
+    "do Google",
+    "documentação",
+    "documentação de {provedor}",
+    "está vazio",
+    "ex.: k1, meuprovedor",
+    "p=none",
+    "p=quarantine",
+    "p=reject",
+    "parece o nome completo; digite só o seletor, que eu monto o resto",
+    "tem caractere que um seletor não aceita (use letras, números, hífen e sublinhado)",
+    "tem um ponto sobrando",
+    "tem uma parte grande demais",
+    "tipo de chave que não conheço",
+    "você está aqui",
+    "{provedor}: digite o seletor que o painel do provedor mostra.",
+    "{total} de {limite} consultas DNS, no pior caso.",
+    "É um bom ponto de partida. Passe para `-all` quando tiver certeza de que todos os remetentes estão na lista.",
+    "é grande demais"
+  ]
+}

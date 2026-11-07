@@ -137,8 +137,16 @@ describe("index.html", () => {
   it("carrega o JavaScript como módulo próprio e o CSS do próprio site", async () => {
     const html = await ler("index.html");
 
-    assert.match(html, /<script type="module" src="\/js\/pagina\.js"><\/script>/);
+    assert.match(html, /<script type="module" src="\/js\/entrada-pt\.js"><\/script>/);
     assert.match(html, /<link rel="stylesheet" href="\/css\/pagina\.css"/);
+  });
+
+  it("a entrada do idioma liga a página com o catálogo do mesmo idioma", async () => {
+    const entrada = semComentarios(await ler("js/entrada-pt.js"));
+
+    assert.match(entrada, /import \{ iniciarPagina \} from "\.\/pagina\.js";/);
+    assert.match(entrada, /import \{ textos \} from "\.\/textos\/pt\/index\.js";/);
+    assert.match(entrada, /iniciarPagina\(textos\);/);
   });
 
   it("tem título, descrição e ícone (SEO e Lighthouse)", async () => {
