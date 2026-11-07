@@ -63,6 +63,8 @@ public/                  # o site: é o que vai para a hospedagem, sem build
   _headers               # cabeçalhos de segurança (/*) e cache longo das fontes (/fonts/*); a plataforma o consome, não o publica
   robots.txt, sitemap.xml # descoberta; citam o endereço da rota do wrangler.json
   favicon.svg            # ícone da aba, referenciado pelas duas páginas
+  apple-touch-icon.png   # ícone de tela inicial (180 x 180, o logo em branco sobre o azul da marca); só o index o cita
+  social-pt.png          # og:image do index (1280 x 640); igual, byte a byte, à social preview do GitHub em docs/images/
   css/pagina.css         # a folha das duas páginas (tokens, cartões, escada); fontes em fonts/ (OFL ao lado)
   js/                    # módulos ES carregados direto pelo navegador
     dominio.js           # valida e normaliza o domínio digitado (módulo puro: sem DOM, sem rede)
@@ -104,7 +106,7 @@ Camadas: a lógica de parsing (DMARC, SPF, DKIM) e de validação mora em módul
 
 > ⚠️ **Não regredir: o domínio vai dentro de uma URL.** Tudo o que o visitante digita passa por `normalizarDominio` antes de virar consulta DoH. Nenhum módulo monta URL de consulta com texto cru.
 
-> ⚠️ **Não regredir: o endereço público tem uma fonte só, a rota do `wrangler.json`.** `canonical`, `robots.txt`, `sitemap.xml`, os limites `producao-*.json` e a conferência derivam dele; os testes (`descoberta`, `lighthouse-producao`) falham se divergirem. A CSP de `public/_headers` é a da `<meta>` do `index.html` mais `frame-ancestors 'none'` (`test/cabecalhos.test.js`).
+> ⚠️ **Não regredir: o endereço público tem uma fonte só, a rota do `wrangler.json`.** `canonical`, `og:url`, `og:image`, `robots.txt`, `sitemap.xml`, os limites `producao-*.json` e a conferência derivam dele; os testes (`descoberta`, `lighthouse-producao`) falham se divergirem. A CSP de `public/_headers` é a da `<meta>` do `index.html` mais `frame-ancestors 'none'` (`test/cabecalhos.test.js`).
 
 > ⚠️ **Não regredir: sem log e sem rastreador.** Nenhum log de domínios consultados, nenhum script de terceiro na página. Só a estatística agregada da hospedagem. A página diz ao visitante que o resolvedor DoH (Cloudflare, ou Google no fallback) vê o domínio e o IP.
 

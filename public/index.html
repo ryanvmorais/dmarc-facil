@@ -24,8 +24,37 @@
       content="Digite o seu domínio e veja o que o DMARC, o SPF e o DKIM dizem e qual é o próximo passo. A consulta sai do seu navegador."
     />
     <link rel="canonical" href="https://dmarc-facil.ryanmorais.com.br/" />
+    <!--
+      Cartão de compartilhamento (WhatsApp, LinkedIn, Slack, X). og:url e og:image são URLs
+      absolutas, porque quem lê a página é o robô da rede social e não o navegador; saem do
+      mesmo endereço do canonical, e og:url não leva o ?dominio= (test/descoberta.test.js
+      confere). A imagem é a mesma 1280 x 640 do GitHub. A 404 não tem estas tags: não se
+      indexa nem se compartilha.
+    -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="DMARC Fácil" />
+    <meta
+      property="og:title"
+      content="DMARC Fácil: verifique o DMARC, o SPF e o DKIM do seu domínio"
+    />
+    <meta
+      property="og:description"
+      content="Digite o seu domínio e veja o que o DMARC, o SPF e o DKIM dizem e qual é o próximo passo. A consulta sai do seu navegador."
+    />
+    <meta property="og:url" content="https://dmarc-facil.ryanmorais.com.br/" />
+    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:image" content="https://dmarc-facil.ryanmorais.com.br/social-pt.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1280" />
+    <meta property="og:image:height" content="640" />
+    <meta
+      property="og:image:alt"
+      content="DMARC Fácil: o logo, o texto 'Veja o que o DMARC, o SPF e o DKIM do seu domínio dizem e qual é o próximo passo' e a escada do DMARC com três degraus: p=none, p=quarantine e p=reject."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="color-scheme" content="light" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="stylesheet" href="/css/pagina.css" />
     <script type="module" src="/js/pagina.js"></script>
   </head>
