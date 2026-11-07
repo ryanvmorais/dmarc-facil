@@ -8,6 +8,10 @@
  *
  * O parâmetro vem de um link que qualquer pessoa pode montar, então é entrada hostil: a
  * função devolve o texto como veio (`<script>` incluído), e a página só o põe em `value`.
+ *
+ * Os links de idioma levam o que está no campo para a outra página (ADR-6 da spec 008):
+ * `montarEnderecoIdioma` junta a base fixa do link com o texto digitado, sem nunca deixar o texto
+ * virar esquema nem marcação.
  */
 
 // @ts-check
@@ -47,3 +51,20 @@ export const lerDominioDoEndereco = (busca) => {
  * @returns {string} Por exemplo ``"?dominio=exemplo.com.br"``, com o domínio codificado.
  */
 export const montarEndereco = (dominio) => `?${new URLSearchParams({ dominio }).toString()}`;
+
+/**
+ * Monta o endereço do link de idioma: a base do link mais o que está no campo.
+ *
+ * O texto é o do campo (digitado, ainda não verificado): quem normaliza é o envio da outra
+ * página. Vai aparado, cortado no mesmo limite de `lerDominioDoEndereco` e codificado por
+ * `URLSearchParams`, então `javascript:`, `<script>` e `%00` só aparecem codificados, depois do
+ * `?dominio=`, e a base (`/` ou `/en/`) é a que veio do HTML.
+ *
+ * @param {string} base - O `href` do link como veio do HTML (`"/"` ou `"/en/"`).
+ * @param {unknown} texto - O que está no campo de domínio.
+ * @returns {string} A base sozinha se o campo está vazio; senão a base e o `?dominio=`.
+ */
+export const montarEnderecoIdioma = (base, texto) => {
+  const aparado = typeof texto === "string" ? texto.trim().slice(0, MAXIMO_PARAMETRO) : "";
+  return aparado === "" ? base : `${base}${montarEndereco(aparado)}`;
+};

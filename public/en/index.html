@@ -1,0 +1,225 @@
+<!doctype html>
+<!--
+  Página em inglês do DMARC Fácil (spec 008): a mesma estrutura do index.html, com o texto
+  traduzido (um teste compara o esqueleto). O que existe antes do JavaScript está aqui: cabeçalho,
+  formulário, aviso de privacidade e o <noscript>. O resultado é desenhado por /js/pagina.js
+  dentro de #resultado, só com textContent (TXT é dado de terceiros), com o catálogo em inglês
+  que /js/entrada-en.js entrega. Os caminhos são absolutos: nada é copiado para dentro de en/.
+  Sem style= e sem script inline: a Content-Security-Policy abaixo não os aceita.
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <!--
+      CSP logo depois do charset: a política só vale para o que vem depois dela. O connect-src
+      lista exatamente os dois resolvedores DoH de public/js/doh.js (test/pagina-estatica.test.js
+      confere). RNF-03 e ADR-10.
+    -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src https://cloudflare-dns.com https://dns.google; base-uri 'none'; form-action 'none'"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DMARC Fácil: check your domain's DMARC, SPF and DKIM</title>
+    <meta
+      name="description"
+      content="Type your domain and see what DMARC, SPF and DKIM say and what the next step is. The lookup runs in your browser."
+    />
+    <link rel="canonical" href="https://dmarc-facil.ryanmorais.com.br/en/" />
+    <!--
+      Versões por idioma (spec 008): cada página cita as duas e a si mesma, e o x-default é a
+      portuguesa. O idioma é o endereço, nunca o navegador do visitante. A 404 não tem estas tags
+      (test/descoberta.test.js confere).
+    -->
+    <link rel="alternate" hreflang="pt-BR" href="https://dmarc-facil.ryanmorais.com.br/" />
+    <link rel="alternate" hreflang="en" href="https://dmarc-facil.ryanmorais.com.br/en/" />
+    <link rel="alternate" hreflang="x-default" href="https://dmarc-facil.ryanmorais.com.br/" />
+    <!--
+      Cartão de compartilhamento (WhatsApp, LinkedIn, Slack, X). og:url e og:image são URLs
+      absolutas, porque quem lê a página é o robô da rede social e não o navegador; saem do
+      mesmo endereço do canonical, e og:url não leva o ?dominio= (test/descoberta.test.js
+      confere). A imagem é a versão em inglês da 1280 x 640 do GitHub. A 404 não tem estas tags: não se
+      indexa nem se compartilha.
+    -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="DMARC Fácil" />
+    <meta property="og:title" content="DMARC Fácil: check your domain's DMARC, SPF and DKIM" />
+    <meta
+      property="og:description"
+      content="Type your domain and see what DMARC, SPF and DKIM say and what the next step is. The lookup runs in your browser."
+    />
+    <meta property="og:url" content="https://dmarc-facil.ryanmorais.com.br/en/" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image" content="https://dmarc-facil.ryanmorais.com.br/social-en.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1280" />
+    <meta property="og:image:height" content="640" />
+    <meta
+      property="og:image:alt"
+      content="DMARC Fácil: the logo, the text 'See what your domain's DMARC, SPF and DKIM say, and the next step' and the DMARC ladder with three steps: p=none, p=quarantine and p=reject."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="stylesheet" href="/css/pagina.css" />
+    <script type="module" src="/js/entrada-en.js"></script>
+  </head>
+  <body>
+    <!-- ============================================================
+         SEÇÃO: TOPO
+         Logo A (escudo com olho) e o nome. O <path> é o mesmo de docs/images/ (um teste
+         compara); fill-rule é atributo porque style= não passa na CSP.
+         ============================================================ -->
+    <header class="topo">
+      <div class="topo-interno">
+        <a class="marca" href="/">
+          <svg viewBox="2 1 40 50" width="29" height="36" aria-hidden="true" focusable="false">
+            <path
+              fill="#2563eb"
+              fill-rule="evenodd"
+              d="M22 1Q32 8 42 9V26C42 39 33 46.5 22 51C11 46.5 2 39 2 26V9Q12 8 22 1ZM9 27Q22 18 35 27Q22 36 9 27ZM18.5 27a3.5 3.5 0 1 0 7 0a3.5 3.5 0 1 0-7 0Z"
+            />
+          </svg>
+          <span class="titulo marca-nome">DMARC Fácil</span>
+        </a>
+        <nav class="idioma" aria-label="Language">
+          <a href="/" lang="pt-BR" hreflang="pt-BR" aria-label="PT: Português">PT</a>
+          <a href="/en/" lang="en" hreflang="en" aria-current="page" aria-label="EN: English">EN</a>
+        </nav>
+      </div>
+    </header>
+    <!-- fim: TOPO -->
+
+    <main class="coluna principal">
+      <!-- ============================================================
+           SEÇÃO: APRESENTAÇÃO E FORMULÁRIO
+           O aviso de privacidade fica junto do botão: é onde o visitante decide digitar
+           (RF-10). Enter envia, porque é um <form>. O erro do domínio (#erro-dominio) é
+           mostrado por pagina.js, anunciado por role="alert" (o foco já está no campo, e re-focar
+           não é anunciado por todo leitor) e ligado ao campo por aria-describedby (RF-01).
+           ============================================================ -->
+      <section class="apresentacao" aria-labelledby="titulo-pagina">
+        <h1 id="titulo-pagina" class="titulo">Can someone send email on behalf of your domain?</h1>
+        <p>Type the domain and see what DMARC, SPF and DKIM say about it and what to do now.</p>
+      </section>
+
+      <noscript>
+        <p class="aviso-noscript">
+          Checking needs JavaScript, because the lookup leaves your browser. Turn JavaScript on and
+          reload the page.
+        </p>
+      </noscript>
+
+      <form class="formulario" id="formulario" novalidate>
+        <label class="rotulo" for="dominio">Domain</label>
+        <input
+          class="campo"
+          id="dominio"
+          name="dominio"
+          type="text"
+          autocomplete="off"
+          autocapitalize="none"
+          spellcheck="false"
+          placeholder="example.com"
+          aria-describedby="erro-dominio privacidade"
+        />
+        <p class="erro-campo" id="erro-dominio" role="alert" hidden>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 14 14"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path d="M7 1.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 1 0 0-11ZM7 4v3.5M7 10v.01" />
+          </svg>
+          <span id="erro-dominio-texto"></span>
+        </p>
+        <button class="botao botao-cheio" id="botao-verificar" type="submit">Check</button>
+        <p id="privacidade" class="nota">
+          The lookup leaves your browser and goes straight to Cloudflare's public DNS (or Google's,
+          if Cloudflare does not answer). Whoever answers sees the domain, the DKIM selectors we try
+          and your IP. DMARC Fácil does not store the domain you type.
+        </p>
+      </form>
+      <!-- fim: APRESENTAÇÃO E FORMULÁRIO -->
+
+      <!-- ============================================================
+           SEÇÃO: RESULTADO
+           #anuncio é a região aria-live que lê o início e o fim da verificação; o cartão que
+           muda de estado não é aria-live (seriam três anúncios juntos). #resultado nasce
+           vazio e oculto: pagina.js o preenche (ADR-12).
+           ============================================================ -->
+      <p class="so-leitor" id="anuncio" role="status" aria-live="polite"></p>
+      <div class="resultado" id="resultado" hidden></div>
+      <!-- fim: RESULTADO -->
+
+      <!-- ============================================================
+           SEÇÃO: APOIO
+           HTML estático, fora do pagina.js: fica na página antes e depois da verificação e
+           não depende de JavaScript, então o buscador e o leitor de tela o encontram. Os
+           mesmos limites e a mesma regra do DKIM que a página aplica ao resultado (sem
+           "você não tem DKIM"; o limite de 10 consultas do SPF).
+           ============================================================ -->
+      <section class="apoio" aria-labelledby="titulo-apoio">
+        <h2 id="titulo-apoio" class="titulo">What each record does</h2>
+        <p class="apoio-lead">The three work together so your email cannot be spoofed.</p>
+        <div class="apoio-lista">
+          <div class="cartao apoio-item">
+            <h3>DMARC</h3>
+            <p>
+              Tells the receiving provider what to do with email that pretends to be your domain:
+              nothing (<code class="codigo">p=none</code>), send it to spam (<code class="codigo"
+                >p=quarantine</code
+              >) or reject it (<code class="codigo">p=reject</code>). Start at
+              <code class="codigo">p=none</code> and go up one step at a time.
+            </p>
+          </div>
+          <div class="cartao apoio-item">
+            <h3>SPF</h3>
+            <p>
+              Lists who may send email for your domain. The limit is 10 DNS lookups: going over it
+              invalidates the record, which is why the page counts each one.
+            </p>
+          </div>
+          <div class="cartao apoio-item">
+            <h3>DKIM</h3>
+            <p>
+              Signs each message with a key. The selector is the sender's choice and DNS does not
+              let anyone list them, so the page searches the most common ones and says “not found in
+              these selectors”, never “you don't have DKIM”.
+            </p>
+          </div>
+        </div>
+      </section>
+      <!-- fim: APOIO -->
+    </main>
+
+    <!-- ============================================================
+         SEÇÃO: RODAPÉ
+         Duas pontas: nome e licença à esquerda, os links e o seletor de idioma à direita. A promessa de
+         privacidade não se repete aqui: fica só junto do botão "Check".
+         ============================================================ -->
+    <footer class="rodape">
+      <div class="rodape-interno">
+        <p class="nota">DMARC Fácil · Apache-2.0</p>
+        <div class="rodape-links">
+          <a class="link-doc" href="https://github.com/ryanvmorais/dmarc-facil">GitHub</a>
+          <a class="link-doc" href="https://github.com/ryanvmorais/mailvigil">MailVigil</a>
+          <nav class="idioma" aria-label="Language (footer)">
+            <a href="/" lang="pt-BR" hreflang="pt-BR" aria-label="PT: Português">PT</a>
+            <a href="/en/" lang="en" hreflang="en" aria-current="page" aria-label="EN: English"
+              >EN</a
+            >
+          </nav>
+        </div>
+      </div>
+    </footer>
+    <!-- fim: RODAPÉ -->
+  </body>
+</html>
