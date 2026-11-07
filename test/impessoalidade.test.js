@@ -75,7 +75,7 @@ describe("impessoalidade: o nome do mantenedor", () => {
 
 // Comandos de skills pessoais: quem clona o repositório não os tem.
 const COMANDOS_PESSOAIS =
-  /(?<![\w/.-])\/(spec|idioma|estilo-arquivos|fechar-sessao|atualizar-docs|revisar-dependabot|nova-interface|stack|novo-projeto)(?![\w-])/;
+  /(?<![\w/.-])\/(spec|idioma|stack|estilo-arquivos|fechar-sessao|atualizar-(docs|dependencias|ferramentas)|revisar-dependabot|nova-interface|novo-projeto|preparar-release|qualidade-python|limpar-branches|enxugar-memoria|auditoria-[a-z]+)(?![\w-])/;
 
 describe("impessoalidade: orientação para o Claude Code", () => {
   it("o CLAUDE.md e o .claude/ não citam skills pessoais", opcoes, async () => {
