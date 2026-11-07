@@ -11,11 +11,11 @@
 ![types](https://img.shields.io/badge/types-JSDoc%20%2B%20tsc-3178C6?logo=typescript&logoColor=white)
 ![license](https://img.shields.io/badge/license-Apache%202.0-blue)
 
-**DMARC Fácil is a DMARC, SPF and DKIM checker that runs in your browser: you type a domain, it queries the DNS, explains each record in plain Brazilian Portuguese and tells you the next step to stop your email from being spoofed.**
+**DMARC Fácil is a DMARC, SPF and DKIM checker that runs in your browser: you type a domain, it queries the DNS, explains each record in plain language, in Brazilian Portuguese or in English, and tells you the next step to stop your email from being spoofed.**
 
 Anyone searching for "verificar DMARC" or "meu e-mail cai no spam" mostly lands on English-language tools that show the record and leave the rest to the reader. Here the record comes translated, with the state of each part and the DMARC ladder (`p=none`, `p=quarantine`, `p=reject`) showing which step the domain is on and what to do to move up.
 
-It is built for site owners, developers and small agencies who work in Portuguese, in Brazil or elsewhere, and anyone can use it from anywhere: the tool only queries public DNS. It is plain JavaScript, with no build step and no runtime dependency, and has no server: the page queries DNS straight from your browser. The interface is in Portuguese.
+It is built for site owners, developers and small agencies who work in Portuguese or English, in Brazil or elsewhere, and anyone can use it from anywhere: the tool only queries public DNS. It is plain JavaScript, with no build step and no runtime dependency, and has no server: the page queries DNS straight from your browser. The page comes in two languages, Portuguese at [dmarc-facil.ryanmorais.com.br](https://dmarc-facil.ryanmorais.com.br) and English at [/en/](https://dmarc-facil.ryanmorais.com.br/en/), with a PT/EN switch in the header and the footer.
 
 > **Status:** live at [dmarc-facil.ryanmorais.com.br](https://dmarc-facil.ryanmorais.com.br). It checks the DMARC, SPF and DKIM of a domain, and the check runs entirely in the browser of whoever uses it.
 
@@ -23,7 +23,7 @@ It is built for site owners, developers and small agencies who work in Portugues
 
 ![DMARC Fácil: page with the result for ryanmorais.com.br, the DMARC ladder (domain at p=quarantine, next step at p=reject) and the DMARC (OK), SPF (Atenção) and DKIM (Atenção) cards](docs/images/dmarc-facil-dmarc-checker-result.png)
 
-_The whole page on a real check of `ryanmorais.com.br`, the maintainer's domain: DMARC is at `p=quarantine` and the next step is `p=reject`; SPF and DKIM have one warning each. The interface is in Portuguese._
+_The whole page on a real check of `ryanmorais.com.br`, the maintainer's domain: DMARC is at `p=quarantine` and the next step is `p=reject`; SPF and DKIM have one warning each. The screenshot is of the Portuguese page._
 
 ## What it checks
 
@@ -36,7 +36,7 @@ How the tool was built, one step at a time, is in [`specs/`](specs/) (in Portugu
 
 ## How to read the result
 
-The page shows three cards, one for each record (DMARC, SPF and DKIM), and the DMARC ladder. Each card carries a badge with a word, so that color is not the only clue. The words are in Portuguese, as in the interface:
+The page shows three cards, one for each record (DMARC, SPF and DKIM), and the DMARC ladder. Each card carries a badge with a word, so that color is not the only clue. The words below are those of the Portuguese page; the English page uses OK, Attention, Problem and Not checked:
 
 <img alt="DMARC Fácil: the four badges of a card, OK, Atenção, Problema and Não verificado, each with an icon, a word and a color" src="docs/images/dmarc-facil-dmarc-checker-badges.png" width="409">
 
@@ -45,7 +45,7 @@ The page shows three cards, one for each record (DMARC, SPF and DKIM), and the D
 - **Problema** (problem): the record has an error that stops the protection from working, or does not exist.
 - **Não verificado** (not checked): the query did not finish or the resolver did not answer.
 
-The **ladder** shows which step your DMARC is on (`p=none`, `p=quarantine` or `p=reject`) and marks the next one with the "Próximo passo" (next step) label. Each finding comes with a sentence in Portuguese saying what it means and what to do.
+The **ladder** shows which step your DMARC is on (`p=none`, `p=quarantine` or `p=reject`) and marks the next one with the "Próximo passo" (in English, "Next step") label. Each finding comes with a sentence, in the language of the page, saying what it means and what to do.
 
 ## Privacy and use
 

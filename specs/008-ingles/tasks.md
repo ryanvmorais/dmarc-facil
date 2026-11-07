@@ -58,38 +58,38 @@ Um PR só. Os textos em inglês são provisórios até a revisão da 3.19.
 
 ### 3A — O catálogo em inglês
 
-- [ ] 3.1 `public/js/textos/en/interface.js` e `motivos.js`: a tradução de cada chave, com o nome "DMARC Fácil", `p=none`, `~all` e demais trechos técnicos intactos; "não encontrei nesses seletores" vira o equivalente (nunca "you don't have DKIM"). — RF-02, RNF-06
-- [ ] 3.2 `public/js/textos/en/achados.js` e `index.js`, anotados com `@type {Textos}`: a tradução de cada achado (título, explicação, ação) e de `generico`. — RF-02, ADR-4
-- [ ] 3.3 `test/paridade-textos.test.js`: lista de idiomas `["pt", "en"]`; os testes de cobertura de achados e de motivos passam a rodar para cada idioma. — RF-04
-- [ ] 3.4 `test/` (novo, com `test/ajudas/`): o mesmo resultado sintético montado com `pt` e com `en` tem os mesmos selos, degraus, códigos de achado e seletores; um registro TXT com `<script>` vira texto puro em inglês. — RF-02
-- [ ] 3.5 `public/js/entrada-en.js`. — ADR-2
+- [x] 3.1 `public/js/textos/en/interface.js` e `motivos.js`: a tradução de cada chave, com o nome "DMARC Fácil", `p=none`, `~all` e demais trechos técnicos intactos; "não encontrei nesses seletores" vira o equivalente (nunca "you don't have DKIM"). Feito em `public/js/textos/en/interface.js` e `motivos.js`; "Atenção" virou "Attention" (e não "Warning", que é a gravidade `aviso`). — RF-02, RNF-06
+- [x] 3.2 `public/js/textos/en/achados.js` e `index.js`, anotados com `@type {Textos}`: a tradução de cada achado (título, explicação, ação) e de `generico`. — RF-02, ADR-4
+- [x] 3.3 `test/paridade-textos.test.js`: lista de idiomas `["pt", "en"]`; os testes de cobertura de achados e de motivos passam a rodar para cada idioma. `ajudas/textos.js` ganhou `catalogos = { pt, en }`; `textos-injecao.test.js` também confere o `en`. — RF-04
+- [x] 3.4 `test/` (novo, com `test/ajudas/`): o mesmo resultado sintético montado com `pt` e com `en` tem os mesmos selos, degraus, códigos de achado e seletores; um registro TXT com `<script>` vira texto puro em inglês. Em `test/idiomas-resultado.test.js`. — RF-02
+- [x] 3.5 `public/js/entrada-en.js`. — ADR-2
 
 ### 3B — As páginas e o seletor
 
-- [ ] 3.6 `public/js/endereco.js` e `test/endereco.test.js`: `montarEnderecoIdioma(base, texto)`: campo vazio (sem parâmetro), texto longo (cortado no limite), texto com `<script>`, `javascript:` e `%00` (codificado e inerte). — RF-05, ADR-6
-- [ ] 3.7 `public/js/pagina.js` e `test/ajudas/documento-falso.js`: guardar a base do `href` de cada link de idioma e regravá-lo no `input` do campo e ao fim da verificação; teste com o documento falso (campo vazio, digitado, verificado). — RF-05, ADR-6
-- [ ] 3.8 `public/css/pagina.css`: o `.idioma` do mockup (alvo de 44 px, `aria-current` sublinhado, tokens claros e escuros). — RF-05, RNF-04
-- [ ] 3.9 `public/index.html`: o `nav` de idioma no cabeçalho e no rodapé (`aria-label` do `nav`, `lang`, `hreflang`, nome acessível "PT: Português" e "EN: English"), os três `link rel="alternate" hreflang` e a entrada `/js/entrada-pt.js`. — RF-05, RF-06, ADR-6
-- [ ] 3.10 `public/en/index.html`: a mesma estrutura do `index.html`, com `lang="en"`, `title`, `description`, `canonical` (`/en/`), `og:*` (`og:locale` `en_US`, `og:image` `social-en.png`), os mesmos `hreflang`, a entrada `/js/entrada-en.js`, o texto de apoio, o rodapé e o `<noscript>` em inglês. Caminhos absolutos para CSS, fontes, favicon e módulos. — RF-01, RF-06, ADR-1, ADR-9
-- [ ] 3.11 `public/en/404.html`: a 404 em inglês, sem script, com o link de volta para `/en/`, sem `canonical`, `og:*` nem `hreflang`; a CSP igual à da 404 atual. — RF-01, RF-06
-- [ ] 3.12 `test/pagina-estatica.test.js` e `test/cabecalhos.test.js`: as páginas em inglês sem `style=` nem script inline, com o `lang` certo, a CSP da `<meta>` igual à do `index.html`, a entrada e o catálogo do mesmo idioma; o esqueleto de `index.html` e `en/index.html` (ids, classes e ordem) idêntico; idem para as duas 404. — RF-01, ADR-1
+- [x] 3.6 `public/js/endereco.js` e `test/endereco.test.js`: `montarEnderecoIdioma(base, texto)`: campo vazio (sem parâmetro), texto longo (cortado no limite), texto com `<script>`, `javascript:` e `%00` (codificado e inerte). — RF-05, ADR-6
+- [x] 3.7 `public/js/pagina.js` e `test/ajudas/documento-falso.js`: guardar a base do `href` de cada link de idioma e regravá-lo no `input` do campo e ao fim da verificação; teste com o documento falso (campo vazio, digitado, verificado). A ligação é `ligarLinksDeIdioma(links, campo)`, exportada de `pagina.js` e testada em `test/idiomas-links.test.js` com o `NoFalso` ampliado (`getAttribute`, `addEventListener`, `disparar`, `value`). — RF-05, ADR-6
+- [x] 3.8 `public/css/pagina.css`: o `.idioma` do mockup (alvo de 44 px, `aria-current` sublinhado, tokens claros e escuros). — RF-05, RNF-04
+- [x] 3.9 `public/index.html`: o `nav` de idioma no cabeçalho e no rodapé (`aria-label` do `nav`, `lang`, `hreflang`, nome acessível "PT: Português" e "EN: English"), os três `link rel="alternate" hreflang` e a entrada `/js/entrada-pt.js`. — RF-05, RF-06, ADR-6
+- [x] 3.10 `public/en/index.html`: a mesma estrutura do `index.html`, com `lang="en"`, `title`, `description`, `canonical` (`/en/`), `og:*` (`og:locale` `en_US`, `og:image` `social-en.png`), os mesmos `hreflang`, a entrada `/js/entrada-en.js`, o texto de apoio, o rodapé e o `<noscript>` em inglês. Caminhos absolutos para CSS, fontes, favicon e módulos. — RF-01, RF-06, ADR-1, ADR-9
+- [x] 3.11 `public/en/404.html`: a 404 em inglês, sem script, com o link de volta para `/en/`, sem `canonical`, `og:*` nem `hreflang`; a CSP igual à da 404 atual. — RF-01, RF-06
+- [x] 3.12 `test/pagina-estatica.test.js` e `test/cabecalhos.test.js`: as páginas em inglês sem `style=` nem script inline, com o `lang` certo, a CSP da `<meta>` igual à do `index.html`, a entrada e o catálogo do mesmo idioma; o esqueleto de `index.html` e `en/index.html` (ids, classes e ordem) idêntico; idem para as duas 404. — RF-01, ADR-1
 
 ### 3C — Descoberta e imagem
 
-- [ ] 3.13 `public/sitemap.xml`: as duas URLs com `xhtml:link` recíproco; `test/descoberta.test.js`: `canonical` de cada página é ela mesma, `hreflang` recíproco, `x-default` para `/`, sitemap com exatamente as duas páginas, tudo derivado da rota do `wrangler.json`, e a ausência dessas tags nas 404. — RF-06, ADR-7, RNF-08
-- [ ] 3.14 `docs/images/dmarc-facil-dmarc-checker-social-preview-en.html` (mesmo desenho, texto da escada e da frase em inglês), o PNG gerado pelo comando do cabeçalho do HTML e `public/social-en.png` idêntico a ele; `test/imagem-social.test.js` rodando para os dois (1280 × 640, até 1 MB, mesmo `<path>` do logo, cópia idêntica byte a byte). — RF-06, ADR-8
-- [ ] 3.15 `eslint.config.mjs` e `test/lint-dom.test.js`: proibir `navigator.language`, `navigator.languages`, `localStorage`, `sessionStorage`, `indexedDB` e `document.cookie` em `public/**`, com um teste que alimenta cada um e espera a recusa. — RF-07, ADR-10
+- [x] 3.13 `public/sitemap.xml`: as duas URLs com `xhtml:link` recíproco (o `x-default` fica só nas páginas); `test/descoberta.test.js`: `canonical` de cada página é ela mesma, `hreflang` recíproco, `x-default` para `/`, sitemap com exatamente as duas páginas, tudo derivado da rota do `wrangler.json`, e a ausência dessas tags nas 404. — RF-06, ADR-7, RNF-08
+- [x] 3.14 `docs/images/dmarc-facil-dmarc-checker-social-preview-en.html` (mesmo desenho, texto da escada e da frase em inglês), o PNG gerado pelo comando do cabeçalho do HTML e `public/social-en.png` idêntico a ele; `test/imagem-social.test.js` rodando para os dois (1280 × 640, até 1 MB, mesmo `<path>` do logo, cópia idêntica byte a byte). — RF-06, ADR-8
+- [x] 3.15 `eslint.config.mjs` e `test/lint-dom.test.js`: proibir `navigator.language`, `navigator.languages`, `localStorage`, `sessionStorage`, `indexedDB` e `document.cookie` em `public/**`, com um teste que alimenta cada um e espera a recusa. — RF-07, ADR-10
 
 ### 3D — Hospedagem e CI
 
-- [ ] 3.16 `.github/lighthouse/mobile.json`, `desktop.json` e `.github/workflows/lighthouse.yml`: medir `en/index.html` e `en/404.html` sobre `public/`; `producao-mobile.json` e `producao-desktop.json`: acrescentar `/en/`; `test/lighthouse-producao.test.js` derivando as URLs do `wrangler.json`. — RF-08, RNF-03
-- [ ] 3.17 `scripts/conferir-hospedagem.mjs` e `test/conferir-hospedagem.test.js`: conferir `/en/` (200, corpo idêntico a `en/index.html`, cabeçalhos), `/en` (redirecionamento para `/en/` ou 200) e um caminho inexistente sob `/en/` (404, corpo idêntico a `en/404.html`). — RF-08, ADR-9
-- [ ] 3.18 `CLAUDE.md`, `docs/stack.md`, `README.md` e `README.en.md`: a página em inglês, `textos/`, as entradas, o seletor de idioma, a linha de convenção "strings visíveis, no idioma da página", o `social-en.png`. — RF-05, RF-06, RNF-07
+- [x] 3.16 `.github/lighthouse/mobile.json`, `desktop.json` e `.github/workflows/lighthouse.yml`: medir `en/index.html` e `en/404.html` sobre `public/` (o `staticDistDir` já mede todo HTML da pasta, então `mobile.json` e `desktop.json` não mudaram; o teste confere que não há lista de URLs e que as quatro páginas existem); `producao-mobile.json` e `producao-desktop.json`: acrescentar `/en/`; `test/lighthouse-producao.test.js` derivando as URLs do `wrangler.json`. — RF-08, RNF-03
+- [x] 3.17 `scripts/conferir-hospedagem.mjs` e `test/conferir-hospedagem.test.js`: conferir `/en/` (200, corpo idêntico a `en/index.html`, cabeçalhos), `/en` (redirecionamento para `/en/` ou 200) e um caminho inexistente sob `/en/` (404, corpo idêntico a `en/404.html`). O script passou de sete para dez verificações; a de JavaScript cobre as duas entradas. — RF-08, ADR-9
+- [x] 3.18 `CLAUDE.md`, `docs/stack.md`, `README.md` e `README.en.md`: a página em inglês, `textos/`, as entradas, o seletor de idioma, a linha de convenção "strings visíveis, no idioma da página", o `social-en.png`. — RF-05, RF-06, RNF-07
 
 ### Revisão e fechamento da etapa
 
 - [ ] 3.19 O mantenedor revisa os textos em inglês (catálogo `en/`, `en/index.html`, `en/404.html`, `social-en.png`); as correções entram no mesmo PR e nenhum texto vai ao ar com marca de provisório. — RNF-06
-- [ ] 3.20 **Portão de qualidade.** Resultado: _a registrar_.
+- [ ] 3.20 **Portão de qualidade.** Resultado: `format:check`, `lint` e `typecheck` limpos; 974 testes, 974 passam. Conferido também no Chrome (`public/` servido, `/en/`): sem erro de console, sem rolagem horizontal em 390 px, os links PT/EN levam o domínio digitado, o resultado de `github.com` e o anúncio saem em inglês, claro e escuro. Fica aberta até a 3.19.
 
 ## Etapa 4 — Conferência no ar e fechamento (RF-08, RNF-03, RNF-04)
 

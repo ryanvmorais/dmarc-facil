@@ -105,6 +105,16 @@ Todo nó da página nasce de `criar(documento, tag, atributos, filhos)`: tag e a
 
 **Docs:** [MDN: Node.textContent](https://developer.mozilla.org/pt-BR/docs/Web/API/Node/textContent).
 
+### Versões por idioma: catálogo injetado, `hreflang` e links reais
+
+A página existe em português (`/`) e em inglês (`/en/`), com o mesmo código. Nenhum módulo puro carrega frase: cada um devolve códigos e dados, e o texto mora num catálogo por idioma (`public/js/textos/pt/` e `textos/en/`, a mesma forma nos dois), que a entrada do idioma (`entrada-pt.js`, `entrada-en.js`) entrega a `iniciarPagina(textos)` e as funções de apresentação recebem como primeiro parâmetro. Os dois HTMLs são escritos à mão com o mesmo esqueleto, e um teste compara ids, classes e ordem. O seletor PT/EN são dois links reais; o script só acrescenta o `?dominio=` neles. Para o buscador, cada página cita as duas e a si mesma em `<link rel="alternate" hreflang>`, e o `sitemap.xml` repete a relação com `xhtml:link`.
+
+**Por que esta:** o idioma é o endereço, então o clique do meio e o "copiar link" funcionam sem script e o buscador indexa cada língua. Alternativas descartadas: uma página só com o texto trocado por JavaScript (sem texto até o script rodar e um endereço para dois idiomas), `navigator.language` ou cookie (a página promete não guardar nada; a regra de lint proíbe) e um gerador de HTML (o projeto é sem build).
+
+**Estudar:** `hreflang` e `x-default`, `<link rel="canonical">`, o atributo `lang` e a pronúncia do leitor de tela, injeção de dependência por parâmetro, `aria-current="page"`.
+
+**Docs:** [Google: versões de uma página por idioma](https://developers.google.com/search/docs/specialty/international/localized-versions) · [MDN: hreflang](https://developer.mozilla.org/pt-BR/docs/Web/HTML/Element/a#hreflang) · [MDN: aria-current](https://developer.mozilla.org/pt-BR/docs/Web/Accessibility/ARIA/Reference/Attributes/aria-current).
+
 ### History API (`history.replaceState`)
 
 Ao verificar, a página troca o endereço para `?dominio=exemplo.com.br` sem criar entrada no histórico, para o resultado poder ser compartilhado. Abrir o link só preenche o campo; quem decide quando o domínio sai do navegador é o visitante, apertando o botão.
@@ -163,7 +173,7 @@ Formata JavaScript, JSON, YAML e Markdown. O `pnpm format:check` falha se algum 
 
 ### Workers Static Assets (Cloudflare)
 
-O site é a pasta `public/` servida como um Worker só de arquivos: o `wrangler.json` não tem `main`, só o nome, a pasta (`./public`), a rota do domínio `dmarc-facil.ryanmorais.com.br` e `not_found_handling: "404-page"`, que serve a `404.html` com status 404 em qualquer caminho que não existe. Nenhum código de servidor. O `workers_dev` e as pré-visualizações públicas ficam desligados, para o domínio ser o único endereço.
+O site é a pasta `public/` servida como um Worker só de arquivos (as páginas em português na raiz e as em inglês em `public/en/`, com CSS, fontes e módulos compartilhados): o `wrangler.json` não tem `main`, só o nome, a pasta (`./public`), a rota do domínio `dmarc-facil.ryanmorais.com.br` e `not_found_handling: "404-page"`, que serve a `404.html` com status 404 em qualquer caminho que não existe. Nenhum código de servidor. O `workers_dev` e as pré-visualizações públicas ficam desligados, para o domínio ser o único endereço.
 
 **Por que esta:** a zona `ryanmorais.com.br` já está na Cloudflare, requisição a arquivo estático é grátis e ilimitada, `_headers` vale, e a doc da Cloudflare manda começar projeto novo por Workers, não por Pages. Alternativas descartadas: Cloudflare Pages e outra hospedagem estática (sem ganho aqui).
 
