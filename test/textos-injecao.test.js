@@ -59,7 +59,7 @@ describe("módulos sem frase", () => {
   });
 
   it("os catálogos são dado puro: só importam o próprio idioma e os tipos", async () => {
-    for (const idioma of ["pt"]) {
+    for (const idioma of ["pt", "en"]) {
       const pasta = new URL(`textos/${idioma}/`, PASTA);
       for (const nome of (await readdir(pasta)).filter((arquivo) => arquivo.endsWith(".js"))) {
         const fonte = await readFile(new URL(nome, pasta), "utf8");
