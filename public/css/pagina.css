@@ -22,7 +22,7 @@
 /* 1. Fontes locais
  * Self-hosting: nenhuma requisição ao Google Fonts (privacidade e CSP `font-src 'self'`).
  * `font-display: swap` mostra o texto na fonte do sistema até a nossa chegar (sem FOIT).
- * Só o subconjunto latino, 15 KB e 21 KB. A licença OFL de cada uma está ao lado. */
+ * Só o subconjunto latino, 15 KB e 7 KB (a mono, reduzida a ASCII e Latin-1, sem ligaduras). A licença OFL de cada uma está ao lado. */
 @font-face {
   font-family: "Sora";
   font-style: normal;
