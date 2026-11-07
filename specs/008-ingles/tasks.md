@@ -54,7 +54,7 @@ Nenhuma frase muda. O catálogo ainda tem um idioma só.
 
 ## Etapa 3 — O inglês (RF-01 a RF-08)
 
-Um PR só. Os textos em inglês são provisórios até a revisão da 3.19.
+Um PR só. Os textos em inglês foram revisados e aprovados na 3.19.
 
 ### 3A — O catálogo em inglês
 
@@ -88,8 +88,8 @@ Um PR só. Os textos em inglês são provisórios até a revisão da 3.19.
 
 ### Revisão e fechamento da etapa
 
-- [ ] 3.19 O mantenedor revisa os textos em inglês (catálogo `en/`, `en/index.html`, `en/404.html`, `social-en.png`); as correções entram no mesmo PR e nenhum texto vai ao ar com marca de provisório. — RNF-06
-- [ ] 3.20 **Portão de qualidade.** Resultado: `format:check`, `lint` e `typecheck` limpos; 974 testes, 974 passam. Conferido também no Chrome (`public/` servido, `/en/`): sem erro de console, sem rolagem horizontal em 390 px, os links PT/EN levam o domínio digitado, o resultado de `github.com` e o anúncio saem em inglês, claro e escuro. Fica aberta até a 3.19.
+- [x] 3.19 O mantenedor revisa os textos em inglês (catálogo `en/`, `en/index.html`, `en/404.html`, `social-en.png`); as correções entram no mesmo PR e nenhum texto vai ao ar com marca de provisório. Revisados e aprovados sem correção; a marca `[provisório]` saiu dos dois `motivos.js`. — RNF-06
+- [x] 3.20 **Portão de qualidade.** Resultado: `format:check`, `lint` e `typecheck` limpos; 974 testes, 974 passam. Conferido também no Chrome (`public/` servido, `/en/`): sem erro de console, sem rolagem horizontal em 390 px, os links PT/EN levam o domínio digitado, o resultado de `github.com` e o anúncio saem em inglês, claro e escuro.
 
 ## Etapa 4 — Conferência no ar e fechamento (RF-08, RNF-03, RNF-04)
 
