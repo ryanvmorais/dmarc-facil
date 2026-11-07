@@ -75,6 +75,16 @@ O corpo do texto usa a fonte do sistema (`system-ui`); só dois arquivos `woff2`
 
 **Docs:** [MDN: @font-face](https://developer.mozilla.org/pt-BR/docs/Web/CSS/@font-face).
 
+### Tema escuro por `prefers-color-scheme`
+
+A página segue o tema do sistema, sem botão e sem guardar escolha no navegador. As cores são tokens (`--cor-*`, `--selo-*`) em `:root`; um bloco `@media (prefers-color-scheme: dark)` redefine os mesmos nomes, e nenhuma outra regra do CSS conhece o tema. Por isso o hover do botão, o botão desabilitado e o logo também são tokens. A `<meta name="color-scheme" content="light dark">` das duas páginas e o `color-scheme` do CSS fazem campo, barra de rolagem e fundo inicial já nascerem no tema certo. O `favicon.svg` traz a própria `@media` e troca o azul por um mais claro na aba escura. `test/tema-escuro.test.js` exige que o bloco escuro cubra todo token de cor e mede o contraste dos pares de texto e fundo nos dois temas.
+
+**Por que esta:** quem usa o sistema no escuro não toma um flash branco, e a escolha não precisa de JavaScript nem de armazenamento (a página promete não guardar nada). Alternativa descartada: botão de tema com `localStorage`, que traria estado, mais um controle e script antes da pintura.
+
+**Estudar:** a media query `prefers-color-scheme`, a propriedade `color-scheme`, contraste WCAG (4,5:1 para texto, 3:1 para bordas e foco).
+
+**Docs:** [MDN: prefers-color-scheme](https://developer.mozilla.org/pt-BR/docs/Web/CSS/@media/prefers-color-scheme) · [MDN: color-scheme](https://developer.mozilla.org/pt-BR/docs/Web/CSS/color-scheme).
+
 ### Content-Security-Policy por `<meta>`
 
 Cada página declara no `<head>`, logo depois do `charset`, uma política que só deixa carregar script, estilo, imagem e fonte do próprio site e só deixa o JavaScript falar com os dois resolvedores DoH (`connect-src https://cloudflare-dns.com https://dns.google`). Sem `unsafe-inline` nem `unsafe-eval`: por isso a página não usa `style=` nem script inline, e a largura dos esqueletos de "verificando" é classe do CSS. `test/pagina-estatica.test.js` compara o `connect-src` com os hosts de `RESOLVEDORES` em `doh.js`.
