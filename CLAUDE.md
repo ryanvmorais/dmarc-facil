@@ -59,7 +59,7 @@ pnpm format
 ```text
 wrangler.json            # projeto de hospedagem (Worker só de assets): rota do domínio, ./public, 404-page; FONTE ÚNICA do endereço
 public/                  # o site: é o que vai para a hospedagem, sem build
-  index.html, 404.html   # as duas páginas (CSP por <meta>, sem style= nem script inline; caminhos absolutos; canonical só no index)
+  index.html, 404.html   # as duas páginas (CSP por <meta>, sem style= nem script inline; caminhos absolutos; canonical só no index; o texto de apoio e o rodapé são HTML estático do index, fora do pagina.js)
   _headers               # cabeçalhos de segurança (/*) e cache longo das fontes (/fonts/*); a plataforma o consome, não o publica
   robots.txt, sitemap.xml # descoberta; citam o endereço da rota do wrangler.json
   favicon.svg            # ícone da aba (troca de cor no tema escuro), referenciado pelas duas páginas
