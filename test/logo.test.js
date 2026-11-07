@@ -19,7 +19,10 @@ import { describe, it } from "node:test";
 // ---------------------------------------------------------------------------
 
 // Relativo a este arquivo (e não ao diretório atual), para o teste rodar de qualquer pasta.
-const CAMINHO_LOGO = new URL("../docs/images/dmarc-facil-dmarc-checker-logo.svg", import.meta.url);
+const CAMINHO_LOGO = new URL(
+  "../docs/images/dmarc-facil-dmarc-spf-dkim-checker-logo.svg",
+  import.meta.url,
+);
 
 describe("logo oficial", () => {
   it("usa um único <path> com fill-rule evenodd", async () => {

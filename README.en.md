@@ -1,4 +1,4 @@
-# <img align="bottom" alt="DMARC Fácil logo: a shield with an open eye" src="docs/images/dmarc-facil-dmarc-checker-logo.svg" width="29"> DMARC Fácil
+# <img align="bottom" alt="DMARC Fácil logo: a shield with an open eye" src="docs/images/dmarc-facil-dmarc-spf-dkim-checker-logo.svg" width="29"> DMARC Fácil
 
 [Português (Brasil)](README.md) · **English**
 
@@ -21,7 +21,7 @@ It is built for site owners, developers and small agencies who work in Portugues
 
 **Use it now:** [dmarc-facil.ryanmorais.com.br](https://dmarc-facil.ryanmorais.com.br). No install and no account needed.
 
-![DMARC Fácil: page with the result for ryanmorais.com.br, the DMARC ladder (domain at p=quarantine, next step at p=reject) and the DMARC (OK), SPF (Atenção) and DKIM (Atenção) cards](docs/images/dmarc-facil-dmarc-checker-result.png)
+![DMARC, SPF and DKIM checker: DMARC Fácil result for ryanmorais.com.br, with the DMARC ladder (domain at p=quarantine, next step at p=reject) and the DMARC (OK), SPF (Atenção) and DKIM (Atenção) cards](docs/images/dmarc-facil-dmarc-spf-dkim-checker-result.png)
 
 _The whole page on a real check of `ryanmorais.com.br`, the maintainer's domain: DMARC is at `p=quarantine` and the next step is `p=reject`; SPF and DKIM have one warning each. The screenshot is of the Portuguese page._
 
@@ -38,7 +38,7 @@ How the tool was built, one step at a time, is in [`specs/`](specs/) (in Portugu
 
 The page shows three cards, one for each record (DMARC, SPF and DKIM), and the DMARC ladder. Each card carries a badge with a word, so that color is not the only clue. The words below are those of the Portuguese page; the English page uses OK, Attention, Problem and Not checked:
 
-<img alt="DMARC Fácil: the four badges of a card, OK, Atenção, Problema and Não verificado, each with an icon, a word and a color" src="docs/images/dmarc-facil-dmarc-checker-badges.png" width="409">
+<img alt="DMARC Fácil: the four badges of a card, OK, Atenção, Problema and Não verificado, each with an icon, a word and a color" src="docs/images/dmarc-facil-dmarc-spf-dkim-checker-badges.png" width="409">
 
 - **OK:** the record exists and has nothing to fix.
 - **Atenção** (attention): the record works but could be safer or clearer. For DKIM, it also shows up when the key was not found in the selectors tried.

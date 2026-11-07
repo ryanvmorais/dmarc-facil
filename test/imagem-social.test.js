@@ -22,20 +22,23 @@ import { catalogos } from "./ajudas/textos.js";
 // ---------------------------------------------------------------------------
 
 // Relativo a este arquivo (e não ao diretório atual), para o teste rodar de qualquer pasta.
-const CAMINHO_LOGO = new URL("../docs/images/dmarc-facil-dmarc-checker-logo.svg", import.meta.url);
+const CAMINHO_LOGO = new URL(
+  "../docs/images/dmarc-facil-dmarc-spf-dkim-checker-logo.svg",
+  import.meta.url,
+);
 
 // Uma imagem por idioma: a fonte HTML e o PNG de `docs/images/`, e a cópia que a página serve.
 const IMAGENS = /** @type {const} */ ([
   {
     idioma: "pt",
-    png: "../docs/images/dmarc-facil-dmarc-checker-social-preview.png",
-    html: "../docs/images/dmarc-facil-dmarc-checker-social-preview.html",
+    png: "../docs/images/dmarc-facil-dmarc-spf-dkim-checker-social-preview.png",
+    html: "../docs/images/dmarc-facil-dmarc-spf-dkim-checker-social-preview.html",
     copia: "../public/social-pt.png",
   },
   {
     idioma: "en",
-    png: "../docs/images/dmarc-facil-dmarc-checker-social-preview-en.png",
-    html: "../docs/images/dmarc-facil-dmarc-checker-social-preview-en.html",
+    png: "../docs/images/dmarc-facil-dmarc-spf-dkim-checker-social-preview-en.png",
+    html: "../docs/images/dmarc-facil-dmarc-spf-dkim-checker-social-preview-en.html",
     copia: "../public/social-en.png",
   },
 ]);

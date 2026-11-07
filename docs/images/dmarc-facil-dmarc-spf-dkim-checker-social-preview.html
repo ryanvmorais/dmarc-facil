@@ -1,22 +1,21 @@
 <!doctype html>
 <!--
-  Fonte da imagem social em inglês (dmarc-facil-dmarc-checker-social-preview-en.png, 1280 x 640),
-  a versão de public/social-en.png (og:image de /en/). Mesmo desenho da imagem em português, só
-  com o texto traduzido. Não vai para a hospedagem: serve só para refazer o PNG, que o teste
-  compara, byte a byte, com a cópia de public/. O texto sai exato e o logo é o mesmo do SVG oficial (o `d` do
+  Fonte da imagem social do GitHub (dmarc-facil-dmarc-spf-dkim-checker-social-preview.png, 1280 x 640).
+  Não vai para a hospedagem: serve só para refazer o PNG, que o mantenedor envia à mão em
+  Settings > Social preview. O texto sai exato e o logo é o mesmo do SVG oficial (o `d` do
   <path> é conferido por test/imagem-social.test.js). Os textos da escada são os de
-  public/js/textos/en/interface.js.
+  public/js/textos/pt/interface.js.
 
   Para refazer, a partir da raiz do repositório (Chrome instalado):
     chrome --headless=new --hide-scrollbars --force-device-scale-factor=1 --window-size=1280,640 \
-      --screenshot=docs/images/dmarc-facil-dmarc-checker-social-preview-en.png \
-      file:///<raiz>/docs/images/dmarc-facil-dmarc-checker-social-preview-en.html
+      --screenshot=docs/images/dmarc-facil-dmarc-spf-dkim-checker-social-preview.png \
+      file:///<raiz>/docs/images/dmarc-facil-dmarc-spf-dkim-checker-social-preview.html
 -->
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=1280" />
-    <title>DMARC Fácil: social image</title>
+    <title>DMARC Fácil: imagem social</title>
     <style>
       /* Fontes locais da página (public/fonts/): a imagem usa as mesmas, sem CDN. */
       @font-face {
@@ -207,11 +206,13 @@
         />
       </svg>
       <p class="nome">DMARC Fácil</p>
-      <p class="frase">See what your domain's DMARC, SPF and DKIM say, and the next step.</p>
+      <p class="frase">
+        Veja o que o DMARC, o SPF e o DKIM do seu domínio dizem e qual é o próximo passo.
+      </p>
       <div class="pilulas">
-        <span class="pilula">Runs in your browser</span>
-        <span class="pilula">No account</span>
-        <span class="pilula">Open source</span>
+        <span class="pilula">Roda no navegador</span>
+        <span class="pilula">Sem conta</span>
+        <span class="pilula">Código aberto</span>
       </div>
     </div>
     <!-- fim: MARCA E FRASE -->
@@ -221,22 +222,24 @@
          Os mesmos três degraus e textos da página, com o degrau 2 como atual.
          ============================================================ -->
     <div class="direita">
-      <p class="titulo-escada">Which DMARC step you are at</p>
+      <p class="titulo-escada">Em que degrau do DMARC você está</p>
       <div class="escada">
         <div class="degrau">
           <span class="numero">1</span>
           <div>
             <div class="linha"><span class="degrau-titulo">p=none</span></div>
-            <div class="degrau-resumo">Only monitors. Spoofed email still reaches the inbox.</div>
+            <div class="degrau-resumo">
+              Só monitora. Falsificação ainda chega à caixa de entrada.
+            </div>
           </div>
         </div>
         <div class="degrau degrau-atual">
           <span class="numero">2</span>
           <div>
             <div class="linha">
-              <span class="degrau-titulo">p=quarantine · you are here</span>
+              <span class="degrau-titulo">p=quarantine · você está aqui</span>
             </div>
-            <div class="degrau-resumo">Spoofed email goes to spam.</div>
+            <div class="degrau-resumo">Falsificação vai para o spam.</div>
           </div>
         </div>
         <div class="degrau degrau-proximo">
@@ -244,9 +247,9 @@
           <div>
             <div class="linha">
               <span class="degrau-titulo">p=reject</span>
-              <span class="etiqueta">Next step</span>
+              <span class="etiqueta">Próximo passo</span>
             </div>
-            <div class="degrau-resumo">Spoofed email is rejected. Full protection.</div>
+            <div class="degrau-resumo">Falsificação é recusada. Proteção completa.</div>
           </div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-# <img align="bottom" alt="Logotipo do DMARC Fácil: um escudo com um olho aberto" src="docs/images/dmarc-facil-dmarc-checker-logo.svg" width="29"> DMARC Fácil
+# <img align="bottom" alt="Logotipo do DMARC Fácil: um escudo com um olho aberto" src="docs/images/dmarc-facil-dmarc-spf-dkim-checker-logo.svg" width="29"> DMARC Fácil
 
 **Português (Brasil)** · [English](README.en.md)
 
@@ -21,7 +21,7 @@ Ele é feito para donos de site, desenvolvedores e agências pequenas, no Brasil
 
 **Use agora:** [dmarc-facil.ryanmorais.com.br](https://dmarc-facil.ryanmorais.com.br). Não precisa instalar nada nem criar conta.
 
-![DMARC Fácil: página com o resultado para ryanmorais.com.br, a escada do DMARC (domínio em p=quarantine, próximo passo em p=reject) e os cartões de DMARC (OK), SPF (Atenção) e DKIM (Atenção)](docs/images/dmarc-facil-dmarc-checker-result.png)
+![Verificador de DMARC, SPF e DKIM: resultado do DMARC Fácil para ryanmorais.com.br, com a escada do DMARC (domínio em p=quarantine, próximo passo em p=reject) e os cartões de DMARC (OK), SPF (Atenção) e DKIM (Atenção)](docs/images/dmarc-facil-dmarc-spf-dkim-checker-result.png)
 
 _A página inteira numa verificação real de `ryanmorais.com.br`, o domínio do mantenedor: o DMARC está em `p=quarantine` e o próximo passo é `p=reject`; o SPF e o DKIM têm um aviso cada._
 
@@ -38,7 +38,7 @@ Como a ferramenta foi construída, uma etapa por vez, está em [`specs/`](specs/
 
 A página mostra três cartões, um para cada registro (DMARC, SPF e DKIM), e a escada do DMARC. Cada cartão leva um selo com uma palavra, para que a cor não seja a única pista:
 
-<img alt="DMARC Fácil: os quatro selos de um cartão, OK, Atenção, Problema e Não verificado, cada um com um ícone, uma palavra e uma cor" src="docs/images/dmarc-facil-dmarc-checker-badges.png" width="409">
+<img alt="DMARC Fácil: os quatro selos de um cartão, OK, Atenção, Problema e Não verificado, cada um com um ícone, uma palavra e uma cor" src="docs/images/dmarc-facil-dmarc-spf-dkim-checker-badges.png" width="409">
 
 - **OK:** o registro existe e não tem nada a corrigir.
 - **Atenção:** o registro funciona, mas pode ficar mais seguro ou mais claro. No DKIM, também aparece quando a chave não foi encontrada nos seletores tentados.
