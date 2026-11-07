@@ -10,13 +10,15 @@
  * "protegido". O código que dois módulos emitem (`registro-grande-demais`,
  * `caixa-fora-do-padrao`) tem uma entrada só, escrita para valer nos dois.
  *
- * É dado puro: sem DOM, sem rede, sem lógica além de `textoDoAchado`.
+ * É dado puro: sem DOM, sem rede, sem lógica além de `textoDoAchado` e `textoDoMotivo`.
  */
 
 // @ts-check
 
-import { MOTIVOS_SELETOR } from "./textos-interface.js";
+import { preencher } from "./preencher.js";
+import { MOTIVOS } from "./textos-interface.js";
 
+/** @typedef {import("./tipos.js").Recusa} Recusa */
 /** @typedef {{ titulo: string, explicacao: string, acao: string }} TextoAchado */
 /**
  * O achado como os módulos o devolvem (a união dos campos das specs 003 a 005).
@@ -405,8 +407,8 @@ const textoGenerico = (codigo) => ({
  * Junta o achado ao texto dele.
  *
  * O `detalhe` do `seletor-invalido` é o motivo da recusa, que o módulo devolve como código
- * (`caractere-invalido`); aqui vira a frase. Os demais detalhes (números, o termo SPF que
- * falhou) passam como texto.
+ * (`caractere-invalido`); aqui vira a frase, e um detalhe que não é código passa como texto.
+ * Os demais detalhes (números, o termo SPF que falhou) passam como texto.
  *
  * @param {AchadoLido} achado - O achado como o módulo o devolveu.
  * @returns {AchadoVisivel} O achado com título, explicação e ação.
@@ -419,7 +421,9 @@ export const textoDoAchado = (achado) => {
   const bruto = achado.detalhe;
   const detalhe =
     achado.codigo === "seletor-invalido" && typeof bruto === "string"
-      ? (MOTIVOS_SELETOR[bruto]?.texto ?? bruto)
+      ? Object.hasOwn(MOTIVOS, bruto)
+        ? textoDoMotivo({ motivo: bruto })
+        : bruto
       : bruto === undefined
         ? undefined
         : String(bruto);
@@ -435,4 +439,19 @@ export const textoDoAchado = (achado) => {
     ...(achado.seletor === undefined ? {} : { seletor: achado.seletor }),
     ...(achado.dominio === undefined ? {} : { dominio: achado.dominio }),
   };
+};
+
+/**
+ * A frase de uma recusa ou falha, a partir do código que o módulo devolveu.
+ *
+ * O `valor` entra onde a frase tem `{valor}` (o status HTTP, o `Status` do DNS). Código sem
+ * entrada no catálogo devolve a frase de `sem-motivo`, nunca o código cru: a página não mostra
+ * identificador interno ao visitante.
+ *
+ * @param {Recusa} recusa - O `motivo` (código) e o `valor`, se houver.
+ * @returns {string} A frase pronta para mostrar.
+ */
+export const textoDoMotivo = ({ motivo, valor }) => {
+  const entrada = Object.hasOwn(MOTIVOS, motivo) ? MOTIVOS[motivo] : MOTIVOS["sem-motivo"];
+  return preencher(entrada?.texto ?? "", valor === undefined ? {} : { valor });
 };

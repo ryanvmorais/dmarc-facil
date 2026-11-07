@@ -35,7 +35,7 @@ import { MAXIMO_SELETORES, normalizarSeletor } from "./seletor-dkim.js";
  * @typedef {{
  *   seletor: string, nome: string, estado: ResultadoDkim["situacao"] | "nao-verificado",
  *   dkim?: Exclude<ResultadoDkim, { situacao: "ausente" }>, motivo?: string,
- *   interrompido?: true
+ *   valor?: string | number, interrompido?: true
  * }} SeletorTentado
  */
 /**
@@ -44,7 +44,8 @@ import { MAXIMO_SELETORES, normalizarSeletor } from "./seletor-dkim.js";
  *   seletores: SeletorTentado[], achados: Achado[], resolvedores: string[]
  * }} BuscaDkim
  */
-/** @typedef {BuscaDkim | { ok: false, motivo: string }} ResultadoBusca */
+/** @typedef {import("./tipos.js").Recusa} Recusa */
+/** @typedef {BuscaDkim | ({ ok: false } & Recusa)} ResultadoBusca */
 /** @typedef {{ concorrencia?: number, maximoFalhas?: number }} OpcoesBusca */
 
 // ---------------------------------------------------------------------------
@@ -60,9 +61,6 @@ const CONCORRENCIA_MAXIMA = 10;
 // tempo dos dois resolvedores, e com a rede fora do ar as outras também falhariam.
 export const MAXIMO_FALHAS = 3;
 const FALHAS_MAXIMAS = 10;
-
-const MOTIVO_SEM_SELETORES = "Não há seletor para procurar.";
-const MOTIVO_SEM_DOMINIO = "Digite um domínio, por exemplo exemplo.com.br.";
 
 // ---------------------------------------------------------------------------
 // AUXILIARES
@@ -176,7 +174,7 @@ export const buscarDkim = async (dominio, seletores, consulta, opcoes = {}) => {
   // 1. O domínio vira nome DNS só depois de normalizado.
   const normalizado = typeof dominio === "string" ? normalizarDominio(dominio) : undefined;
   if (normalizado === undefined) {
-    return { ok: false, motivo: MOTIVO_SEM_DOMINIO };
+    return { ok: false, motivo: "dominio-vazio" };
   }
   if (!normalizado.ok) {
     return { ok: false, motivo: normalizado.motivo };
@@ -185,7 +183,7 @@ export const buscarDkim = async (dominio, seletores, consulta, opcoes = {}) => {
   // 2. A lista de seletores.
   const { lista, achados: daBusca } = prepararLista(seletores);
   if (lista.length === 0) {
-    return { ok: false, motivo: MOTIVO_SEM_SELETORES };
+    return { ok: false, motivo: "sem-seletores" };
   }
   const concorrencia = limitar(opcoes.concorrencia, CONCORRENCIA_MAXIMA, CONCORRENCIA_PADRAO);
   const maximoFalhas = limitar(opcoes.maximoFalhas, FALHAS_MAXIMAS, MAXIMO_FALHAS);
@@ -213,7 +211,13 @@ export const buscarDkim = async (dominio, seletores, consulta, opcoes = {}) => {
 
       if (!resposta.ok) {
         falhas += 1;
-        tentados[indice] = { seletor, nome, estado: "nao-verificado", motivo: resposta.motivo };
+        tentados[indice] = {
+          seletor,
+          nome,
+          estado: "nao-verificado",
+          motivo: resposta.motivo,
+          ...(resposta.valor === undefined ? {} : { valor: resposta.valor }),
+        };
         continue;
       }
       if (resposta.resolvedor !== undefined) {

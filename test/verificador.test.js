@@ -47,7 +47,7 @@ const SEM_REGISTRO = {
 /** @type {Resposta} */
 const INEXISTENTE = { ok: true, situacao: "inexistente", registros: [], resolvedor: "cloudflare" };
 /** @type {Resposta} */
-const FALHA = { ok: false, motivo: "A consulta ao resolvedor falhou." };
+const FALHA = { ok: false, motivo: "resolvedor-http", valor: 503 };
 
 /**
  * Um portão: a resposta presa nele só sai quando `abrir` é chamado.
@@ -190,7 +190,10 @@ describe("criarVerificador: as três partes", () => {
 
     const dmarc = ultimo().partes.dmarc;
     assert.equal(dmarc.fase, "falha");
-    assert.equal(dmarc.fase === "falha" ? dmarc.motivo : "", FALHA.ok ? "" : FALHA.motivo);
+    assert.deepEqual(dmarc.fase === "falha" ? [dmarc.motivo, dmarc.valor] : [], [
+      "resolvedor-http",
+      503,
+    ]);
     assert.equal(ultimo().partes.spf.fase, "pronto");
     assert.equal(ultimo().partes.dkim.fase, "pronto");
   });
@@ -207,7 +210,11 @@ describe("criarVerificador: as três partes", () => {
 
     await verificador.verificar("exemplo.com.br");
 
-    assert.equal(ultimo().partes.dmarc.fase, "falha");
+    assert.deepEqual(ultimo().partes.dmarc, {
+      parte: "dmarc",
+      fase: "falha",
+      motivo: "sem-motivo",
+    });
     assert.equal(ultimo().partes.spf.fase, "pronto");
   });
 
@@ -253,7 +260,7 @@ describe("criarVerificador: o domínio digitado", () => {
       const resultado = await verificador.verificar(entrada);
 
       assert.equal(resultado.ok, false);
-      assert.ok(!resultado.ok && resultado.motivo.length > 0);
+      assert.ok(!resultado.ok && resultado.motivo.startsWith("dominio-"));
       assert.deepEqual(chamadas, []);
       assert.deepEqual(estados, []);
     });

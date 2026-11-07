@@ -14,9 +14,9 @@ import { urlHttps } from "./dom.js";
 import { calcularSelo } from "./selo.js";
 import { normalizarSeletor } from "./seletor-dkim.js";
 import { ORIENTACOES, SELETORES_COMUNS } from "./seletores-dkim.js";
-import { textoDoAchado } from "./textos-achados.js";
+import { preencher } from "./preencher.js";
+import { textoDoAchado, textoDoMotivo } from "./textos-achados.js";
 import {
-  MOTIVOS_SELETOR,
   TEXTOS_ANUNCIO,
   TEXTOS_DKIM,
   TEXTOS_DMARC,
@@ -103,15 +103,9 @@ export const cortarTexto = (texto, maximo) => {
   return { texto: pontos.slice(0, maximo).join("") + RETICENCIAS, cortado: true };
 };
 
-/**
- * Troca `{nome}` pelos valores. Os valores entram como estão e não são expandidos de novo.
- *
- * @param {string} modelo - Texto com marcadores `{nome}`.
- * @param {Record<string, string | number>} [valores] - Valor de cada marcador.
- * @returns {string} O texto montado; marcador sem valor vira vazio.
- */
-export const preencher = (modelo, valores = {}) =>
-  modelo.replace(/\{([a-z]+)\}/g, (_, nome) => String(valores[nome] ?? ""));
+// `preencher` mora em `preencher.js` (a frase dos motivos também o usa); segue exportado
+// daqui para quem já o importa de `apresentacao.js`.
+export { preencher };
 
 /**
  * Parte um texto do catálogo em trechos de texto e de código (o que está entre crases).
@@ -161,7 +155,7 @@ export const lerSeletoresDigitados = (texto) => {
     } else {
       recusados.push({
         texto: cortarTexto(item, MAXIMO_RECUSADO).texto,
-        motivo: MOTIVOS_SELETOR[lido.motivo]?.texto ?? lido.motivo,
+        motivo: textoDoMotivo({ motivo: lido.motivo }),
       });
     }
   }
@@ -173,8 +167,8 @@ export const lerSeletoresDigitados = (texto) => {
 // ---------------------------------------------------------------------------
 
 /**
- * A mensagem de uma parte que não conseguiu consultar: a causa em português, que a consulta
- * já devolveu, e a frase que diz que isso não é um defeito do registro.
+ * A mensagem de uma parte que não conseguiu consultar: a frase do motivo que a consulta
+ * devolveu (por código) e a frase que diz que isso não é um defeito do registro.
  *
  * @param {EstadoParte} estadoParte - O estado da parte.
  * @returns {string} A mensagem, ou ``""`` se a parte não falhou.
@@ -183,7 +177,7 @@ export const mensagemDeFalha = (estadoParte) => {
   if (estadoParte.fase !== "falha") {
     return "";
   }
-  const causa = estadoParte.motivo.trim() || TEXTOS_FALHA.semMotivo.texto;
+  const causa = textoDoMotivo(estadoParte);
   const naoDiz = preencher(TEXTOS_FALHA.naoDiz.texto, {
     parte: TITULOS_CARTAO[estadoParte.parte].texto,
   });

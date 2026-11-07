@@ -223,20 +223,23 @@ describe("RF-06 — resumo da busca", () => {
   });
 
   it("é indeterminado quando um seletor falhou e nenhum tem registro", async () => {
-    const falsa = criarConsulta({ [nome("b")]: { ok: false, motivo: "rede fora" } });
+    const falsa = criarConsulta({
+      [nome("b")]: { ok: false, motivo: "resolvedor-http", valor: 503 },
+    });
     const busca = aceita(await buscarDkim("exemplo.com.br", ["a", "b", "c"], falsa.consulta));
 
     assert.equal(busca.situacao, "indeterminado");
     assert.equal(busca.incompleta, true);
     assert.equal(busca.seletores[1]?.estado, "nao-verificado");
-    assert.equal(busca.seletores[1]?.motivo, "rede fora");
+    assert.equal(busca.seletores[1]?.motivo, "resolvedor-http");
+    assert.equal(busca.seletores[1]?.valor, 503);
     assert.equal(busca.seletores[1]?.interrompido, undefined);
     assert.deepEqual(busca.achados, []);
   });
 
   it("continua encontrado, mas incompleta, quando um seletor falhou e outro tem registro", async () => {
     const falsa = criarConsulta({
-      [nome("a")]: { ok: false, motivo: "rede fora" },
+      [nome("a")]: { ok: false, motivo: "resolvedor-http", valor: 503 },
       [nome("b")]: com([REGISTRO]),
     });
     const busca = aceita(await buscarDkim("exemplo.com.br", ["a", "b"], falsa.consulta));
@@ -251,7 +254,7 @@ describe("RF-06 — resumo da busca", () => {
 // ---------------------------------------------------------------------------
 
 describe("RF-06 — falhas de rede", () => {
-  const falha = /** @type {const} */ ({ ok: false, motivo: "rede fora" });
+  const falha = /** @type {const} */ ({ ok: false, motivo: "resolvedor-http", valor: 503 });
 
   it("para de abrir consultas na terceira falha e marca os não tentados", async () => {
     const seletores = seletoresNumerados(10);
@@ -271,8 +274,10 @@ describe("RF-06 — falhas de rede", () => {
       busca.seletores.map((item) => item.interrompido === true),
       seletores.map((_, i) => i >= 3),
     );
-    assert.equal(busca.seletores[0]?.motivo, "rede fora");
+    assert.equal(busca.seletores[0]?.motivo, "resolvedor-http");
+    assert.equal(busca.seletores[0]?.valor, 503);
     assert.equal(busca.seletores[5]?.motivo, undefined);
+    assert.equal(busca.seletores[5]?.valor, undefined);
     assert.deepEqual(busca.achados, [{ codigo: "busca-interrompida", gravidade: "aviso" }]);
   });
 
@@ -375,7 +380,7 @@ describe("RF-06 e RF-08 — lista de seletores", () => {
     for (const lista of [[], ["a/b"], undefined, null, "google", [42]]) {
       const falsa = criarConsulta();
       const busca = await buscarDkim("exemplo.com.br", lista, falsa.consulta);
-      assert.equal(busca.ok, false);
+      assert.deepEqual(busca, { ok: false, motivo: "sem-seletores" });
       assert.equal(falsa.chamadas.length, 0);
     }
   });
@@ -400,7 +405,7 @@ describe("RF-08 — domínio", () => {
       const falsa = criarConsulta();
       const busca = await buscarDkim(dominio, ["google"], falsa.consulta);
       assert.equal(busca.ok, false);
-      assert.equal(typeof (!busca.ok && busca.motivo), "string");
+      assert.ok(!busca.ok && busca.motivo.startsWith("dominio-"));
       assert.equal(falsa.chamadas.length, 0);
     });
   }

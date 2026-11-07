@@ -32,6 +32,7 @@ import { normalizarDominio } from "./dominio.js";
 import { lerDominioDoEndereco, montarEndereco } from "./endereco.js";
 import { montarEscada, textoDoFim } from "./escada.js";
 import { SELETORES_COMUNS } from "./seletores-dkim.js";
+import { textoDoMotivo } from "./textos-achados.js";
 import {
   ROTULOS_DADO_DO_ACHADO,
   ROTULOS_GRAVIDADE,
@@ -638,9 +639,9 @@ function aoEnviarSeletores(texto) {
   });
 }
 
-/** @param {string} motivo - Por que o domínio foi recusado, em português. */
-const mostrarErroDoCampo = (motivo) => {
-  erroDominioTexto.textContent = motivo;
+/** @param {import("./tipos.js").Recusa} recusa - Por que o domínio foi recusado (o código). */
+const mostrarErroDoCampo = (recusa) => {
+  erroDominioTexto.textContent = textoDoMotivo(recusa);
   erroDominio.hidden = false;
   campo.setAttribute("aria-invalid", "true");
   // O erro é anunciado por `role="alert"`; refocar um campo já focado faria o leitor repetir
@@ -673,7 +674,7 @@ formulario.addEventListener("submit", (evento) => {
   evento.preventDefault();
   const lido = normalizarDominio(campo.value);
   if (!lido.ok) {
-    mostrarErroDoCampo(lido.motivo);
+    mostrarErroDoCampo(lido);
     return;
   }
   limparErroDoCampo();

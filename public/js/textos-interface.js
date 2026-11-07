@@ -110,13 +110,64 @@ export const RESSALVAS_ESCADA = {
 };
 
 // ---------------------------------------------------------------------------
-// SELETOR DIGITADO
+// MOTIVOS DE RECUSA E FALHA
 // ---------------------------------------------------------------------------
 
-// O `normalizarSeletor` devolve o motivo da recusa como código; aqui vira a frase que a página
-// mostra ao lado do seletor recusado.
+// Os módulos puros devolvem o motivo como código estável (`dominio-vazio`, `resolvedor-http`),
+// nunca como frase; aqui cada código vira a frase que a página mostra. `{valor}` marca o dado
+// que a recusa traz (o status HTTP, o `Status` do DNS). O código do seletor digitado
+// (`vazio`, `caractere-invalido`) divide a tabela com os demais, sem colisão de nome. Código
+// sem entrada cai em `sem-motivo` (`textoDoMotivo`), nunca aparece cru. O teste de cobertura
+// falha se um módulo emite um código que não está aqui, ou se sobra entrada que ninguém emite.
 /** @type {Record<string, TextoFixo>} */
-export const MOTIVOS_SELETOR = {
+export const MOTIVOS = {
+  // dominio.js
+  "dominio-vazio": { texto: "Digite um domínio, por exemplo exemplo.com.br." },
+  "dominio-com-porta-ou-ipv6": { texto: "Digite só o domínio, sem porta nem endereço IPv6." },
+  "dominio-invalido": { texto: "Esse texto não é um domínio válido." },
+  "dominio-comprido-demais": {
+    texto: "O domínio é comprido demais (o limite é 253 caracteres).",
+  },
+  "dominio-incompleto": { texto: "Use o domínio completo, por exemplo exemplo.com.br." },
+  "dominio-e-ip": { texto: "Endereço IP não tem DMARC: digite o nome do domínio." },
+  "dominio-parte-comprida-demais": { texto: "Uma parte do domínio passa de 63 caracteres." },
+  "dominio-caractere-invalido": { texto: "O domínio só pode ter letras, números e hífen." },
+  // nome-dns.js
+  "nome-vazio": { texto: "O nome da consulta está vazio." },
+  "nome-comprido-demais": {
+    texto: "O nome da consulta é comprido demais (o limite é 253 caracteres).",
+  },
+  "nome-caractere-invalido": {
+    texto: "O nome da consulta tem um caractere que não é permitido.",
+  },
+  "nome-parte-vazia": {
+    texto: "O nome da consulta tem uma parte vazia (dois pontos seguidos).",
+  },
+  "nome-parte-comprida-demais": {
+    texto: "Uma parte do nome da consulta passa de 63 caracteres.",
+  },
+  // resposta-doh.js
+  "resposta-nao-objeto": { texto: "A resposta do resolvedor não é um objeto." },
+  "resposta-sem-status": { texto: "A resposta do resolvedor não traz o Status." },
+  "resposta-status-dns": {
+    texto: "O resolvedor não conseguiu resolver o nome (Status {valor}).",
+  },
+  "resposta-answer-invalido": { texto: "O Answer da resposta não é uma lista." },
+  // doh.js
+  "resolvedor-http": { texto: "O resolvedor respondeu HTTP {valor}." },
+  "consulta-falhou": {
+    texto: "A consulta ao resolvedor falhou (rede, tempo ou resposta inválida).",
+  },
+  // [provisório]
+  "resolvedores-indisponiveis": {
+    texto:
+      "Não consegui consultar o DNS agora, nem pela Cloudflare nem pelo Google. Confira sua conexão e tente de novo.",
+  },
+  // dkim-busca.js
+  "sem-seletores": { texto: "Não há seletor para procurar." },
+  // verificador.js e a guarda de `textoDoMotivo`
+  "sem-motivo": { texto: "Não consegui consultar o DNS agora." },
+  // seletor-dkim.js: o motivo vem depois de "Não aceitei `{texto}`:"
   vazio: { texto: "está vazio" },
   "parece-nome-completo": {
     texto: "parece o nome completo; digite só o seletor, que eu monto o resto",
@@ -149,9 +200,8 @@ export const TEXTOS_VERIFICANDO = {
   dkim: { texto: "Procurando em {total} seletores comuns…" },
 };
 
-/** @type {{ semMotivo: TextoFixo, naoDiz: TextoFixo }} */
+/** @type {{ naoDiz: TextoFixo }} */
 export const TEXTOS_FALHA = {
-  semMotivo: { texto: "Não consegui consultar o DNS agora." },
   naoDiz: { texto: "Isso não diz nada sobre o seu {parte}." },
 };
 

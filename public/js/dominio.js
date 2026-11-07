@@ -85,38 +85,38 @@ const paraAscii = (host) => {
  *
  * @param {string} entrada - Texto digitado, ex.: ``"https://Exemplo.com.br/"``.
  * @returns {ResultadoDominio} ``{ ok: true, dominio }`` normalizado, ou ``{ ok: false,
- *   motivo }`` com a explicação em português para mostrar ao visitante.
+ *   motivo }`` com o código da recusa (a frase está em `textos-interface.js`).
  */
 export const normalizarDominio = (entrada) => {
   const host = extrairHost(entrada);
   if (host === "") {
-    return { ok: false, motivo: "Digite um domínio, por exemplo exemplo.com.br." };
+    return { ok: false, motivo: "dominio-vazio" };
   }
   if (host.includes(":")) {
-    return { ok: false, motivo: "Digite só o domínio, sem porta nem endereço IPv6." };
+    return { ok: false, motivo: "dominio-com-porta-ou-ipv6" };
   }
 
   const dominio = paraAscii(host);
   if (dominio === null || dominio === "") {
-    return { ok: false, motivo: "Esse texto não é um domínio válido." };
+    return { ok: false, motivo: "dominio-invalido" };
   }
   if (dominio.length > TAMANHO_MAXIMO_DOMINIO) {
-    return { ok: false, motivo: "O domínio é comprido demais (o limite é 253 caracteres)." };
+    return { ok: false, motivo: "dominio-comprido-demais" };
   }
 
   const rotulos = dominio.split(".");
   if (rotulos.length < 2) {
-    return { ok: false, motivo: "Use o domínio completo, por exemplo exemplo.com.br." };
+    return { ok: false, motivo: "dominio-incompleto" };
   }
   if (/^\d+$/.test(rotulos[rotulos.length - 1] ?? "")) {
-    return { ok: false, motivo: "Endereço IP não tem DMARC: digite o nome do domínio." };
+    return { ok: false, motivo: "dominio-e-ip" };
   }
   for (const rotulo of rotulos) {
     if (rotulo.length > TAMANHO_MAXIMO_ROTULO) {
-      return { ok: false, motivo: "Uma parte do domínio passa de 63 caracteres." };
+      return { ok: false, motivo: "dominio-parte-comprida-demais" };
     }
     if (!PADRAO_ROTULO.test(rotulo)) {
-      return { ok: false, motivo: "O domínio só pode ter letras, números e hífen." };
+      return { ok: false, motivo: "dominio-caractere-invalido" };
     }
   }
 
