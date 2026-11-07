@@ -148,6 +148,46 @@ describe("index.html", () => {
     assert.match(html, /<meta\s+name="description"/);
     assert.match(html, /<link rel="icon"/);
   });
+
+  it("tem o apoio no HTML, dentro do main e fora do resultado, com um cartão por registro", async () => {
+    const html = semComentarios(await ler("index.html"));
+    const principal = html.match(/<main\b[\s\S]*<\/main>/)?.[0] ?? "";
+    const apoio = principal.match(/<section class="apoio"[\s\S]*?<\/section>/)?.[0] ?? "";
+
+    assert.match(apoio, /aria-labelledby="titulo-apoio"/);
+    assert.match(apoio, /<h2 id="titulo-apoio"/);
+    assert.deepEqual(
+      [...apoio.matchAll(/<h3>([^<]+)<\/h3>/g)].map((m) => m[1]),
+      ["DMARC", "SPF", "DKIM"],
+    );
+    // O resultado é desenhado por pagina.js; o apoio não pode morar dentro dele.
+    assert.ok(principal.indexOf('id="resultado"') < principal.indexOf('class="apoio"'));
+    assert.doesNotMatch(
+      principal.match(/<div[^>]*id="resultado"[^>]*>[\s\S]*?<\/div>/)?.[0] ?? "",
+      /apoio/,
+    );
+  });
+
+  it("tem o rodapé fora do main, com nome, licença e os links do GitHub e do MailVigil", async () => {
+    const html = semComentarios(await ler("index.html"));
+    const rodape = html.match(/<footer\b[\s\S]*?<\/footer>/)?.[0] ?? "";
+    const pagina = await ler("js/pagina.js");
+    const mailvigil = pagina.match(/ENDERECO_MAILVIGIL = "([^"]+)"/)?.[1] ?? "";
+
+    assert.ok(html.indexOf("</main>") < html.indexOf("<footer"));
+    assert.match(rodape, /DMARC Fácil · Apache-2\.0/);
+    assert.match(rodape, /href="https:\/\/github\.com\/ryanvmorais\/dmarc-facil">GitHub</);
+    // O MailVigil do rodapé aponta para o mesmo lugar do cartão do resultado.
+    assert.notEqual(mailvigil, "");
+    assert.match(rodape, new RegExp(`href="${mailvigil}">MailVigil<`));
+  });
+
+  it("não repete a promessa de privacidade fora do aviso junto do botão", async () => {
+    const html = semComentarios(await ler("index.html"));
+    const foraDoAviso = html.replace(/<p id="privacidade"[\s\S]*?<\/p>/, "");
+
+    assert.doesNotMatch(foraDoAviso, /não guarda|nenhum domínio/i);
+  });
 });
 
 // ---------------------------------------------------------------------------

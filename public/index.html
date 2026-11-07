@@ -147,17 +147,60 @@
       <p class="so-leitor" id="anuncio" role="status" aria-live="polite"></p>
       <div class="resultado" id="resultado" hidden></div>
       <!-- fim: RESULTADO -->
+
+      <!-- ============================================================
+           SEÇÃO: APOIO
+           HTML estático, fora do pagina.js: fica na página antes e depois da verificação e
+           não depende de JavaScript, então o buscador e o leitor de tela o encontram. Os
+           mesmos limites e a mesma regra do DKIM que a página aplica ao resultado (sem
+           "você não tem DKIM"; o limite de 10 consultas do SPF).
+           ============================================================ -->
+      <section class="apoio" aria-labelledby="titulo-apoio">
+        <h2 id="titulo-apoio" class="titulo">O que cada registro faz</h2>
+        <p class="apoio-lead">Os três trabalham juntos para o seu e-mail não ser falsificado.</p>
+        <div class="apoio-lista">
+          <div class="cartao apoio-item">
+            <h3>DMARC</h3>
+            <p>
+              Diz ao provedor de quem recebe o que fazer com e-mail que se passa pelo seu domínio:
+              nada (<code class="codigo">p=none</code>), mandar para o spam (<code class="codigo"
+                >p=quarantine</code
+              >) ou recusar (<code class="codigo">p=reject</code>). Comece em
+              <code class="codigo">p=none</code> e suba um degrau de cada vez.
+            </p>
+          </div>
+          <div class="cartao apoio-item">
+            <h3>SPF</h3>
+            <p>
+              Lista quem pode enviar e-mail pelo seu domínio. O limite é de 10 consultas DNS: passar
+              disso invalida o registro, e por isso a página conta cada uma.
+            </p>
+          </div>
+          <div class="cartao apoio-item">
+            <h3>DKIM</h3>
+            <p>
+              Assina cada mensagem com uma chave. O seletor é escolha de quem envia e o DNS não
+              deixa listá-los, então a página procura nos mais comuns e diz “não encontrei nesses
+              seletores”, nunca “você não tem DKIM”.
+            </p>
+          </div>
+        </div>
+      </section>
+      <!-- fim: APOIO -->
     </main>
 
     <!-- ============================================================
          SEÇÃO: RODAPÉ
+         Duas pontas: nome e licença à esquerda, os dois links à direita. A promessa de
+         privacidade não se repete aqui: fica só junto do botão "Verificar".
          ============================================================ -->
-    <footer class="coluna rodape">
+    <footer class="rodape">
       <div class="rodape-interno">
-        <p class="nota">
-          O DMARC Fácil é código aberto (Apache-2.0). Nenhum domínio consultado é guardado.
-        </p>
-        <a class="link-doc" href="https://github.com/ryanvmorais/dmarc-facil">Código no GitHub</a>
+        <p class="nota">DMARC Fácil · Apache-2.0</p>
+        <div class="rodape-links">
+          <a class="link-doc" href="https://github.com/ryanvmorais/dmarc-facil">GitHub</a>
+          <a class="link-doc" href="https://github.com/ryanvmorais/mailvigil">MailVigil</a>
+        </div>
       </div>
     </footer>
     <!-- fim: RODAPÉ -->

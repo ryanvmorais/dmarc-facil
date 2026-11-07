@@ -15,7 +15,7 @@
  *   5. Cartões, selos e achados
  *   6. Escada do DMARC
  *   7. DKIM: seletores tentados e campo livre
- *   8. Rodapé, 404 e utilitários
+ *   8. Apoio, rodapé, 404 e utilitários
  *   9. Telas largas e movimento reduzido
  */
 
@@ -643,15 +643,61 @@ a {
   border-top: 1px solid var(--cor-borda);
 }
 
-/* 8. Rodapé, 404 e utilitários */
+/* 8. Apoio, rodapé, 404 e utilitários
+ * O apoio reaproveita `.cartao` (borda e fundo já têm token escuro) e só acrescenta a
+ * separação do formulário e a grade. O rodapé tem a mesma largura do cabeçalho (1120 px),
+ * com borda no topo; as duas pontas só se separam em tela larga (seção 9). */
+.apoio {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--cor-borda);
+}
+
+.apoio h2 {
+  padding-top: 20px;
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.apoio-lead {
+  font-size: 15px;
+  color: var(--cor-texto-2);
+}
+
+.apoio-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.apoio-item h3 {
+  font-size: 16px;
+}
+
+.apoio-item p {
+  font-size: 15px;
+  color: var(--cor-texto-2);
+}
+
 .rodape {
-  padding-block: 8px 40px;
+  border-top: 1px solid var(--cor-borda);
 }
 
 .rodape-interno {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  max-width: 1120px;
+  margin-inline: auto;
+  padding: 12px 16px 24px;
+}
+
+.rodape-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 18px;
 }
 
 .aviso-noscript {
@@ -828,6 +874,20 @@ a {
 
   .seletores-extras .botao-secundario {
     align-self: flex-start;
+  }
+
+  /* Um cartão por registro, lado a lado; no celular ficam empilhados. */
+  .apoio-lista {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .rodape-interno {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 24px;
   }
 
   .pagina-erro {
