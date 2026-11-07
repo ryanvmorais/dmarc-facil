@@ -77,7 +77,7 @@ Um PR só. Os textos em inglês foram revisados e aprovados na 3.19.
 ### 3C — Descoberta e imagem
 
 - [x] 3.13 `public/sitemap.xml`: as duas URLs com `xhtml:link` recíproco (o `x-default` fica só nas páginas); `test/descoberta.test.js`: `canonical` de cada página é ela mesma, `hreflang` recíproco, `x-default` para `/`, sitemap com exatamente as duas páginas, tudo derivado da rota do `wrangler.json`, e a ausência dessas tags nas 404. — RF-06, ADR-7, RNF-08
-- [x] 3.14 `docs/images/dmarc-facil-dmarc-checker-social-preview-en.html` (mesmo desenho, texto da escada e da frase em inglês), o PNG gerado pelo comando do cabeçalho do HTML e `public/social-en.png` idêntico a ele; `test/imagem-social.test.js` rodando para os dois (1280 × 640, até 1 MB, mesmo `<path>` do logo, cópia idêntica byte a byte). — RF-06, ADR-8
+- [x] 3.14 `docs/images/dmarc-facil-dmarc-spf-dkim-checker-social-preview-en.html` (mesmo desenho, texto da escada e da frase em inglês), o PNG gerado pelo comando do cabeçalho do HTML e `public/social-en.png` idêntico a ele; `test/imagem-social.test.js` rodando para os dois (1280 × 640, até 1 MB, mesmo `<path>` do logo, cópia idêntica byte a byte). — RF-06, ADR-8
 - [x] 3.15 `eslint.config.mjs` e `test/lint-dom.test.js`: proibir `navigator.language`, `navigator.languages`, `localStorage`, `sessionStorage`, `indexedDB` e `document.cookie` em `public/**`, com um teste que alimenta cada um e espera a recusa. — RF-07, ADR-10
 
 ### 3D — Hospedagem e CI

@@ -2,7 +2,7 @@
 
 Cada tecnologia que sustenta o DMARC Fácil: o que faz, por que foi escolhida no lugar da alternativa e os poucos conceitos que valem estudar primeiro.
 
-Este mapa não é exaustivo: o grafo completo de versões está no `pnpm-lock.yaml` e as decisões de cada marco vão nos blocos `### ADR-N` de `specs/*/design.md`. Aqui está a forma do projeto e o raciocínio por trás de cada peça. Hoje ele cobre os marcos até o `v0.7`; depois do `v0.2`, só o `v0.6` (a página: fontes locais, CSP por `<meta>`, History API e Lighthouse CI) e o `v0.7` (a hospedagem: Workers Static Assets, `_headers`, HSTS e o deploy por `wrangler`) trouxeram tecnologia nova.
+Este mapa não é exaustivo: o grafo completo de versões está no `pnpm-lock.yaml` e as decisões de cada marco vão nos blocos `### ADR-N` de `specs/*/design.md`. Aqui está a forma do projeto e o raciocínio por trás de cada peça. Hoje ele cobre os marcos até o `v0.8`; depois do `v0.2`, só o `v0.6` (a página: fontes locais, CSP por `<meta>`, History API e Lighthouse CI), o `v0.7` (a hospedagem: Workers Static Assets, `_headers`, HSTS e o deploy por `wrangler`) e o `v0.8` (o inglês: catálogo de textos por idioma, `hreflang` e links reais de idioma) trouxeram tecnologia nova.
 
 O projeto é um site estático e um conjunto de ferramentas que só existem na máquina de quem desenvolve:
 
@@ -77,7 +77,7 @@ O corpo do texto usa a fonte do sistema (`system-ui`); só dois arquivos `woff2`
 
 ### Tema escuro por `prefers-color-scheme`
 
-A página segue o tema do sistema, sem botão e sem guardar escolha no navegador. As cores são tokens (`--cor-*`, `--selo-*`) em `:root`; um bloco `@media (prefers-color-scheme: dark)` redefine os mesmos nomes, e nenhuma outra regra do CSS conhece o tema. Por isso o hover do botão, o botão desabilitado e o logo também são tokens. A `<meta name="color-scheme" content="light dark">` das duas páginas e o `color-scheme` do CSS fazem campo, barra de rolagem e fundo inicial já nascerem no tema certo. O `favicon.svg` traz a própria `@media` e troca o azul por um mais claro na aba escura. `test/tema-escuro.test.js` exige que o bloco escuro cubra todo token de cor e mede o contraste dos pares de texto e fundo nos dois temas.
+A página segue o tema do sistema, sem botão e sem guardar escolha no navegador. As cores são tokens (`--cor-*`, `--selo-*`) em `:root`; um bloco `@media (prefers-color-scheme: dark)` redefine os mesmos nomes, e nenhuma outra regra do CSS conhece o tema. Por isso o hover do botão, o botão desabilitado e o logo também são tokens. A `<meta name="color-scheme" content="light dark">` das páginas e o `color-scheme` do CSS fazem campo, barra de rolagem e fundo inicial já nascerem no tema certo. O `favicon.svg` traz a própria `@media` e troca o azul por um mais claro na aba escura. `test/tema-escuro.test.js` exige que o bloco escuro cubra todo token de cor e mede o contraste dos pares de texto e fundo nos dois temas.
 
 **Por que esta:** quem usa o sistema no escuro não toma um flash branco, e a escolha não precisa de JavaScript nem de armazenamento (a página promete não guardar nada). Alternativa descartada: botão de tema com `localStorage`, que traria estado, mais um controle e script antes da pintura.
 
@@ -243,7 +243,7 @@ Abre um PR por semana (domingo, 09:00, horário de Brasília) com as atualizaç�
 
 ### Lighthouse CI
 
-Roda o Lighthouse sobre a pasta `public/` (`lhci autorun`, servidor estático embutido) nas duas páginas, em celular e em desktop, três medições e a mediana. Limites em `.github/lighthouse/{mobile,desktop}.json`: acessibilidade = 1 e desempenho, boas práticas e SEO a partir de 0,95, além de contraste, console, CLS e peso (150 KB). Não é check obrigatório: a nota varia em runner compartilhado. Depois de cada deploy, o `deploy.yml` mede também o endereço real, com os mesmos limites (`producao-{mobile,desktop}.json`). O `@lhci/cli` entra por `npx` numa variável do workflow, e não no `package.json`, porque a árvore dele traz vulnerabilidades altas que derrubariam o `pnpm audit` do job `seguranca`. A auditoria `robots-txt` fica de fora: a CSP sem `connect-src 'self'` impede o Lighthouse de baixar o arquivo.
+Roda o Lighthouse sobre a pasta `public/` (`lhci autorun`, servidor estático embutido) nas quatro páginas (`index.html`, `404.html` e as duas de `en/`), em celular e em desktop, três medições e a mediana. Limites em `.github/lighthouse/{mobile,desktop}.json`: acessibilidade = 1 e desempenho, boas práticas e SEO a partir de 0,95, além de contraste, console, CLS e peso (150 KB). Não é check obrigatório: a nota varia em runner compartilhado. Depois de cada deploy, o `deploy.yml` mede também o endereço real, com os mesmos limites (`producao-{mobile,desktop}.json`). O `@lhci/cli` entra por `npx` numa variável do workflow, e não no `package.json`, porque a árvore dele traz vulnerabilidades altas que derrubariam o `pnpm audit` do job `seguranca`. A auditoria `robots-txt` fica de fora: a CSP sem `connect-src 'self'` impede o Lighthouse de baixar o arquivo.
 
 **Por que esta:** pega regressão de carga, de acessibilidade e de estrutura antes do deploy. Não exercita a consulta DoH real.
 

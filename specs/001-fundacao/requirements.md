@@ -100,7 +100,7 @@ O repositório é público desde o começo. Isso define vários requisitos: o pr
 
 ### RF-08 — Logo oficial com fonte única
 
-- **Given** `docs/images/dmarc-facil-dmarc-checker-logo.svg`
+- **Given** `docs/images/dmarc-facil-dmarc-spf-dkim-checker-logo.svg`
   **When** o teste de logo roda
   **Then** o arquivo tem um único `<path>` com `fill-rule="evenodd"`, cor `#2563eb`, `role="img"`, `aria-label` e `<title>`, e nenhum `mask`, `clipPath`, `script` ou `style`.
 

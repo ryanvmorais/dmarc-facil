@@ -66,7 +66,7 @@ public/                  # o site: é o que vai para a hospedagem, sem build
   favicon.svg            # ícone da aba (troca de cor no tema escuro), referenciado pelas duas páginas
   apple-touch-icon.png   # ícone de tela inicial (180 x 180, o logo em branco sobre o azul da marca); só o index o cita
   social-pt.png          # og:image do index (1280 x 640); igual, byte a byte, à social preview do GitHub em docs/images/
-  social-en.png          # og:image de en/index.html; igual, byte a byte, a docs/images/dmarc-facil-dmarc-checker-social-preview-en.png (gerado do HTML ao lado pelo Chrome)
+  social-en.png          # og:image de en/index.html; igual, byte a byte, a docs/images/dmarc-facil-dmarc-spf-dkim-checker-social-preview-en.png (gerado do HTML ao lado pelo Chrome)
   css/pagina.css         # a folha das duas páginas (tokens claros e escuros, cartões, escada); fontes em fonts/ (OFL ao lado)
   js/                    # módulos ES carregados direto pelo navegador
     dominio.js           # valida e normaliza o domínio digitado (módulo puro: sem DOM, sem rede)
@@ -100,7 +100,7 @@ test/                    # testes com o runner nativo do Node (node:test); ajuda
 scripts/                 # scripts em Node (conferir-links-dkim.mjs: links dos provedores; conferir-hospedagem.mjs: o que está no ar)
 docs/                    # documentação do projeto
   stack.md               # mapa de cada tecnologia: o que faz, por que, o que estudar
-  images/                # logo oficial (SVG) e a captura da página usada no README
+  images/                # logo oficial (SVG), as capturas usadas nos README e as fontes das imagens sociais (HTML e PNG)
 specs/                   # specs de cada marco (requirements, design, tasks)
 .githooks/pre-commit     # portão de qualidade local, o mesmo do CI
 .claude/                 # hooks do Claude Code (scripts em hooks/, ligados por settings.json)

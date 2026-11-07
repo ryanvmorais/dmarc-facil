@@ -38,7 +38,7 @@ const PAGINAS = /** @type {const} */ ([
     caminho: "",
     locale: "pt_BR",
     imagem: "social-pt.png",
-    docs: "dmarc-facil-dmarc-checker-social-preview.png",
+    docs: "dmarc-facil-dmarc-spf-dkim-checker-social-preview.png",
   },
   {
     arquivo: "public/en/index.html",
@@ -46,7 +46,7 @@ const PAGINAS = /** @type {const} */ ([
     caminho: "en/",
     locale: "en_US",
     imagem: "social-en.png",
-    docs: "dmarc-facil-dmarc-checker-social-preview-en.png",
+    docs: "dmarc-facil-dmarc-spf-dkim-checker-social-preview-en.png",
   },
 ]);
 

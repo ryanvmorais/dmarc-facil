@@ -511,7 +511,7 @@ describe("logo nas páginas", () => {
   it("o <path> do index, da 404 e do favicon é o do arquivo oficial", async () => {
     const oficial = caminhoDoLogo(
       await readFile(
-        new URL("../docs/images/dmarc-facil-dmarc-checker-logo.svg", import.meta.url),
+        new URL("../docs/images/dmarc-facil-dmarc-spf-dkim-checker-logo.svg", import.meta.url),
         "utf8",
       ),
     );

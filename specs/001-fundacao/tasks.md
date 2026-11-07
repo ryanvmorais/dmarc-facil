@@ -44,6 +44,6 @@ A fundação foi construída antes desta spec (PRs #1 e #2). As tarefas abaixo s
 
 ## Etapa 4 — Marca
 
-- [x] `docs/images/dmarc-facil-dmarc-checker-logo.svg`: logo A (escudo com olho aberto), um `<path>` só com `evenodd`, cor `#2563eb`, `role="img"`, `aria-label` e `<title>`. — RF-08
+- [x] `docs/images/dmarc-facil-dmarc-spf-dkim-checker-logo.svg`: logo A (escudo com olho aberto), um `<path>` só com `evenodd`, cor `#2563eb`, `role="img"`, `aria-label` e `<title>`. — RF-08
 - [x] `test/logo.test.js`: confere a construção e recusa `mask`, `clipPath`, `script` e `style`. — RF-08
 - [x] Portão de qualidade final. — prettier, eslint e tsc sem aviso; `node --test`: 28 testes, 28 passam, 0 falham
