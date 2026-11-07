@@ -62,14 +62,14 @@ O navegador não fala DNS direto, então a página pergunta a um resolvedor púb
 
 O corpo do texto usa a fonte do sistema (`system-ui`); só dois arquivos `woff2` do subconjunto latino vêm de `public/fonts/`: a Sora 800 (títulos e o nome) e a JetBrains Mono 400 (registros e trechos de código). O CSS os declara em `@font-face` com `font-display: swap` e URL relativa à própria folha.
 
-**Origem e conferência (baixados em 2026-10-31):** o endereço que o CSS do Google Fonts devolve para o subconjunto latino, em `fonts.gstatic.com`, com o cabeçalho `wOF2` conferido.
+**Origem e conferência (baixados em 2026-10-31):** o endereço que o CSS do Google Fonts devolve para o subconjunto latino, em `fonts.gstatic.com`, com o cabeçalho `wOF2` conferido. A JetBrains Mono foi reduzida depois com `pyftsubset` (fonttools) para ASCII, Latin-1, aspas e reticências, sem as tabelas de layout (ligaduras `calt`, `kern`), `STAT`, `GDEF`, `gasp` e `prep`: de 21 168 para 7244 bytes. Sem as ligaduras, o `==` do fim de uma chave DKIM aparece como dois sinais, como no registro. Caractere fora do subconjunto cai na fonte monoespaçada do sistema.
 
 | Arquivo                         | Bytes  | SHA-256                                                            | Licença                                                                                                     |
 | ------------------------------- | ------ | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
 | `Sora-800-latin.woff2`          | 14 864 | `b3058cd014993defb5c446d9ccdeba7f994c4b7f0ff2b50b2b213944af0f176e` | OFL 1.1, `OFL-Sora.txt` (de [sora-xor/sora-font](https://github.com/sora-xor/sora-font))                    |
-| `JetBrainsMono-400-latin.woff2` | 21 168 | `14425ba9c695763c1547f48a206b7aa60350a33ae23de09f0407877f3fcd89eb` | OFL 1.1, `OFL-JetBrainsMono.txt` (de [JetBrains/JetBrainsMono](https://github.com/JetBrains/JetBrainsMono)) |
+| `JetBrainsMono-400-latin.woff2` | 7 244  | `66cdc7887a7b6c3edd1555514f84251a3c9a6209fee8eb1d446d6fcd87157d21` | OFL 1.1, `OFL-JetBrainsMono.txt` (de [JetBrains/JetBrainsMono](https://github.com/JetBrains/JetBrainsMono)) |
 
-**Por que esta:** zero requisição ao Google Fonts (privacidade e `font-src 'self'` da CSP) e só 36 KB de fonte, o que ajuda o orçamento de 150 KB da página. Alternativa descartada: uma fonte do corpo local (Inter somaria uns 100 KB).
+**Por que esta:** zero requisição ao Google Fonts (privacidade e `font-src 'self'` da CSP) e só uns 22 KB de fonte, o que ajuda o orçamento de 150 KB da página (o Lighthouse do endereço real mede os bytes transferidos). Alternativa descartada: uma fonte do corpo local (Inter somaria uns 100 KB).
 
 **Estudar:** `@font-face` e `font-display`, subconjunto `unicode-range`, a licença OFL (o que ela exige ao redistribuir).
 
