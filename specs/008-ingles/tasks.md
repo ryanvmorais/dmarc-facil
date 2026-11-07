@@ -22,17 +22,17 @@ Convenções: o código e os comentários seguem em português; o texto visível
 
 A página em português mostra exatamente as mesmas frases de antes. Só muda o que os módulos devolvem.
 
-- [ ] 1.1 Conferir o apêndice A contra o código: `grep -n "motivo" public/js/*.js` e a lista de frases fixas; acrescentar ao apêndice o que faltar. — RF-03
-- [ ] 1.2 `public/js/tipos.js`: typedef `Recusa` (`{ motivo: string, valor?: string | number }`) e o `EstadoParte` de falha com `motivo` e `valor?`. — ADR-5
-- [ ] 1.3 `public/js/textos-interface.js`: tabela `MOTIVOS` com os códigos do apêndice A (as frases de hoje, com `{valor}` onde há dado) e o `MOTIVOS_SELETOR` atual incorporado a ela; `TEXTOS_FALHA.semMotivo` sai (vira o código `sem-motivo`). — ADR-5
-- [ ] 1.4 `public/js/textos-achados.js`: `textoDoMotivo(recusa)`, que devolve a frase com o `valor` encaixado por `preencher`; código sem entrada devolve a frase de `sem-motivo`, nunca o código. — ADR-5, ADR-11
-- [ ] 1.5 `public/js/dominio.js` e `test/dominio.test.js`: devolver o código; os testes comparam o código, não a frase. — RF-03
-- [ ] 1.6 `public/js/nome-dns.js` e `test/nome-dns.test.js`: idem. — RF-03
-- [ ] 1.7 `public/js/resposta-doh.js`, `public/js/doh.js`, `test/resposta-doh.test.js` e `test/doh.test.js`: idem, com `valor` no status HTTP e no `Status` do DNS. — RF-03
-- [ ] 1.8 `public/js/spf-consultas.js`, `public/js/dkim-busca.js`, `public/js/verificador.js` e os testes `spf-consultas`, `dkim-busca` e `verificador`: propagar `motivo` **e** `valor` da consulta que falhou (o `tentados[].motivo` do DKIM inclusive); o `catch` do verificador devolve `sem-motivo`; o `verificador.js` deixa de importar `textos-interface.js`. — RF-03, ADR-3
-- [ ] 1.9 `public/js/apresentacao.js` (`mensagemDeFalha`, e onde mais ler `.motivo`: conferir com `grep -n "\.motivo" public/js`), `public/js/pagina.js` (`mostrarErroDoCampo`) e `test/ajudas/estados.js`: mostrar o texto por `textoDoMotivo`. — RF-03
-- [ ] 1.10 `test/textos-achados.test.js` (ou `test/motivos.test.js`): teste de cobertura que varre o código-fonte dos módulos pelos códigos emitidos (`motivo: "..."`) e falha se algum não tem entrada em `MOTIVOS`, ou se há entrada que ninguém emite; e um teste com as frases do apêndice A escritas por extenso, que prova que `textoDoMotivo` devolve a mesma frase de antes para cada código. — RF-03
-- [ ] 1.11 **Portão de qualidade.** Resultado: _a registrar_.
+- [x] 1.1 Conferir o apêndice A contra o código: `grep -n "motivo" public/js/*.js` e a lista de frases fixas; acrescentar ao apêndice o que faltar. Conferido: as 22 frases batem; faltavam só os 6 códigos do seletor digitado (`seletor-dkim.js`), que já eram código e entraram na `MOTIVOS` (apêndice abaixo). — RF-03
+- [x] 1.2 `public/js/tipos.js`: typedef `Recusa` (`{ motivo: string, valor?: string | number }`) e o `EstadoParte` de falha com `motivo` e `valor?`. — ADR-5
+- [x] 1.3 `public/js/textos-interface.js`: tabela `MOTIVOS` com os códigos do apêndice A (as frases de hoje, com `{valor}` onde há dado) e o `MOTIVOS_SELETOR` atual incorporado a ela; `TEXTOS_FALHA.semMotivo` sai (vira o código `sem-motivo`). — ADR-5
+- [x] 1.4 `public/js/textos-achados.js`: `textoDoMotivo(recusa)`, que devolve a frase com o `valor` encaixado por `preencher`; código sem entrada devolve a frase de `sem-motivo`, nunca o código. O `preencher` saiu de `apresentacao.js` para `public/js/preencher.js` (reexportado por `apresentacao.js`), porque `apresentacao.js` já importa `textos-achados.js` e os dois se importariam em círculo. — ADR-5, ADR-11
+- [x] 1.5 `public/js/dominio.js` e `test/dominio.test.js`: devolver o código; os testes comparam o código, não a frase. — RF-03
+- [x] 1.6 `public/js/nome-dns.js` e `test/nome-dns.test.js`: idem. — RF-03
+- [x] 1.7 `public/js/resposta-doh.js`, `public/js/doh.js`, `test/resposta-doh.test.js` e `test/doh.test.js`: idem, com `valor` no status HTTP e no `Status` do DNS. O `consultarUm` do `doh.js` passou a ser exportado, só para os testes: o `consultarTxt` junta as falhas em `resolvedores-indisponiveis`, e `resolvedor-http` e `resposta-status-dns` (com `valor`) só se veem nele. — RF-03
+- [x] 1.8 `public/js/spf-consultas.js`, `public/js/dkim-busca.js`, `public/js/verificador.js` e os testes `spf-consultas`, `dkim-busca` e `verificador`: propagar `motivo` **e** `valor` da consulta que falhou (o `tentados[].motivo` do DKIM inclusive); o `catch` do verificador devolve `sem-motivo`; o `verificador.js` deixa de importar `textos-interface.js`. — RF-03, ADR-3
+- [x] 1.9 `public/js/apresentacao.js` (`mensagemDeFalha`, e onde mais ler `.motivo`: conferir com `grep -n "\.motivo" public/js`), `public/js/pagina.js` (`mostrarErroDoCampo`) e `test/ajudas/estados.js`: mostrar o texto por `textoDoMotivo`. — RF-03
+- [x] 1.10 `test/motivos.test.js`: teste de cobertura que varre o código-fonte dos módulos pelos códigos emitidos (`motivo: "..."`) e falha se algum não tem entrada em `MOTIVOS`, ou se há entrada que ninguém emite; e um teste com as frases do apêndice A escritas por extenso, que prova que `textoDoMotivo` devolve a mesma frase de antes para cada código. — RF-03
+- [x] 1.11 **Portão de qualidade.** Resultado: `format:check`, `lint` e `typecheck` limpos; 871 testes, 871 passam.
 
 ## Etapa 2 — O catálogo vira `textos/pt/` e entra como parâmetro (ADR-2, ADR-3, ADR-4, ADR-12)
 
@@ -104,7 +104,7 @@ Roda depois do merge da etapa 3 e do deploy.
 
 ## Apêndice A — Códigos de recusa e falha (etapa 1)
 
-Frases de hoje, em português, e o código que as substitui. `valor` indica o dado que o texto encaixa. São 22 códigos; o "Digite um domínio" de `dominio.js` e de `dkim-busca.js` é um só.
+Frases de hoje, em português, e o código que as substitui. `valor` indica o dado que o texto encaixa. São 22 códigos; o "Digite um domínio" de `dominio.js` e de `dkim-busca.js` é um só. Os 6 códigos do seletor digitado (`vazio`, `parece-nome-completo`, `grande-demais`, `componente-vazio`, `componente-grande-demais`, `caractere-invalido`) já eram código antes desta etapa e dividem a tabela `MOTIVOS`, que fica com 28 entradas.
 
 | Origem            | Frase de hoje                                                                  | Código                          | `valor`       |
 | ----------------- | ------------------------------------------------------------------------------ | ------------------------------- | ------------- |

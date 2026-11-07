@@ -79,11 +79,12 @@ public/                  # o site: é o que vai para a hospedagem, sem build
     chave-rsa.js         # lerChaveRsa: mede o módulo da chave pública RSA do p= (leitor ASN.1 mínimo, puro)
     dkim.js              # lerDkim: escolhe o registro de um seletor, lê as tags e aponta os achados (puro)
     dkim-busca.js        # buscarDkim: tenta os seletores com concorrência limitada (consulta injetada, sem fetch)
-    tipos.js             # só typedef: o estado de cada parte (verificando, pronto, falha) e da verificação
+    tipos.js             # só typedef: a recusa (motivo em código + valor), o estado de cada parte (verificando, pronto, falha) e da verificação
     selo.js              # calcularSelo: a regra única do selo dos três cartões (puro)
     escada.js            # montarEscada: degraus none/quarantine/reject, próximo passo e ressalvas (puro)
-    textos-achados.js    # dados: o português de cada código de achado; textoDoAchado
-    textos-interface.js  # dados: selos, degraus, falhas, anúncios e demais frases montadas por script
+    textos-achados.js    # dados: o português de cada código de achado; textoDoAchado e textoDoMotivo (o código de recusa vira frase)
+    textos-interface.js  # dados: selos, degraus, MOTIVOS (a frase de cada código de recusa e falha), anúncios e demais frases montadas por script
+    preencher.js         # preencher: troca {nome} pelo valor nos textos do catálogo (puro)
     apresentacao.js      # cartões de DMARC, SPF e DKIM prontos para desenhar, seletores digitados, anúncios (puro)
     endereco.js          # ?dominio= do endereço compartilhável (puro: preenche o campo, não verifica)
     verificador.js       # criarVerificador: as três partes em paralelo, descarta a verificação anterior (consulta injetada)
