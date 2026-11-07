@@ -105,8 +105,8 @@ export const consultarUm = async (resolvedor, nome, buscar, tempoLimiteMs) => {
  * @param {OpcoesConsulta} [opcoes={}] - ``buscar`` troca o `fetch` (testes); ``tempoLimiteMs``
  *   troca o tempo por resolvedor.
  * @returns {Promise<ResultadoTxt>} ``{ ok: true, situacao, registros, resolvedor }``, ou
- *   ``{ ok: false, motivo, valor? }`` com o código da falha (a frase está em
- *   `textos-interface.js`).
+ *   ``{ ok: false, motivo, valor? }`` com o código da falha (a frase está no catálogo, em
+ *   `textos/<idioma>/motivos.js`).
  * @throws {TypeError} Se ``nome`` não for texto (erro de programação, não de consulta).
  */
 export const consultarTxt = async (

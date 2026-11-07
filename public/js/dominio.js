@@ -85,7 +85,8 @@ const paraAscii = (host) => {
  *
  * @param {string} entrada - Texto digitado, ex.: ``"https://Exemplo.com.br/"``.
  * @returns {ResultadoDominio} ``{ ok: true, dominio }`` normalizado, ou ``{ ok: false,
- *   motivo }`` com o código da recusa (a frase está em `textos-interface.js`).
+ *   motivo }`` com o código da recusa (a frase está em
+ *   `textos/<idioma>/motivos.js`).
  */
 export const normalizarDominio = (entrada) => {
   const host = extrairHost(entrada);

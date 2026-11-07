@@ -4,13 +4,13 @@
  * O selo resume o cartão em quatro estados (`ok`, `atencao`, `problema`, `nao-verificado`).
  * Os módulos das specs 003 a 005 devolvem `gravidade` por achado, e gravidade não é selo: o
  * selo também depende de o registro existir e de a consulta ter funcionado. As regras estão no
- * ADR-6 da spec 006 e cada uma tem teste. O módulo é puro (sem DOM, sem rede).
+ * ADR-6 da spec 006 e cada uma tem teste. O módulo é puro (sem DOM, sem rede) e não carrega
+ * frase: a palavra do selo vem do catálogo que a chamada recebe.
  */
 
 // @ts-check
 
-import { TEXTOS_SELO } from "./textos-interface.js";
-
+/** @typedef {import("./textos/tipos.js").Textos} Textos */
 /** @typedef {import("./tipos.js").EstadoParte} EstadoParte */
 /** @typedef {import("./tipos.js").EstadoDe<unknown>} EstadoQualquer */
 /** @typedef {import("./tipos.js").NomeParte} NomeParte */
@@ -23,10 +23,11 @@ import { TEXTOS_SELO } from "./textos-interface.js";
 // ---------------------------------------------------------------------------
 
 /**
+ * @param {Textos} textos - O catálogo do idioma da página.
  * @param {EstadoSelo} estado - Estado do selo.
  * @returns {Selo} O selo com a palavra fixa do estado.
  */
-const selo = (estado) => ({ estado, texto: TEXTOS_SELO[estado].texto });
+const selo = (textos, estado) => ({ estado, texto: textos.interface.selo[estado].texto });
 
 /**
  * O selo que o pior achado pede: `erro` é problema, `aviso` é atenção, o resto está ok.
@@ -65,24 +66,25 @@ const comIncompleta = (estado, incompleta) => (incompleta && estado === "ok" ? "
  *    `nao-verificado`.
  * 4. Leitura `incompleta` sobe `ok` para `atencao`.
  *
+ * @param {Textos} textos - O catálogo do idioma da página.
  * @param {NomeParte} parte - Qual parte é.
  * @param {EstadoParte} estadoParte - O estado da parte, como o `verificador` o entrega.
  * @returns {Selo} O selo do cartão.
  */
-export const calcularSelo = (parte, estadoParte) => {
+export const calcularSelo = (textos, parte, estadoParte) => {
   if (estadoParte.fase !== "pronto") {
-    return selo("nao-verificado");
+    return selo(textos, "nao-verificado");
   }
 
   if (parte === "dkim") {
     const busca = /** @type {import("./tipos.js").ResultadoDkimBusca} */ (estadoParte.resultado);
     if (busca.situacao === "indeterminado") {
-      return selo("nao-verificado");
+      return selo(textos, "nao-verificado");
     }
     if (busca.situacao === "nao-encontrado") {
-      return selo("atencao");
+      return selo(textos, "atencao");
     }
-    return selo(comIncompleta(pelaGravidade(busca.achados), busca.incompleta));
+    return selo(textos, comIncompleta(pelaGravidade(busca.achados), busca.incompleta));
   }
 
   if (parte === "spf") {
@@ -90,11 +92,14 @@ export const calcularSelo = (parte, estadoParte) => {
       estadoParte.resultado
     );
     if (caminhada.spf.situacao !== "valido") {
-      return selo("problema");
+      return selo(textos, "problema");
     }
-    return selo(comIncompleta(pelaGravidade(caminhada.achados), caminhada.consultas.incompleta));
+    return selo(
+      textos,
+      comIncompleta(pelaGravidade(caminhada.achados), caminhada.consultas.incompleta),
+    );
   }
 
   const dmarc = /** @type {import("./tipos.js").ResultadoDmarc} */ (estadoParte.resultado);
-  return selo(dmarc.situacao === "valido" ? pelaGravidade(dmarc.achados) : "problema");
+  return selo(textos, dmarc.situacao === "valido" ? pelaGravidade(dmarc.achados) : "problema");
 };

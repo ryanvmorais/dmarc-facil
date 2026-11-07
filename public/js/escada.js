@@ -6,19 +6,13 @@
  * (ausente, inválido ou duplicado) nenhum degrau é o atual e o próximo passo é publicar o
  * registro com `p=none`. Um `reject` que vale só para parte do tráfego ou dos subdomínios
  * ganha uma ressalva, para a página não afirmar proteção completa. O módulo é puro (sem DOM,
- * sem rede); o português dos degraus vem de `textos-interface.js`.
+ * sem rede) e não carrega frase: o texto dos degraus vem do catálogo que a chamada recebe.
  */
 
 // @ts-check
 
-import {
-  ACOES_PROXIMO,
-  ETIQUETAS_DEGRAU,
-  TEXTOS_DEGRAUS,
-  TEXTOS_ESCADA,
-} from "./textos-interface.js";
-
 /** @typedef {import("./dmarc.js").ResultadoDmarc} ResultadoDmarc */
+/** @typedef {import("./textos/tipos.js").Textos} Textos */
 /** @typedef {"none" | "quarantine" | "reject"} PoliticaDegrau */
 /**
  * Um degrau. `etiqueta` é a palavra que marca o degrau atual ("você está aqui") ou o seguinte
@@ -55,19 +49,20 @@ const RESSALVAS = /** @type {const} */ (["subdominios-mais-fracos", "aplicacao-p
 // ---------------------------------------------------------------------------
 
 /**
+ * @param {Textos} textos - O catálogo do idioma da página.
  * @param {PoliticaDegrau} politica - Política do degrau.
  * @param {Degrau["papel"]} papel - Papel do degrau nesta escada.
  * @param {string} [acao] - O que fazer, só para o degrau seguinte.
  * @returns {Degrau} O degrau com os textos.
  */
-const degrau = (politica, papel, acao) => {
-  const { titulo, resumo } = TEXTOS_DEGRAUS[politica];
+const degrau = (textos, politica, papel, acao) => {
+  const { titulo, resumo } = textos.interface.degraus[politica];
   return {
     politica,
     papel,
     titulo,
     resumo,
-    ...(papel === "outro" ? {} : { etiqueta: ETIQUETAS_DEGRAU[papel].texto }),
+    ...(papel === "outro" ? {} : { etiqueta: textos.interface.etiquetas[papel].texto }),
     ...(acao === undefined ? {} : { acao }),
   };
 };
@@ -75,16 +70,19 @@ const degrau = (politica, papel, acao) => {
 /**
  * Monta a escada a partir da leitura do DMARC.
  *
+ * @param {Textos} textos - O catálogo do idioma da página.
  * @param {ResultadoDmarc} dmarc - O resultado de `lerDmarc`.
  * @returns {Escada} Os três degraus, o próximo passo e as ressalvas.
  */
-export const montarEscada = (dmarc) => {
+export const montarEscada = (textos, dmarc) => {
   if (dmarc.situacao !== "valido") {
     // Sem registro que valha: o primeiro degrau é o destino, e publicar é o passo.
-    const acao = ACOES_PROXIMO.publicar[dmarc.situacao].texto;
+    const acao = textos.interface.acoesProximo.publicar[dmarc.situacao].texto;
     return {
       degraus: ORDEM.map((politica) =>
-        politica === "none" ? degrau(politica, "proximo", acao) : degrau(politica, "outro"),
+        politica === "none"
+          ? degrau(textos, politica, "proximo", acao)
+          : degrau(textos, politica, "outro"),
       ),
       semAtual: true,
       proximo: "publicar",
@@ -98,12 +96,12 @@ export const montarEscada = (dmarc) => {
   return {
     degraus: ORDEM.map((politica) => {
       if (politica === atual) {
-        return degrau(politica, "atual");
+        return degrau(textos, politica, "atual");
       }
       if (politica === seguinte) {
-        return degrau(politica, "proximo", ACOES_PROXIMO[politica].texto);
+        return degrau(textos, politica, "proximo", textos.interface.acoesProximo[politica].texto);
       }
-      return degrau(politica, "outro");
+      return degrau(textos, politica, "outro");
     }),
     semAtual: false,
     proximo: seguinte,
@@ -114,8 +112,9 @@ export const montarEscada = (dmarc) => {
 /**
  * O texto que a página mostra no lugar do "Próximo passo" quando não há mais degrau.
  *
+ * @param {Textos} textos - O catálogo do idioma da página.
  * @param {Escada} escada - A escada montada.
  * @returns {string | null} A frase do degrau final, ou `null` se há próximo passo.
  */
-export const textoDoFim = (escada) =>
-  escada.proximo === null && !escada.semAtual ? TEXTOS_ESCADA.final.texto : null;
+export const textoDoFim = (textos, escada) =>
+  escada.proximo === null && !escada.semAtual ? textos.interface.escada.final.texto : null;

@@ -248,24 +248,26 @@ export const conferirHospedagem = async ({ endereco, pasta, buscar = fetch }) =>
   );
 
   // 3. JavaScript e CSS: idênticos (nada reescrito) e, no código, cache que obriga a revalidar.
-  const js = await abrir(url("/js/pagina.js"), buscar);
+  const js = await abrir(url("/js/entrada-pt.js"), buscar);
   const css = await abrir(url("/css/pagina.css"), buscar);
   /** @type {string[]} */
   const problemasCodigo = [];
   if (js === null) {
-    problemasCodigo.push("js/pagina.js: não foi possível abrir o endereço");
+    problemasCodigo.push("js/entrada-pt.js: não foi possível abrir o endereço");
   } else {
     problemasCodigo.push(
-      ...conferirCorpo(js, 200, await arquivo("js/pagina.js")).map((p) => `js/pagina.js: ${p}`),
+      ...conferirCorpo(js, 200, await arquivo("js/entrada-pt.js")).map(
+        (p) => `js/entrada-pt.js: ${p}`,
+      ),
     );
     if (!/javascript/i.test(js.resposta.headers.get("content-type") ?? "")) {
       problemasCodigo.push(
-        `js/pagina.js: content-type "${js.resposta.headers.get("content-type")}" não é JavaScript`,
+        `js/entrada-pt.js: content-type "${js.resposta.headers.get("content-type")}" não é JavaScript`,
       );
     }
     const cache = js.resposta.headers.get("cache-control") ?? "";
     if (!/no-cache|must-revalidate|max-age=0/i.test(cache) || /immutable/i.test(cache)) {
-      problemasCodigo.push(`js/pagina.js: cache-control "${cache}" não obriga a revalidar`);
+      problemasCodigo.push(`js/entrada-pt.js: cache-control "${cache}" não obriga a revalidar`);
     }
   }
   if (css === null) {

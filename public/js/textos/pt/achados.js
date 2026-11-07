@@ -1,5 +1,5 @@
 /**
- * @file Catálogo de textos dos achados: o português que explica cada código.
+ * @file Catálogo em português dos textos dos achados: o que explica cada código.
  *
  * As specs 003 a 005 devolvem códigos e dados, nunca frases. Aqui está uma entrada por código,
  * com `titulo`, `explicacao` (o que o achado significa) e `acao` (o que fazer). O teste de
@@ -10,41 +10,20 @@
  * "protegido". O código que dois módulos emitem (`registro-grande-demais`,
  * `caixa-fora-do-padrao`) tem uma entrada só, escrita para valer nos dois.
  *
- * É dado puro: sem DOM, sem rede, sem lógica além de `textoDoAchado` e `textoDoMotivo`.
+ * É dado puro: sem DOM, sem rede, sem lógica. Quem escolhe a entrada é `textoDoAchado`
+ * (`textos/resolver.js`).
  */
 
 // @ts-check
 
-import { preencher } from "./preencher.js";
-import { MOTIVOS } from "./textos-interface.js";
-
-/** @typedef {import("./tipos.js").Recusa} Recusa */
-/** @typedef {{ titulo: string, explicacao: string, acao: string }} TextoAchado */
-/**
- * O achado como os módulos o devolvem (a união dos campos das specs 003 a 005).
- *
- * @typedef {{
- *   codigo: string, gravidade: "erro" | "aviso" | "info", tag?: string,
- *   detalhe?: number | string, seletor?: string, dominio?: string
- * }} AchadoLido
- */
-/**
- * O achado pronto para a tela. `detalhe` já é texto (e, no `seletor-invalido`, já em português);
- * quem desenha o corta e o põe como texto puro.
- *
- * @typedef {{
- *   codigo: string, gravidade: "erro" | "aviso" | "info", titulo: string, explicacao: string,
- *   acao: string, tag?: string, detalhe?: string, seletor?: string, seletores?: string[],
- *   dominio?: string
- * }} AchadoVisivel
- */
+/** @typedef {import("../tipos.js").TextoAchado} TextoAchado */
 
 // ---------------------------------------------------------------------------
-// CATÁLOGO
+// POR CÓDIGO
 // ---------------------------------------------------------------------------
 
 /** @type {Record<string, TextoAchado>} */
-export const TEXTOS_ACHADOS = {
+const porCodigo = {
   // -------------------------------------------------------------------------
   // DMARC (dmarc.js)
   // -------------------------------------------------------------------------
@@ -384,74 +363,19 @@ export const TEXTOS_ACHADOS = {
 };
 
 // ---------------------------------------------------------------------------
-// TEXTO GENÉRICO
+// CATÁLOGO
 // ---------------------------------------------------------------------------
 
-// Para o código que o catálogo não tem: o achado aparece, não some nem quebra a página
-// (RF-08). O código vai em fonte monoespaçada para quem for reportar.
-/**
- * @param {string} codigo - Código do achado sem entrada.
- * @returns {TextoAchado} O texto genérico.
- */
-const textoGenerico = (codigo) => ({
-  titulo: "Achado sem explicação ainda",
-  explicacao: `A ferramenta apontou algo no registro que ainda não tem texto em português. Código: \`${codigo}\`.`,
-  acao: "Confira o registro no painel do seu DNS.",
-});
-
-// ---------------------------------------------------------------------------
-// ESCOLHA DO TEXTO
-// ---------------------------------------------------------------------------
-
-/**
- * Junta o achado ao texto dele.
- *
- * O `detalhe` do `seletor-invalido` é o motivo da recusa, que o módulo devolve como código
- * (`caractere-invalido`); aqui vira a frase, e um detalhe que não é código passa como texto.
- * Os demais detalhes (números, o termo SPF que falhou) passam como texto.
- *
- * @param {AchadoLido} achado - O achado como o módulo o devolveu.
- * @returns {AchadoVisivel} O achado com título, explicação e ação.
- */
-export const textoDoAchado = (achado) => {
-  const { titulo, explicacao, acao } = Object.hasOwn(TEXTOS_ACHADOS, achado.codigo)
-    ? /** @type {TextoAchado} */ (TEXTOS_ACHADOS[achado.codigo])
-    : textoGenerico(String(achado.codigo));
-
-  const bruto = achado.detalhe;
-  const detalhe =
-    achado.codigo === "seletor-invalido" && typeof bruto === "string"
-      ? Object.hasOwn(MOTIVOS, bruto)
-        ? textoDoMotivo({ motivo: bruto })
-        : bruto
-      : bruto === undefined
-        ? undefined
-        : String(bruto);
-
-  return {
-    codigo: String(achado.codigo),
-    gravidade: achado.gravidade,
-    titulo,
-    explicacao,
-    acao,
-    ...(achado.tag === undefined ? {} : { tag: achado.tag }),
-    ...(detalhe === undefined ? {} : { detalhe }),
-    ...(achado.seletor === undefined ? {} : { seletor: achado.seletor }),
-    ...(achado.dominio === undefined ? {} : { dominio: achado.dominio }),
-  };
-};
-
-/**
- * A frase de uma recusa ou falha, a partir do código que o módulo devolveu.
- *
- * O `valor` entra onde a frase tem `{valor}` (o status HTTP, o `Status` do DNS). Código sem
- * entrada no catálogo devolve a frase de `sem-motivo`, nunca o código cru: a página não mostra
- * identificador interno ao visitante.
- *
- * @param {Recusa} recusa - O `motivo` (código) e o `valor`, se houver.
- * @returns {string} A frase pronta para mostrar.
- */
-export const textoDoMotivo = ({ motivo, valor }) => {
-  const entrada = Object.hasOwn(MOTIVOS, motivo) ? MOTIVOS[motivo] : MOTIVOS["sem-motivo"];
-  return preencher(entrada?.texto ?? "", valor === undefined ? {} : { valor });
+// `generico` é o texto do código que o catálogo não tem: o achado aparece, não some nem quebra
+// a página (RF-08), e o código vai em fonte monoespaçada para quem for reportar. `{codigo}` é
+// trocado por `preencher`. Fica no catálogo, e não no código, para sair no idioma da página.
+/** @type {{ porCodigo: Record<string, TextoAchado>, generico: TextoAchado }} */
+export const achados = {
+  porCodigo,
+  generico: {
+    titulo: "Achado sem explicação ainda",
+    explicacao:
+      "A ferramenta apontou algo no registro que ainda não tem texto em português. Código: `{codigo}`.",
+    acao: "Confira o registro no painel do seu DNS.",
+  },
 };

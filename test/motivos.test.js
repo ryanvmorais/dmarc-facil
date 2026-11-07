@@ -14,15 +14,15 @@ import assert from "node:assert/strict";
 import { readdir, readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 
-import { textoDoMotivo } from "../public/js/textos-achados.js";
-import { MOTIVOS } from "../public/js/textos-interface.js";
+import { textoDoMotivo } from "../public/js/textos/resolver.js";
+import { textos } from "./ajudas/textos.js";
+
+// Os motivos do catálogo em português, o idioma de referência.
+const MOTIVOS = textos.motivos;
 
 // ---------------------------------------------------------------------------
 // VARREDURA DOS MÓDULOS
 // ---------------------------------------------------------------------------
-
-// O catálogo em si não emite nada: ficam de fora os dois arquivos de texto.
-const CATALOGOS = new Set(["textos-achados.js", "textos-interface.js"]);
 
 // `motivo: "codigo"`: o único jeito de um módulo escrever um código de recusa.
 const PADRAO_MOTIVO = /motivo: "([a-z0-9-]+)"/g;
@@ -30,9 +30,7 @@ const PADRAO_MOTIVO = /motivo: "([a-z0-9-]+)"/g;
 /** @returns {Promise<Map<string, string[]>>} Os códigos emitidos, com os arquivos que os emitem. */
 const codigosEmitidos = async () => {
   const pasta = new URL("../public/js/", import.meta.url);
-  const arquivos = (await readdir(pasta)).filter(
-    (arquivo) => arquivo.endsWith(".js") && !CATALOGOS.has(arquivo),
-  );
+  const arquivos = (await readdir(pasta)).filter((arquivo) => arquivo.endsWith(".js"));
   /** @type {Map<string, string[]>} */
   const emitidos = new Map();
   for (const arquivo of arquivos) {
@@ -166,7 +164,7 @@ describe("textoDoMotivo: as frases de antes", () => {
   for (const [codigo, valor, frase] of FRASES) {
     it(`${codigo} dá a mesma frase`, () => {
       assert.equal(
-        textoDoMotivo({ motivo: codigo, ...(valor === undefined ? {} : { valor }) }),
+        textoDoMotivo(textos, { motivo: codigo, ...(valor === undefined ? {} : { valor }) }),
         frase,
       );
     });
@@ -178,24 +176,24 @@ describe("textoDoMotivo: as frases de antes", () => {
 
   it("código sem entrada devolve a frase de sem-motivo, nunca o código", () => {
     for (const motivo of ["", "  ", "codigo-que-ninguem-cadastrou", "constructor", "__proto__"]) {
-      assert.equal(textoDoMotivo({ motivo }), "Não consegui consultar o DNS agora.");
+      assert.equal(textoDoMotivo(textos, { motivo }), "Não consegui consultar o DNS agora.");
     }
   });
 
   it("o valor entra onde a frase pede e é ignorado onde ela não pede", () => {
     assert.equal(
-      textoDoMotivo({ motivo: "resolvedor-http", valor: 429 }),
+      textoDoMotivo(textos, { motivo: "resolvedor-http", valor: 429 }),
       "O resolvedor respondeu HTTP 429.",
     );
     assert.equal(
-      textoDoMotivo({ motivo: "nome-vazio", valor: 9 }),
+      textoDoMotivo(textos, { motivo: "nome-vazio", valor: 9 }),
       "O nome da consulta está vazio.",
     );
   });
 
   it("o valor não é expandido de novo como marcador", () => {
     assert.equal(
-      textoDoMotivo({ motivo: "resolvedor-http", valor: "{valor}" }),
+      textoDoMotivo(textos, { motivo: "resolvedor-http", valor: "{valor}" }),
       "O resolvedor respondeu HTTP {valor}.",
     );
   });

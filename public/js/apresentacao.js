@@ -4,8 +4,10 @@
  * É a camada que decide **o que mostrar**: o selo, o resumo em português, o registro cortado,
  * os achados com texto, a lista de seletores DKIM com o link da documentação de cada provedor
  * e as frases do `aria-live`. Não toca o DOM nem a rede (RNF-02 da spec 006); quem desenha é
- * `pagina.js`, com `criar` de `dom.js`. Todo texto de terceiros (o registro TXT, o `detalhe`
- * de um achado, o seletor digitado) sai daqui como texto puro e cortado: nada é marcação.
+ * `pagina.js`, com `criar` de `dom.js`. Não carrega frase: toda função que escolhe texto
+ * recebe o catálogo do idioma da página (`textos`) como primeiro parâmetro (ADR-3 da spec 008).
+ * Todo texto de terceiros (o registro TXT, o `detalhe` de um achado, o seletor digitado) sai
+ * daqui como texto puro e cortado: nada é marcação.
  */
 
 // @ts-check
@@ -15,20 +17,11 @@ import { calcularSelo } from "./selo.js";
 import { normalizarSeletor } from "./seletor-dkim.js";
 import { ORIENTACOES, SELETORES_COMUNS } from "./seletores-dkim.js";
 import { preencher } from "./preencher.js";
-import { textoDoAchado, textoDoMotivo } from "./textos-achados.js";
-import {
-  TEXTOS_ANUNCIO,
-  TEXTOS_DKIM,
-  TEXTOS_DMARC,
-  TEXTOS_FALHA,
-  TEXTOS_RESULTADO,
-  TEXTOS_SPF,
-  TEXTOS_VERIFICANDO,
-  TITULOS_CARTAO,
-} from "./textos-interface.js";
+import { textoDoAchado, textoDoMotivo } from "./textos/resolver.js";
 
 /** @typedef {import("./selo.js").Selo} Selo */
-/** @typedef {import("./textos-achados.js").AchadoVisivel} AchadoVisivel */
+/** @typedef {import("./textos/tipos.js").Textos} Textos */
+/** @typedef {import("./textos/resolver.js").AchadoVisivel} AchadoVisivel */
 /** @typedef {import("./tipos.js").EstadoDmarc} EstadoDmarc */
 /** @typedef {import("./tipos.js").EstadoSpf} EstadoSpf */
 /** @typedef {import("./tipos.js").EstadoDkim} EstadoDkim */
@@ -133,11 +126,12 @@ export const partirCodigo = (texto) => {
  * Lê o campo "Seletores extras": separa por vírgula, espaço ou quebra de linha e passa cada
  * item por `normalizarSeletor`.
  *
+ * @param {Textos} textos - O catálogo do idioma da página.
  * @param {string} texto - O que o visitante digitou.
  * @returns {{ validos: string[], recusados: SeletorRecusado[] }} Os seletores aceitos (sem
- *   repetição) e os recusados com o motivo em português. O texto recusado vai cortado.
+ *   repetição) e os recusados com o motivo na língua da página. O texto recusado vai cortado.
  */
-export const lerSeletoresDigitados = (texto) => {
+export const lerSeletoresDigitados = (textos, texto) => {
   /** @type {string[]} */
   const validos = [];
   /** @type {SeletorRecusado[]} */
@@ -155,7 +149,7 @@ export const lerSeletoresDigitados = (texto) => {
     } else {
       recusados.push({
         texto: cortarTexto(item, MAXIMO_RECUSADO).texto,
-        motivo: textoDoMotivo({ motivo: lido.motivo }),
+        motivo: textoDoMotivo(textos, { motivo: lido.motivo }),
       });
     }
   }
@@ -170,29 +164,31 @@ export const lerSeletoresDigitados = (texto) => {
  * A mensagem de uma parte que não conseguiu consultar: a frase do motivo que a consulta
  * devolveu (por código) e a frase que diz que isso não é um defeito do registro.
  *
+ * @param {Textos} textos - O catálogo do idioma da página.
  * @param {EstadoParte} estadoParte - O estado da parte.
  * @returns {string} A mensagem, ou ``""`` se a parte não falhou.
  */
-export const mensagemDeFalha = (estadoParte) => {
+export const mensagemDeFalha = (textos, estadoParte) => {
   if (estadoParte.fase !== "falha") {
     return "";
   }
-  const causa = textoDoMotivo(estadoParte);
-  const naoDiz = preencher(TEXTOS_FALHA.naoDiz.texto, {
-    parte: TITULOS_CARTAO[estadoParte.parte].texto,
-  });
+  const { falha, titulosCartao } = textos.interface;
+  const causa = textoDoMotivo(textos, estadoParte);
+  const naoDiz = preencher(falha.naoDiz.texto, { parte: titulosCartao[estadoParte.parte].texto });
   return `${causa} ${naoDiz}`;
 };
 
 /**
  * A frase da contagem de consultas DNS do SPF.
  *
+ * @param {Textos} textos - O catálogo do idioma da página.
  * @param {{ total: number, limite: number, incompleta: boolean }} consultas - A contagem.
  * @returns {string} "N de 10 consultas DNS", ou "Pelo menos N de 10" se a contagem ficou
  *   incompleta. Acima de 10 mostra o número real (ex.: "13 de 10").
  */
-export const resumoConsultas = (consultas) => {
-  const modelo = consultas.incompleta ? TEXTOS_SPF.consultasPeloMenos : TEXTOS_SPF.consultas;
+export const resumoConsultas = (textos, consultas) => {
+  const { spf } = textos.interface;
+  const modelo = consultas.incompleta ? spf.consultasPeloMenos : spf.consultas;
   return preencher(modelo.texto, { total: consultas.total, limite: consultas.limite });
 };
 
@@ -201,16 +197,17 @@ export const resumoConsultas = (consultas) => {
 // ---------------------------------------------------------------------------
 
 /**
+ * @param {Textos} textos - O catálogo do idioma da página.
  * @param {"dmarc" | "spf" | "dkim"} id - Qual cartão.
  * @param {EstadoParte} estado - O estado da parte.
  * @param {Partial<Cartao>} resto - O que muda de cartão para cartão.
  * @returns {Cartao} O cartão com o que todos têm em comum.
  */
-const cartao = (id, estado, resto) => ({
+const cartao = (textos, id, estado, resto) => ({
   id,
-  titulo: TITULOS_CARTAO[id].texto,
+  titulo: textos.interface.titulosCartao[id].texto,
   fase: estado.fase,
-  selo: calcularSelo(id, estado),
+  selo: calcularSelo(textos, id, estado),
   resumo: "",
   achados: [],
   ...resto,
@@ -246,14 +243,15 @@ const agruparPorSeletor = (achados) => {
 };
 
 /**
- * @param {Array<import("./textos-achados.js").AchadoLido>} achados - Achados do módulo.
+ * @param {Textos} textos - O catálogo do idioma da página.
+ * @param {Array<import("./textos/resolver.js").AchadoLido>} achados - Achados do módulo.
  * @returns {AchadoVisivel[]} Os achados com texto, o `detalhe` cortado e os de seletores
  *   diferentes agrupados, na ordem do módulo.
  */
-const achadosVisiveis = (achados) =>
+const achadosVisiveis = (textos, achados) =>
   agruparPorSeletor(
     achados.map((achado) => {
-      const visivel = textoDoAchado(achado);
+      const visivel = textoDoAchado(textos, achado);
       return visivel.detalhe === undefined
         ? visivel
         : { ...visivel, detalhe: cortarTexto(visivel.detalhe, MAXIMO_DETALHE).texto };
@@ -263,96 +261,105 @@ const achadosVisiveis = (achados) =>
 /**
  * O estado que não é "pronto": o cartão mostra a espera ou a falha.
  *
+ * @param {Textos} textos - O catálogo do idioma da página.
  * @param {"dmarc" | "spf" | "dkim"} id - Qual cartão.
  * @param {EstadoParte} estado - O estado da parte.
  * @param {number} [total] - Quantos seletores a espera do DKIM cita.
  * @returns {Cartao | null} O cartão de espera ou de falha, ou ``null`` se a parte está pronta.
  */
-const cartaoSemResultado = (id, estado, total = SELETORES_COMUNS.length) => {
+const cartaoSemResultado = (textos, id, estado, total = SELETORES_COMUNS.length) => {
   if (estado.fase === "verificando") {
-    return cartao(id, estado, { resumo: preencher(TEXTOS_VERIFICANDO[id].texto, { total }) });
+    return cartao(textos, id, estado, {
+      resumo: preencher(textos.interface.verificando[id].texto, { total }),
+    });
   }
   if (estado.fase === "falha") {
-    return cartao(id, estado, { resumo: mensagemDeFalha(estado) });
+    return cartao(textos, id, estado, { resumo: mensagemDeFalha(textos, estado) });
   }
   return null;
 };
 
 /**
+ * @param {Textos} textos - O catálogo do idioma da página.
  * @param {EstadoDmarc} estado - O estado do DMARC.
  * @returns {Cartao} O cartão do DMARC: selo, registro cru cortado e achados.
  */
-export const apresentarDmarc = (estado) => {
-  const espera = cartaoSemResultado("dmarc", estado);
+export const apresentarDmarc = (textos, estado) => {
+  const frases = textos.interface.dmarc;
+  const espera = cartaoSemResultado(textos, "dmarc", estado);
   if (espera !== null || estado.fase !== "pronto") {
     return /** @type {Cartao} */ (espera);
   }
 
   const dmarc = estado.resultado;
   if (dmarc.situacao === "ausente") {
-    return cartao("dmarc", estado, { resumo: TEXTOS_DMARC.ausente.texto });
+    return cartao(textos, "dmarc", estado, { resumo: frases.ausente.texto });
   }
   if (dmarc.situacao === "multiplos") {
-    return cartao("dmarc", estado, {
-      resumo: preencher(TEXTOS_DMARC.multiplos.texto, { quantidade: dmarc.quantidade }),
+    return cartao(textos, "dmarc", estado, {
+      resumo: preencher(frases.multiplos.texto, { quantidade: dmarc.quantidade }),
     });
   }
-  return cartao("dmarc", estado, {
-    resumo: dmarc.situacao === "invalido" ? TEXTOS_DMARC.invalido.texto : "",
+  return cartao(textos, "dmarc", estado, {
+    resumo: dmarc.situacao === "invalido" ? frases.invalido.texto : "",
     registro: cortarTexto(dmarc.registro, MAXIMO_REGISTRO),
-    achados: achadosVisiveis(dmarc.achados),
+    achados: achadosVisiveis(textos, dmarc.achados),
   });
 };
 
 /**
- * Como o registro SPF termina, em português: o `all` que vale, ou o `redirect`.
+ * Como o registro SPF termina: o `all` que vale, ou o `redirect`.
  *
+ * @param {Textos} textos - O catálogo do idioma da página.
  * @param {import("./spf.js").SpfValido} spf - O registro SPF lido.
  * @returns {string} A frase de terminação.
  */
-const terminacaoDoSpf = (spf) => {
+const terminacaoDoSpf = (textos, spf) => {
+  const frases = textos.interface.spf;
   const todos = spf.termos.find((termo) => termo.tipo === "all" && termo.ignorado === undefined);
   if (todos !== undefined) {
-    return preencher(TEXTOS_SPF.terminaEm.texto, { all: `${todos.qualificador ?? "+"}all` });
+    return preencher(frases.terminaEm.texto, { all: `${todos.qualificador ?? "+"}all` });
   }
-  return (spf.estagio === "redirecionado" ? TEXTOS_SPF.redirecionado : TEXTOS_SPF.semAll).texto;
+  return (spf.estagio === "redirecionado" ? frases.redirecionado : frases.semAll).texto;
 };
 
 /**
+ * @param {Textos} textos - O catálogo do idioma da página.
  * @param {EstadoSpf} estado - O estado do SPF.
  * @returns {Cartao} O cartão do SPF: selo, contagem de consultas, terminação, registro e achados.
  */
-export const apresentarSpf = (estado) => {
-  const espera = cartaoSemResultado("spf", estado);
+export const apresentarSpf = (textos, estado) => {
+  const frases = textos.interface.spf;
+  const espera = cartaoSemResultado(textos, "spf", estado);
   if (espera !== null || estado.fase !== "pronto") {
     return /** @type {Cartao} */ (espera);
   }
 
   const { spf, consultas, achados } = estado.resultado;
   if (spf.situacao === "ausente") {
-    return cartao("spf", estado, { resumo: TEXTOS_SPF.ausente.texto });
+    return cartao(textos, "spf", estado, { resumo: frases.ausente.texto });
   }
   if (spf.situacao === "multiplos") {
-    return cartao("spf", estado, {
-      resumo: preencher(TEXTOS_SPF.multiplos.texto, { quantidade: spf.quantidade }),
+    return cartao(textos, "spf", estado, {
+      resumo: preencher(frases.multiplos.texto, { quantidade: spf.quantidade }),
     });
   }
   if (spf.situacao === "invalido") {
-    return cartao("spf", estado, {
-      resumo: TEXTOS_SPF.invalido.texto,
+    return cartao(textos, "spf", estado, {
+      resumo: frases.invalido.texto,
       registro: cortarTexto(spf.registro, MAXIMO_REGISTRO),
-      achados: achadosVisiveis(achados),
+      achados: achadosVisiveis(textos, achados),
     });
   }
 
-  const frases = [resumoConsultas(consultas), terminacaoDoSpf(spf)];
+  const partes = [resumoConsultas(textos, consultas), terminacaoDoSpf(textos, spf)];
   if (consultas.passouDoLimite) {
-    frases.push(TEXTOS_SPF.passouDoLimite.texto);
+    partes.push(frases.passouDoLimite.texto);
   }
-  return cartao("spf", estado, {
-    resumo: frases.join(" "),
+  return cartao(textos, "spf", estado, {
+    resumo: partes.join(" "),
     registro: cortarTexto(spf.registro, MAXIMO_REGISTRO),
-    achados: achadosVisiveis(achados),
+    achados: achadosVisiveis(textos, achados),
   });
 };
 
@@ -373,68 +380,75 @@ const seletoresMostrados = (tentados) =>
   });
 
 /**
+ * @param {Textos} textos - O catálogo do idioma da página.
  * @param {import("./dkim.js").DkimValido} dkim - A leitura de um seletor com registro válido.
- * @returns {string} O tipo e o tamanho da chave, em português.
+ * @returns {string} O tipo e o tamanho da chave, na língua da página.
  */
-const descreverChave = (dkim) => {
+const descreverChave = (textos, dkim) => {
+  const frases = textos.interface.dkim;
   if (dkim.tipo === "ed25519") {
-    return TEXTOS_DKIM.chaveEd25519.texto;
+    return frases.chaveEd25519.texto;
   }
   if (dkim.tipo === "rsa") {
     return dkim.tamanhoBits === undefined
-      ? TEXTOS_DKIM.chaveRsaSemTamanho.texto
-      : preencher(TEXTOS_DKIM.chaveRsa.texto, { bits: dkim.tamanhoBits });
+      ? frases.chaveRsaSemTamanho.texto
+      : preencher(frases.chaveRsa.texto, { bits: dkim.tamanhoBits });
   }
-  return TEXTOS_DKIM.chaveOutra.texto;
+  return frases.chaveOutra.texto;
 };
 
 /**
+ * @param {Textos} textos - O catálogo do idioma da página.
  * @param {import("./dkim-busca.js").BuscaDkim} busca - O resultado da busca.
  * @param {ExtraDkim["encontrados"]} encontrados - Os seletores com chave.
  * @returns {string} O resumo do cartão para o que a busca achou.
  */
-const resumoDoDkim = (busca, encontrados) => {
+const resumoDoDkim = (textos, busca, encontrados) => {
+  const frases = textos.interface.dkim;
   const total = busca.seletores.length;
   const [primeiro] = encontrados;
   if (busca.situacao === "encontrado" && primeiro !== undefined) {
     const cabecalho =
       encontrados.length === 1
-        ? preencher(TEXTOS_DKIM.encontrado.texto, {
+        ? preencher(frases.encontrado.texto, {
             seletor: primeiro.seletor,
             chave: primeiro.chave,
             total,
           })
-        : preencher(TEXTOS_DKIM.encontradoVarios.texto, {
+        : preencher(frases.encontradoVarios.texto, {
             quantidade: encontrados.length,
             seletores: encontrados.map((item) => `\`${item.seletor}\``).join(", "),
             total,
           });
-    return busca.incompleta ? `${cabecalho} ${parcial(busca)}` : cabecalho;
+    return busca.incompleta ? `${cabecalho} ${parcial(textos, busca)}` : cabecalho;
   }
   return busca.situacao === "nao-encontrado"
-    ? preencher(TEXTOS_DKIM.naoEncontrado.texto, { total })
-    : parcial(busca);
+    ? preencher(frases.naoEncontrado.texto, { total })
+    : parcial(textos, busca);
 };
 
 /**
+ * @param {Textos} textos - O catálogo do idioma da página.
  * @param {import("./dkim-busca.js").BuscaDkim} busca - O resultado da busca.
  * @returns {string} A frase de que parte dos seletores não foi verificada.
  */
-const parcial = (busca) =>
-  preencher(TEXTOS_DKIM.parcial.texto, {
+const parcial = (textos, busca) =>
+  preencher(textos.interface.dkim.parcial.texto, {
     verificados: busca.seletores.filter((item) => item.estado !== "nao-verificado").length,
     total: busca.seletores.length,
   });
 
 /**
+ * @param {Textos} textos - O catálogo do idioma da página.
  * @param {EstadoDkim} estado - O estado do DKIM.
  * @param {{ recusados?: SeletorRecusado[], totalSeletores?: number }} [extras] - As recusas do
  *   campo livre (de `lerSeletoresDigitados`) e quantos seletores a espera cita.
  * @returns {Cartao} O cartão do DKIM: selo, resumo, lista dos tentados com o provedor e o link,
  *   e os achados de cada seletor.
  */
-export const apresentarDkim = (estado, { recusados = [], totalSeletores } = {}) => {
-  const espera = cartaoSemResultado("dkim", estado, totalSeletores);
+export const apresentarDkim = (textos, estado, { recusados = [], totalSeletores } = {}) => {
+  const frases = textos.interface.dkim;
+  const espera = cartaoSemResultado(textos, "dkim", estado, totalSeletores);
   if (espera !== null || estado.fase !== "pronto") {
     return /** @type {Cartao} */ (espera);
   }
@@ -448,15 +462,15 @@ export const apresentarDkim = (estado, { recusados = [], totalSeletores } = {}) 
     return [
       {
         seletor,
-        chave: descreverChave(dkim),
+        chave: descreverChave(textos, dkim),
         ...(comum === undefined ? {} : { provedor: comum.provedor }),
       },
     ];
   });
 
-  return cartao("dkim", estado, {
-    resumo: resumoDoDkim(busca, encontrados),
-    achados: achadosVisiveis(busca.achados),
+  return cartao(textos, "dkim", estado, {
+    resumo: resumoDoDkim(textos, busca, encontrados),
+    achados: achadosVisiveis(textos, busca.achados),
     extra: {
       total: busca.seletores.length,
       tentados: seletoresMostrados(busca.seletores),
@@ -465,12 +479,12 @@ export const apresentarDkim = (estado, { recusados = [], totalSeletores } = {}) 
         const url = urlHttps(documentacao);
         return {
           provedor,
-          texto: preencher(TEXTOS_DKIM.orientacao.texto, { provedor }),
+          texto: preencher(frases.orientacao.texto, { provedor }),
           ...(url === null ? {} : { documentacao: url }),
         };
       }),
       recusados: recusados.map(({ texto, motivo }) => ({
-        texto: preencher(TEXTOS_DKIM.recusado.texto, { texto, motivo }),
+        texto: preencher(frases.recusado.texto, { texto, motivo }),
       })),
       mostrarCampo: true,
     },
@@ -484,10 +498,12 @@ export const apresentarDkim = (estado, { recusados = [], totalSeletores } = {}) 
 /**
  * Quem viu o domínio nesta verificação, para o rodapé do resultado.
  *
+ * @param {Textos} textos - O catálogo do idioma da página.
  * @param {EstadoVerificacao} estado - O estado das três partes.
  * @returns {string | null} A frase, ou ``null`` se nenhum resolvedor respondeu.
  */
-export const rodapeDosResolvedores = (estado) => {
+export const rodapeDosResolvedores = (textos, estado) => {
+  const frases = textos.interface.resultado;
   const nomes = new Set();
   for (const parte of Object.values(estado.partes)) {
     if (parte.fase === "pronto") {
@@ -503,11 +519,11 @@ export const rodapeDosResolvedores = (estado) => {
   }
   const quem =
     cloudflare && google
-      ? TEXTOS_RESULTADO.resolvedorAmbos
+      ? frases.resolvedorAmbos
       : cloudflare
-        ? TEXTOS_RESULTADO.resolvedorCloudflare
-        : TEXTOS_RESULTADO.resolvedorGoogle;
-  return preencher(TEXTOS_RESULTADO.resolvedores.texto, { quem: quem.texto });
+        ? frases.resolvedorCloudflare
+        : frases.resolvedorGoogle;
+  return preencher(frases.resolvedores.texto, { quem: quem.texto });
 };
 
 // ---------------------------------------------------------------------------
@@ -515,28 +531,32 @@ export const rodapeDosResolvedores = (estado) => {
 // ---------------------------------------------------------------------------
 
 /**
+ * @param {Textos} textos - O catálogo do idioma da página.
  * @param {string} dominio - O domínio em verificação.
  * @returns {string} A frase do início da verificação.
  */
-export const anunciarInicio = (dominio) => preencher(TEXTOS_ANUNCIO.inicio.texto, { dominio });
+export const anunciarInicio = (textos, dominio) =>
+  preencher(textos.interface.anuncio.inicio.texto, { dominio });
 
 /**
+ * @param {Textos} textos - O catálogo do idioma da página.
  * @param {string} dominio - O domínio verificado.
  * @returns {string} A frase de que o domínio não existe.
  */
-export const anunciarInexistente = (dominio) =>
-  preencher(TEXTOS_ANUNCIO.inexistente.texto, { dominio });
+export const anunciarInexistente = (textos, dominio) =>
+  preencher(textos.interface.anuncio.inexistente.texto, { dominio });
 
 /**
  * A frase do fim da verificação. Usa só a palavra do selo de cada cartão, em minúsculas, para
  * não afirmar mais do que ele.
  *
+ * @param {Textos} textos - O catálogo do idioma da página.
  * @param {string} dominio - O domínio verificado.
  * @param {{ dmarc: Cartao, spf: Cartao, dkim: Cartao }} cartoes - Os três cartões.
  * @returns {string} A frase de resultado pronto.
  */
-export const anunciarFim = (dominio, cartoes) =>
-  preencher(TEXTOS_ANUNCIO.fim.texto, {
+export const anunciarFim = (textos, dominio, cartoes) =>
+  preencher(textos.interface.anuncio.fim.texto, {
     dominio,
     dmarc: cartoes.dmarc.selo.texto.toLowerCase(),
     spf: cartoes.spf.selo.texto.toLowerCase(),
