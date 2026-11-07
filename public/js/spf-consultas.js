@@ -30,7 +30,7 @@ import { LIMITE_CONSULTAS, lerSpf, ordenarAchados, TIPOS_QUE_CONSULTAM } from ".
  *
  * @typedef {(nome: string) => Promise<
  *   | { ok: true, situacao: "encontrado" | "sem-registro" | "inexistente", registros: string[], resolvedor?: string }
- *   | { ok: false, motivo: string }
+ *   | { ok: false, motivo: string, valor?: string | number }
  * >} Consulta
  */
 /**
@@ -51,7 +51,8 @@ import { LIMITE_CONSULTAS, lerSpf, ordenarAchados, TIPOS_QUE_CONSULTAM } from ".
  *   consultas: Consultas, achados: Achado[], resolvedores: string[]
  * }} CaminhadaSpf
  */
-/** @typedef {CaminhadaSpf | { ok: false, motivo: string }} ResultadoCaminhada */
+/** @typedef {import("./tipos.js").Recusa} Recusa */
+/** @typedef {CaminhadaSpf | ({ ok: false } & Recusa)} ResultadoCaminhada */
 /** @typedef {{ spf: ResultadoSpf | undefined }} Entrada */
 
 // ---------------------------------------------------------------------------
@@ -338,7 +339,11 @@ export const lerSpfComConsultas = async (dominio, consultar) => {
   const raiz = validado.nome;
   const resposta = await consultar(raiz);
   if (!resposta.ok) {
-    return { ok: false, motivo: resposta.motivo };
+    return {
+      ok: false,
+      motivo: resposta.motivo,
+      ...(resposta.valor === undefined ? {} : { valor: resposta.valor }),
+    };
   }
   const resolvedores = new Set(resposta.resolvedor === undefined ? [] : [resposta.resolvedor]);
 

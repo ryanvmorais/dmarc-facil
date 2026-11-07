@@ -160,8 +160,11 @@ describe("lerResposta: situações", () => {
 
   it("Status de falha do resolvedor (1, 2, 4 e 5) é falha", () => {
     for (const status of [1, 2, 4, 5]) {
-      const resultado = lerResposta({ Status: status }, "cloudflare");
-      assert.equal(resultado.ok, false);
+      assert.deepEqual(lerResposta({ Status: status }, "cloudflare"), {
+        ok: false,
+        motivo: "resposta-status-dns",
+        valor: status,
+      });
     }
   });
 });
@@ -173,19 +176,22 @@ describe("lerResposta: situações", () => {
 describe("lerResposta: entrada torta ou hostil", () => {
   it("o que não é objeto é falha", () => {
     for (const json of [null, undefined, 42, "texto", true, [], [{ Status: 0 }]]) {
-      assert.equal(lerResposta(json, "google").ok, false);
+      assert.deepEqual(lerResposta(json, "google"), { ok: false, motivo: "resposta-nao-objeto" });
     }
   });
 
   it("Status ausente, texto ou fracionário é falha", () => {
     for (const json of [{}, { Status: "0" }, { Status: 0.5 }, { Status: null }, { Answer: [] }]) {
-      assert.equal(lerResposta(json, "google").ok, false);
+      assert.deepEqual(lerResposta(json, "google"), { ok: false, motivo: "resposta-sem-status" });
     }
   });
 
   it("Answer que não é lista é falha", () => {
     for (const answer of [null, "texto", 7, { type: 16, data: "x" }]) {
-      assert.equal(lerResposta({ Status: 0, Answer: answer }, "google").ok, false);
+      assert.deepEqual(lerResposta({ Status: 0, Answer: answer }, "google"), {
+        ok: false,
+        motivo: "resposta-answer-invalido",
+      });
     }
   });
 

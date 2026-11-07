@@ -22,15 +22,15 @@ import { buscarDkim } from "./dkim-busca.js";
 import { lerDmarc } from "./dmarc.js";
 import { normalizarDominio } from "./dominio.js";
 import { lerSpfComConsultas } from "./spf-consultas.js";
-import { TEXTOS_FALHA } from "./textos-interface.js";
 
 /** @typedef {import("./spf-consultas.js").Consulta} Consulta */
 /** @typedef {import("./tipos.js").NomeParte} NomeParte */
+/** @typedef {import("./tipos.js").Recusa} Recusa */
 /** @typedef {import("./tipos.js").EstadoVerificacao} EstadoVerificacao */
 /** @typedef {import("./tipos.js").EstadoDmarc} EstadoDmarc */
 /** @typedef {import("./tipos.js").EstadoSpf} EstadoSpf */
 /** @typedef {import("./tipos.js").EstadoDkim} EstadoDkim */
-/** @typedef {{ ok: true, dominio: string } | { ok: false, motivo: string }} ResultadoEnvio */
+/** @typedef {{ ok: true, dominio: string } | ({ ok: false } & Recusa)} ResultadoEnvio */
 /**
  * @typedef {{
  *   consulta: Consulta, seletoresComuns: ReadonlyArray<string>,
@@ -43,6 +43,14 @@ import { TEXTOS_FALHA } from "./textos-interface.js";
 // ---------------------------------------------------------------------------
 
 /**
+ * Copia só o `motivo` e o `valor` de uma falha, para o estado da parte não carregar o resto.
+ *
+ * @param {Recusa} falha - A falha que a consulta devolveu.
+ * @returns {Recusa} O código e, se houver, o valor.
+ */
+const recusaDe = ({ motivo, valor }) => ({ motivo, ...(valor === undefined ? {} : { valor }) });
+
+/**
  * @param {Consulta} consultar - A consulta (já envolvida pela geração).
  * @param {string} dominio - O domínio normalizado.
  * @returns {Promise<EstadoDmarc>} O estado final do DMARC.
@@ -50,7 +58,7 @@ import { TEXTOS_FALHA } from "./textos-interface.js";
 const rodarDmarc = async (consultar, dominio) => {
   const resposta = await consultar(`_dmarc.${dominio}`);
   if (!resposta.ok) {
-    return { parte: "dmarc", fase: "falha", motivo: resposta.motivo };
+    return { parte: "dmarc", fase: "falha", ...recusaDe(resposta) };
   }
   return {
     parte: "dmarc",
@@ -69,7 +77,7 @@ const rodarSpf = async (consultar, dominio) => {
   const caminhada = await lerSpfComConsultas(dominio, consultar);
   return caminhada.ok
     ? { parte: "spf", fase: "pronto", resultado: caminhada, resolvedores: caminhada.resolvedores }
-    : { parte: "spf", fase: "falha", motivo: caminhada.motivo };
+    : { parte: "spf", fase: "falha", ...recusaDe(caminhada) };
 };
 
 /**
@@ -82,7 +90,7 @@ const rodarDkim = async (consultar, dominio, seletores) => {
   const busca = await buscarDkim(dominio, seletores, consultar);
   return busca.ok
     ? { parte: "dkim", fase: "pronto", resultado: busca, resolvedores: busca.resolvedores }
-    : { parte: "dkim", fase: "falha", motivo: busca.motivo };
+    : { parte: "dkim", fase: "falha", ...recusaDe(busca) };
 };
 
 // ---------------------------------------------------------------------------
@@ -160,7 +168,7 @@ export const criarVerificador = ({ consulta, seletoresComuns, aoMudar }) => {
       }
       return resposta;
     } catch {
-      return { ok: false, motivo: TEXTOS_FALHA.semMotivo.texto };
+      return { ok: false, motivo: "sem-motivo" };
     }
   };
 

@@ -12,7 +12,7 @@
 import assert from "node:assert/strict";
 import { describe, it, mock } from "node:test";
 
-import { consultarTxt } from "../public/js/doh.js";
+import { consultarTxt, consultarUm, RESOLVEDORES } from "../public/js/doh.js";
 
 // ---------------------------------------------------------------------------
 // FETCH FALSO
@@ -186,7 +186,7 @@ describe("consultarTxt: fallback para o Google", () => {
     });
   });
 
-  it("devolve falha com motivo em português quando os dois falham", async () => {
+  it("devolve o código resolvedores-indisponiveis quando os dois falham", async () => {
     const { buscar, chamadas } = criarBuscar({
       cloudflare: semRede,
       google: () => respostaJson({}, 503),
@@ -196,7 +196,8 @@ describe("consultarTxt: fallback para o Google", () => {
 
     assert.equal(resultado.ok, false);
     if (!resultado.ok) {
-      assert.match(resultado.motivo, /Não consegui consultar o DNS/);
+      assert.equal(resultado.motivo, "resolvedores-indisponiveis");
+      assert.equal(resultado.valor, undefined);
     }
     assert.equal(chamadas.length, 2);
   });
@@ -314,5 +315,44 @@ describe("consultarTxt: privacidade", () => {
     } finally {
       mock.restoreAll();
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// MOTIVO DE CADA FALHA
+// ---------------------------------------------------------------------------
+
+describe("consultarUm: o código de cada falha de um resolvedor", () => {
+  const [cloudflare] = RESOLVEDORES;
+  const consultar = (/** @type {(opcoes: RequestInit) => Promise<Response> | Response} */ rede) => {
+    const { buscar } = criarBuscar({ cloudflare: rede, google: semRede });
+    return consultarUm(
+      /** @type {NonNullable<typeof cloudflare>} */ (cloudflare),
+      "_dmarc.exemplo.com.br",
+      buscar,
+      1000,
+    );
+  };
+
+  it("HTTP fora de 2xx devolve resolvedor-http com o status em valor", async () => {
+    assert.deepEqual(await consultar(() => respostaJson({}, 503)), {
+      ok: false,
+      motivo: "resolvedor-http",
+      valor: 503,
+    });
+  });
+
+  it("rede fora do ar, tempo esgotado ou corpo torto devolvem consulta-falhou", async () => {
+    for (const rede of [semRede, () => new Response("<html>não é json</html>")]) {
+      assert.deepEqual(await consultar(rede), { ok: false, motivo: "consulta-falhou" });
+    }
+  });
+
+  it("Status de falha do DNS devolve resposta-status-dns com o Status em valor", async () => {
+    assert.deepEqual(await consultar(() => respostaJson({ Status: 2 })), {
+      ok: false,
+      motivo: "resposta-status-dns",
+      valor: 2,
+    });
   });
 });

@@ -50,41 +50,41 @@ describe("validarNomeDns: nomes aceitos", () => {
 // ---------------------------------------------------------------------------
 
 describe("validarNomeDns: nomes recusados", () => {
-  /** @type {Array<[string, string]>} Descrição do caso e o nome recusado. */
+  /** @type {Array<[string, string, string]>} Descrição do caso, o nome recusado e o código. */
   const casos = [
-    ["vazio", ""],
-    ["só o ponto final", "."],
-    ["com espaço", "exemplo .com.br"],
-    ["com espaço nas pontas", " exemplo.com.br"],
-    ["com &", "exemplo.com&name=outro.com"],
-    ["com =", "name=exemplo.com"],
-    ["com ?", "exemplo.com?x=1"],
-    ["com #", "exemplo.com#topo"],
-    ["com /", "exemplo.com/pagina"],
-    ["com %", "exemplo%2ecom"],
-    ["com :", "exemplo.com:443"],
-    ["com acento", "bücher.de"],
-    ["com rótulo vazio", "a..b"],
-    ["começando em ponto", ".exemplo.com"],
-    ["com dois pontos finais", "exemplo.com.."],
-    ["com rótulo de 64 caracteres", `${"a".repeat(64)}.com`],
+    ["vazio", "", "nome-vazio"],
+    ["só o ponto final", ".", "nome-vazio"],
+    ["com espaço", "exemplo .com.br", "nome-caractere-invalido"],
+    ["com espaço nas pontas", " exemplo.com.br", "nome-caractere-invalido"],
+    ["com &", "exemplo.com&name=outro.com", "nome-caractere-invalido"],
+    ["com =", "name=exemplo.com", "nome-caractere-invalido"],
+    ["com ?", "exemplo.com?x=1", "nome-caractere-invalido"],
+    ["com #", "exemplo.com#topo", "nome-caractere-invalido"],
+    ["com /", "exemplo.com/pagina", "nome-caractere-invalido"],
+    ["com %", "exemplo%2ecom", "nome-caractere-invalido"],
+    ["com :", "exemplo.com:443", "nome-caractere-invalido"],
+    ["com acento", "bücher.de", "nome-caractere-invalido"],
+    ["com rótulo vazio", "a..b", "nome-parte-vazia"],
+    ["começando em ponto", ".exemplo.com", "nome-parte-vazia"],
+    ["com dois pontos finais", "exemplo.com..", "nome-parte-vazia"],
+    ["com rótulo de 64 caracteres", `${"a".repeat(64)}.com`, "nome-parte-comprida-demais"],
     [
       "com nome de 254 caracteres",
       `${"a".repeat(63)}.${"a".repeat(63)}.${"a".repeat(63)}.${"a".repeat(62)}`,
+      "nome-comprido-demais",
     ],
   ];
 
-  for (const [descricao, entrada] of casos) {
+  for (const [descricao, entrada, codigo] of casos) {
     it(`recusa nome ${descricao}`, () => {
-      const resultado = validarNomeDns(entrada);
-      assert.equal(resultado.ok, false);
-      if (!resultado.ok) {
-        assert.notEqual(resultado.motivo, "");
-      }
+      assert.deepEqual(validarNomeDns(entrada), { ok: false, motivo: codigo });
     });
   }
 
   it("a entrada hostil que tenta injetar um segundo parâmetro é recusada", () => {
-    assert.equal(validarNomeDns("exemplo.com&name=outro.com").ok, false);
+    assert.deepEqual(validarNomeDns("exemplo.com&name=outro.com"), {
+      ok: false,
+      motivo: "nome-caractere-invalido",
+    });
   });
 });

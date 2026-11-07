@@ -21,8 +21,11 @@ import { lerResposta } from "./resposta-doh.js";
 
 /** @typedef {import("./resposta-doh.js").Resolvedor} Resolvedor */
 /** @typedef {import("./resposta-doh.js").Situacao} Situacao */
+/** @typedef {import("./tipos.js").Recusa} Recusa */
 /**
- * @typedef {{ ok: true, situacao: Situacao, registros: string[], resolvedor: Resolvedor } | { ok: false, motivo: string }} ResultadoTxt
+ * @typedef {{
+ *   ok: true, situacao: Situacao, registros: string[], resolvedor: Resolvedor
+ * } | ({ ok: false } & Recusa)} ResultadoTxt
  */
 /**
  * @typedef {{ buscar?: typeof fetch, tempoLimiteMs?: number }} OpcoesConsulta
@@ -44,11 +47,6 @@ export const RESOLVEDORES = [
 // o fallback ter a sua vez. Vale por resolvedor, então o pior caso é o dobro.
 const TEMPO_LIMITE_PADRAO_MS = 5000;
 
-// Mesmo texto para qualquer falha: o visitante não precisa distinguir tempo esgotado de
-// resposta torta. [provisório]
-const MOTIVO_FALHA_GERAL =
-  "Não consegui consultar o DNS agora, nem pela Cloudflare nem pelo Google. Confira sua conexão e tente de novo.";
-
 // ---------------------------------------------------------------------------
 // CONSULTA
 // ---------------------------------------------------------------------------
@@ -59,13 +57,16 @@ const MOTIVO_FALHA_GERAL =
  * Qualquer exceção (rede, tempo esgotado, JSON inválido) vira falha: quem chama decide o
  * fallback. O tempo limite cobre a requisição e a leitura do corpo.
  *
+ * É exportada só para os testes: a página usa `consultarTxt`, que junta as falhas dos dois
+ * resolvedores em `resolvedores-indisponiveis`; o código de cada falha só se vê por aqui.
+ *
  * @param {{ id: Resolvedor, url: string }} resolvedor - Resolvedor a consultar.
  * @param {string} nome - Nome DNS já validado.
  * @param {typeof fetch} buscar - Função de rede (o `fetch`, ou um falso nos testes).
  * @param {number} tempoLimiteMs - Tempo máximo desta consulta, em milissegundos.
  * @returns {Promise<import("./resposta-doh.js").RespostaLida>} A leitura da resposta.
  */
-const consultarUm = async (resolvedor, nome, buscar, tempoLimiteMs) => {
+export const consultarUm = async (resolvedor, nome, buscar, tempoLimiteMs) => {
   // O nome entra como parâmetro codificado da URL, nunca por concatenação de texto.
   const url = new URL(resolvedor.url);
   url.searchParams.set("name", nome);
@@ -82,13 +83,13 @@ const consultarUm = async (resolvedor, nome, buscar, tempoLimiteMs) => {
       signal: AbortSignal.timeout(tempoLimiteMs),
     });
     if (!resposta.ok) {
-      return { ok: false, motivo: `O resolvedor respondeu HTTP ${resposta.status}.` };
+      return { ok: false, motivo: "resolvedor-http", valor: resposta.status };
     }
     return lerResposta(await resposta.json(), resolvedor.id);
   } catch {
     return {
       ok: false,
-      motivo: "A consulta ao resolvedor falhou (rede, tempo ou resposta inválida).",
+      motivo: "consulta-falhou",
     };
   }
 };
@@ -104,7 +105,8 @@ const consultarUm = async (resolvedor, nome, buscar, tempoLimiteMs) => {
  * @param {OpcoesConsulta} [opcoes={}] - ``buscar`` troca o `fetch` (testes); ``tempoLimiteMs``
  *   troca o tempo por resolvedor.
  * @returns {Promise<ResultadoTxt>} ``{ ok: true, situacao, registros, resolvedor }``, ou
- *   ``{ ok: false, motivo }`` com a explicação em português para mostrar ao visitante.
+ *   ``{ ok: false, motivo, valor? }`` com o código da falha (a frase está em
+ *   `textos-interface.js`).
  * @throws {TypeError} Se ``nome`` não for texto (erro de programação, não de consulta).
  */
 export const consultarTxt = async (
@@ -133,5 +135,7 @@ export const consultarTxt = async (
   }
 
   // 3. Todos falharam.
-  return { ok: false, motivo: MOTIVO_FALHA_GERAL };
+  // Mesmo código para qualquer falha: o visitante não precisa distinguir tempo esgotado de
+  // resposta torta.
+  return { ok: false, motivo: "resolvedores-indisponiveis" };
 };

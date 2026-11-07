@@ -38,7 +38,7 @@ export const consultaDe =
     if (resposta === "FALHA") {
       return {
         ok: false,
-        motivo: "A consulta ao resolvedor falhou (rede, tempo ou resposta inválida).",
+        motivo: "consulta-falhou",
       };
     }
     return {
@@ -86,16 +86,16 @@ export const estadoDkim = async (seletores, mapa) => {
 /**
  * @template {"dmarc" | "spf" | "dkim"} P
  * @param {P} parte - Qual parte falhou.
- * @param {string} [motivo] - Motivo em português.
- * @returns {{ parte: P, fase: "falha", motivo: string }} O estado de falha.
+ * @param {string} [motivo] - Código do motivo.
+ * @param {string | number} [valor] - O dado que a frase do motivo encaixa, se houver.
+ * @returns {{ parte: P, fase: "falha", motivo: string, valor?: string | number }} O estado de
+ *   falha.
  */
-export const falha = (
-  parte,
-  motivo = "A consulta ao resolvedor falhou (rede, tempo ou resposta inválida).",
-) => ({
+export const falha = (parte, motivo = "consulta-falhou", valor) => ({
   parte,
   fase: "falha",
   motivo,
+  ...(valor === undefined ? {} : { valor }),
 });
 
 /**

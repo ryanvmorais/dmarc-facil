@@ -12,10 +12,13 @@
 
 // @ts-check
 
+/** @typedef {import("./tipos.js").Recusa} Recusa */
 /** @typedef {"cloudflare" | "google"} Resolvedor */
 /** @typedef {"encontrado" | "sem-registro" | "inexistente"} Situacao */
 /**
- * @typedef {{ ok: true, situacao: Situacao, registros: string[] } | { ok: false, motivo: string }} RespostaLida
+ * @typedef {{
+ *   ok: true, situacao: Situacao, registros: string[]
+ * } | ({ ok: false } & Recusa)} RespostaLida
  */
 
 // ---------------------------------------------------------------------------
@@ -85,25 +88,25 @@ export const textoDoRegistro = (data, resolvedor) => {
  *
  * @param {unknown} json - Corpo da resposta, já decodificado.
  * @param {Resolvedor} resolvedor - Quem respondeu.
- * @returns {RespostaLida} A situação e os textos, ou ``{ ok: false, motivo }``.
+ * @returns {RespostaLida} A situação e os textos, ou ``{ ok: false, motivo, valor? }``.
  */
 export const lerResposta = (json, resolvedor) => {
   if (typeof json !== "object" || json === null || Array.isArray(json)) {
-    return { ok: false, motivo: "A resposta do resolvedor não é um objeto." };
+    return { ok: false, motivo: "resposta-nao-objeto" };
   }
   const { Status: status, Answer: resposta } = /** @type {Record<string, unknown>} */ (json);
 
   if (typeof status !== "number" || !Number.isInteger(status)) {
-    return { ok: false, motivo: "A resposta do resolvedor não traz o Status." };
+    return { ok: false, motivo: "resposta-sem-status" };
   }
   if (status === STATUS_INEXISTENTE) {
     return { ok: true, situacao: "inexistente", registros: [] };
   }
   if (status !== STATUS_SEM_ERRO) {
-    return { ok: false, motivo: `O resolvedor não conseguiu resolver o nome (Status ${status}).` };
+    return { ok: false, motivo: "resposta-status-dns", valor: status };
   }
   if (resposta !== undefined && !Array.isArray(resposta)) {
-    return { ok: false, motivo: "O Answer da resposta não é uma lista." };
+    return { ok: false, motivo: "resposta-answer-invalido" };
   }
 
   /** @type {string[]} */

@@ -165,24 +165,32 @@ describe("lerSeletoresDigitados", () => {
 
 describe("mensagemDeFalha", () => {
   it("usa a causa que a consulta devolveu e diz que não é defeito do registro", () => {
-    const mensagem = mensagemDeFalha(
-      falha("spf", "Não consegui consultar o DNS agora, nem pela Cloudflare nem pelo Google."),
-    );
+    const mensagem = mensagemDeFalha(falha("spf", "resolvedores-indisponiveis"));
 
     assert.match(mensagem, /nem pela Cloudflare nem pelo Google/);
     assert.match(mensagem, /Isso não diz nada sobre o seu SPF/);
   });
 
   it("outra causa, outra mensagem", () => {
-    const mensagem = mensagemDeFalha(falha("dkim", "O nome consultado não é válido."));
+    const mensagem = mensagemDeFalha(falha("dkim", "nome-vazio"));
 
-    assert.match(mensagem, /O nome consultado não é válido\./);
+    assert.match(mensagem, /O nome da consulta está vazio\./);
     assert.match(mensagem, /seu DKIM/);
     assert.doesNotMatch(mensagem, /Cloudflare/);
   });
 
-  it("sem causa, usa o texto geral", () => {
-    assert.match(mensagemDeFalha(falha("dmarc", "  ")), /Não consegui consultar o DNS agora\./);
+  it("encaixa o valor do motivo na frase", () => {
+    const mensagem = mensagemDeFalha(falha("dmarc", "resposta-status-dns", 2));
+
+    assert.match(mensagem, /\(Status 2\)\./);
+  });
+
+  it("código sem entrada usa o texto geral, nunca o código", () => {
+    for (const motivo of ["  ", "", "codigo-que-ninguem-cadastrou", "constructor"]) {
+      const mensagem = mensagemDeFalha(falha("dmarc", motivo));
+
+      assert.match(mensagem, /^Não consegui consultar o DNS agora\. Isso não diz/);
+    }
   });
 
   it("parte que não falhou não tem mensagem de falha", () => {

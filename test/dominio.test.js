@@ -43,33 +43,29 @@ describe("normalizarDominio: entradas aceitas", () => {
 // ---------------------------------------------------------------------------
 
 describe("normalizarDominio: entradas recusadas", () => {
-  /** @type {Array<[string, string]>} Entrada digitada e o que deve aparecer no motivo. */
+  /** @type {Array<[string, string]>} Entrada digitada e o código da recusa. */
   const casos = [
-    ["", "Digite um domínio"],
-    ["   ", "Digite um domínio"],
-    ["https://", "Digite um domínio"],
-    ["localhost", "domínio completo"],
-    ["exemplo", "domínio completo"],
-    ["192.168.0.1", "Endereço IP"],
-    ["0x7f.1", "Endereço IP"],
-    ["exemplo.com:8080", "porta"],
-    ["[::1]", "porta"],
-    ["exem plo.com", "não é um domínio válido"],
-    ["exemplo_.com", "letras, números e hífen"],
-    ["-exemplo.com", "letras, números e hífen"],
-    ["exemplo-.com", "letras, números e hífen"],
-    ["exemplo..com", "letras, números e hífen"],
-    [`${"a".repeat(64)}.com`, "63 caracteres"],
-    [`${"a.".repeat(130)}com`, "comprido demais"],
+    ["", "dominio-vazio"],
+    ["   ", "dominio-vazio"],
+    ["https://", "dominio-vazio"],
+    ["localhost", "dominio-incompleto"],
+    ["exemplo", "dominio-incompleto"],
+    ["192.168.0.1", "dominio-e-ip"],
+    ["0x7f.1", "dominio-e-ip"],
+    ["exemplo.com:8080", "dominio-com-porta-ou-ipv6"],
+    ["[::1]", "dominio-com-porta-ou-ipv6"],
+    ["exem plo.com", "dominio-invalido"],
+    ["exemplo_.com", "dominio-caractere-invalido"],
+    ["-exemplo.com", "dominio-caractere-invalido"],
+    ["exemplo-.com", "dominio-caractere-invalido"],
+    ["exemplo..com", "dominio-caractere-invalido"],
+    [`${"a".repeat(64)}.com`, "dominio-parte-comprida-demais"],
+    [`${"a.".repeat(130)}com`, "dominio-comprido-demais"],
   ];
 
-  for (const [entrada, trecho] of casos) {
+  for (const [entrada, codigo] of casos) {
     it(`recusa "${entrada.slice(0, 30)}"`, () => {
-      const resultado = normalizarDominio(entrada);
-      assert.equal(resultado.ok, false);
-      if (!resultado.ok) {
-        assert.match(resultado.motivo, new RegExp(trecho));
-      }
+      assert.deepEqual(normalizarDominio(entrada), { ok: false, motivo: codigo });
     });
   }
 });

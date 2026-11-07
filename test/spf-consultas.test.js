@@ -46,7 +46,7 @@ const SEM_REGISTRO = {
 /** @type {Resposta} */
 const INEXISTENTE = { ok: true, situacao: "inexistente", registros: [], resolvedor: "cloudflare" };
 /** @type {Resposta} */
-const FALHA = { ok: false, motivo: "A consulta falhou." };
+const FALHA = { ok: false, motivo: "resolvedor-http", valor: 503 };
 
 /**
  * Monta a consulta falsa. Nome fora do mapa é domínio inexistente.
@@ -140,7 +140,7 @@ describe("domínio digitado", () => {
 
   it("falha na consulta do domínio digitado volta ok: false com o motivo", async () => {
     const r = await lerSpfComConsultas(RAIZ, montar({ [RAIZ]: FALHA }).consultar);
-    assert.deepEqual(r, { ok: false, motivo: "A consulta falhou." });
+    assert.deepEqual(r, { ok: false, motivo: "resolvedor-http", valor: 503 });
   });
 
   it("o domínio é normalizado antes de consultar", async () => {
