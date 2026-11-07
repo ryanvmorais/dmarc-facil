@@ -53,7 +53,9 @@ const REVALIDAR = "public, max-age=0, must-revalidate";
 /** @type {Record<string, { arquivo: string, tipo: string }>} */
 const ROTAS = {
   "/": { arquivo: "index.html", tipo: "text/html; charset=utf-8" },
+  "/en/": { arquivo: "en/index.html", tipo: "text/html; charset=utf-8" },
   "/js/entrada-pt.js": { arquivo: "js/entrada-pt.js", tipo: "text/javascript; charset=utf-8" },
+  "/js/entrada-en.js": { arquivo: "js/entrada-en.js", tipo: "text/javascript; charset=utf-8" },
   "/css/pagina.css": { arquivo: "css/pagina.css", tipo: "text/css; charset=utf-8" },
   [`/fonts/${FONTE}`]: { arquivo: `fonts/${FONTE}`, tipo: "font/woff2" },
   "/robots.txt": { arquivo: "robots.txt", tipo: "text/plain; charset=utf-8" },
@@ -98,7 +100,15 @@ const criarBuscar = (estragar = async () => undefined) =>
       if (url.protocol === "http:") {
         return new Response(null, { status: 301, headers: { location: `https://${url.host}/` } });
       }
+      if (url.pathname === "/en") {
+        // A hospedagem manda `/en` para `/en/` (ADR-9 da spec 008).
+        return new Response(null, { status: 308, headers: { location: "/en/" } });
+      }
       const rota = ROTAS[url.pathname];
+      if (rota === undefined && url.pathname.startsWith("/en/")) {
+        // A 404 mais próxima do caminho: a em inglês, sob `/en/`.
+        return resposta(await arquivo("en/404.html"), 404, { "content-type": "text/html" });
+      }
       if (rota === undefined) {
         // Inclui `/_headers`: a plataforma consome o arquivo e responde 404 como em qualquer
         // caminho que não existe.
@@ -227,11 +237,11 @@ describe("enderecoDaRota", () => {
 // ---------------------------------------------------------------------------
 
 describe("conferirHospedagem: site íntegro", () => {
-  it("passa nas sete verificações", async () => {
+  it("passa nas dez verificações", async () => {
     const resultado = await conferir();
     assert.deepEqual(falhas(resultado), []);
     assert.equal(resultado.ok, true);
-    assert.equal(resultado.verificacoes.length, 7);
+    assert.equal(resultado.verificacoes.length, 10);
   });
 
   it("aceita o http:// recusado, como a conexão que não abre", async () => {
@@ -325,6 +335,54 @@ describe("conferirHospedagem: o que derruba cada verificação", () => {
     assert.deepEqual(falhas(resultado), ["http:// não é servido"]);
   });
 
+  it("/en/ com o corpo da página em português (a rota de /en/ não chegou)", async () => {
+    const resultado = await conferir(async (url) =>
+      url.pathname === "/en/"
+        ? resposta(await arquivo("index.html"), 200, { "content-type": "text/html" })
+        : undefined,
+    );
+    assert.deepEqual(falhas(resultado), ["Página em inglês"]);
+    assert.match(resultado.verificacoes[2]?.detalhe ?? "", /o corpo difere/);
+  });
+
+  it("/en servido em 200 com o arquivo passa, como o redirecionamento", async () => {
+    const resultado = await conferir(async (url) =>
+      url.pathname === "/en"
+        ? resposta(await arquivo("en/index.html"), 200, { "content-type": "text/html" })
+        : undefined,
+    );
+    assert.deepEqual(falhas(resultado), []);
+  });
+
+  it("/en redirecionado para outro lugar falha", async () => {
+    const resultado = await conferir(async (url) =>
+      url.pathname === "/en"
+        ? new Response(null, { status: 301, headers: { location: "/" } })
+        : undefined,
+    );
+    assert.deepEqual(falhas(resultado), ["/en sem a barra"]);
+    assert.match(resultado.verificacoes[3]?.detalhe ?? "", /em vez de \/en\//);
+  });
+
+  it("404 sob /en/ com a página em português (a 404 mais próxima não é a em inglês)", async () => {
+    const resultado = await conferir(async (url) =>
+      url.pathname.startsWith("/en/conferencia")
+        ? resposta(await arquivo("404.html"), 404, { "content-type": "text/html" })
+        : undefined,
+    );
+    assert.deepEqual(falhas(resultado), ["Página 404 em inglês"]);
+  });
+
+  it("404 sob /en/ com status 200 (RF-03)", async () => {
+    const resultado = await conferir(async (url) =>
+      url.pathname.startsWith("/en/conferencia")
+        ? resposta(await arquivo("en/404.html"), 200, { "content-type": "text/html" })
+        : undefined,
+    );
+    assert.deepEqual(falhas(resultado), ["Página 404 em inglês"]);
+    assert.match(resultado.verificacoes[4]?.detalhe ?? "", /status 200, esperado 404/);
+  });
+
   it("/_headers público (ADR-3)", async () => {
     const resultado = await conferir(async (url) =>
       url.pathname === "/_headers" ? resposta(TEXTO_HEADERS, 200, {}) : undefined,
@@ -342,7 +400,7 @@ describe("conferirHospedagem: o que derruba cada verificação", () => {
         : undefined,
     );
     assert.deepEqual(falhas(resultado), ["Fonte"]);
-    assert.match(resultado.verificacoes[3]?.detalhe ?? "", /cache-control: esperado/);
+    assert.match(resultado.verificacoes[6]?.detalhe ?? "", /cache-control: esperado/);
   });
 
   it("código JavaScript guardado sem revalidar (ADR-4)", async () => {
@@ -355,7 +413,7 @@ describe("conferirHospedagem: o que derruba cada verificação", () => {
         : undefined,
     );
     assert.deepEqual(falhas(resultado), ["JavaScript e CSS"]);
-    assert.match(resultado.verificacoes[2]?.detalhe ?? "", /não obriga a revalidar/);
+    assert.match(resultado.verificacoes[5]?.detalhe ?? "", /não obriga a revalidar/);
   });
 
   it("JavaScript com content-type de texto comum", async () => {
@@ -377,7 +435,7 @@ describe("conferirHospedagem: o que derruba cada verificação", () => {
         : undefined,
     );
     assert.deepEqual(falhas(resultado), ["robots.txt e sitemap.xml"]);
-    assert.match(resultado.verificacoes[4]?.detalhe ?? "", /^robots\.txt: /);
+    assert.match(resultado.verificacoes[7]?.detalhe ?? "", /^robots\.txt: /);
   });
 
   it("robots.txt com o bloco gerenciado da Cloudflare na frente passa (Bot Preference Sync)", async () => {
@@ -419,6 +477,9 @@ Disallow: /
     assert.deepEqual(falhas(resultado), [
       "Página inicial",
       "Página 404",
+      "Página em inglês",
+      "/en sem a barra",
+      "Página 404 em inglês",
       "JavaScript e CSS",
       "Fonte",
       "robots.txt e sitemap.xml",
@@ -435,6 +496,9 @@ Disallow: /
     assert.deepEqual(falhas(resultado), [
       "Página inicial",
       "Página 404",
+      "Página em inglês",
+      "/en sem a barra",
+      "Página 404 em inglês",
       "JavaScript e CSS",
       "Fonte",
       "robots.txt e sitemap.xml",

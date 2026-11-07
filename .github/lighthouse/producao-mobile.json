@@ -1,7 +1,10 @@
 {
   "ci": {
     "collect": {
-      "url": ["https://dmarc-facil.ryanmorais.com.br/"],
+      "url": [
+        "https://dmarc-facil.ryanmorais.com.br/",
+        "https://dmarc-facil.ryanmorais.com.br/en/"
+      ],
       "numberOfRuns": 3,
       "settings": {
         "formFactor": "mobile",
