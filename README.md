@@ -13,7 +13,7 @@
 
 **O DMARC Fácil é um verificador de DMARC, SPF e DKIM que roda no navegador: você digita o domínio, ele consulta o DNS, explica cada registro em português e diz qual é o próximo passo para o seu e-mail deixar de ser falsificado.**
 
-Quem pesquisa "verificar DMARC" ou "meu e-mail cai no spam" encontra, quase sempre, ferramentas em inglês que mostram o registro e deixam o resto por conta de quem lê. Aqui o registro vem traduzido, com o estado de cada parte e a escada do DMARC (`p=none`, `p=quarantine`, `p=reject`) mostrando em que degrau o domínio está e o que fazer para subir.
+Quem pesquisa "verificar DMARC" ou "meu e-mail cai no spam" encontra, quase sempre, ferramentas em inglês que mostram o registro e deixam o resto por conta de quem lê. Aqui o registro vem traduzido (e há uma versão da página em inglês, em [`/en/`](https://dmarc-facil.ryanmorais.com.br/en/)), com o estado de cada parte e a escada do DMARC (`p=none`, `p=quarantine`, `p=reject`) mostrando em que degrau o domínio está e o que fazer para subir.
 
 Ele é feito para donos de site, desenvolvedores e agências pequenas, no Brasil ou fora dele, e qualquer pessoa pode usá-lo de qualquer lugar: a ferramenta só consulta o DNS público. É JavaScript puro, sem build e sem dependência de runtime, e não tem servidor: a página consulta o DNS direto do seu navegador.
 

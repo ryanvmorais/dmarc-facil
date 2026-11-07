@@ -23,6 +23,9 @@ import { RESOLVEDORES } from "../public/js/doh.js";
 
 const PUBLIC = fileURLToPath(new URL("../public/", import.meta.url));
 
+// As quatro páginas: as duas em português e as duas em inglês (spec 008).
+const PAGINAS = ["index.html", "404.html", "en/index.html", "en/404.html"];
+
 /**
  * @param {string} caminho - Caminho relativo a `public/`.
  * @returns {Promise<string>} O conteúdo do arquivo.
@@ -204,7 +207,7 @@ describe("index.html", () => {
 
 describe("Content-Security-Policy", () => {
   it("vem logo depois do charset, antes de qualquer outra tag do head", async () => {
-    for (const arquivo of ["index.html", "404.html"]) {
+    for (const arquivo of PAGINAS) {
       const cabeca = semComentarios(await ler(arquivo)).split("<head>")[1] ?? "";
       const tags = cabeca.match(/<\/?(?:meta|link|script|title)\b[^>]*>/gi) ?? [];
 
@@ -221,7 +224,7 @@ describe("Content-Security-Policy", () => {
   });
 
   it("não usa unsafe-inline nem unsafe-eval em nenhuma das páginas", async () => {
-    for (const arquivo of ["index.html", "404.html"]) {
+    for (const arquivo of PAGINAS) {
       const html = await ler(arquivo);
 
       assert.doesNotMatch(html, /unsafe-(inline|eval)/, arquivo);
@@ -253,7 +256,7 @@ describe("Content-Security-Policy", () => {
 
 describe("public/: nada de fora e nada inline", () => {
   it("nenhum HTML tem atributo style nem script inline ou de fora", async () => {
-    for (const arquivo of ["index.html", "404.html"]) {
+    for (const arquivo of PAGINAS) {
       const html = semComentarios(await ler(arquivo));
 
       assert.doesNotMatch(html, /<[^>]*\sstyle\s*=/i, `${arquivo} tem style=`);
@@ -266,7 +269,7 @@ describe("public/: nada de fora e nada inline", () => {
   });
 
   it("nenhum atributo de evento on* nos HTML", async () => {
-    for (const arquivo of ["index.html", "404.html"]) {
+    for (const arquivo of PAGINAS) {
       assert.doesNotMatch(semComentarios(await ler(arquivo)), /<[^>]*\son[a-z]+\s*=/i, arquivo);
     }
   });
@@ -282,10 +285,11 @@ describe("public/: nada de fora e nada inline", () => {
       assert.doesNotMatch(texto, /url\(\s*["']?(?:https?:)?\/\//, arquivo);
       // Âncora para fora (rodapé, MailVigil) é link que o visitante clica; o que o navegador
       // carrega sozinho (script, imagem, moldura, folha de estilo) nunca é de fora. O
-      // `<link rel="canonical">` (spec 007, ADR-8) é endereço absoluto por exigência do padrão,
-      // mas é metadado: o navegador não baixa nada dele.
+      // `<link rel="canonical">` (spec 007, ADR-8) e os `rel="alternate" hreflang` (spec 008, ADR-7)
+      // são endereço absoluto por exigência do padrão, mas é metadado: o navegador não baixa
+      // nada deles.
       assert.doesNotMatch(
-        texto.replace(/<link\s+rel="canonical"[^>]*>/gi, ""),
+        texto.replace(/<link\s+rel="(?:canonical|alternate)"[^>]*>/gi, ""),
         /<(?:script|img|iframe|link)\b[^>]*(?:src|href)="(?:https?:)?\/\//i,
         arquivo,
       );
@@ -353,6 +357,150 @@ describe("404.html", () => {
 });
 
 // ---------------------------------------------------------------------------
+// PÁGINAS EM INGLÊS (spec 008)
+// ---------------------------------------------------------------------------
+
+/**
+ * O esqueleto de um HTML: a sequência de tags com `id` e `class`, sem texto nem comentário nem
+ * os atributos que mudam com o idioma. É o que o teste compara entre os dois idiomas (ADR-1).
+ *
+ * @param {string} html - O HTML de uma página.
+ * @returns {string[]} Uma linha por tag de abertura: `tag#id.classe`.
+ */
+const esqueleto = (html) =>
+  [...semComentarios(html).matchAll(/<([a-z][a-z0-9]*)\b([^>]*)>/gi)].map(([, tag, atributos]) => {
+    const id = /\sid="([^"]+)"/.exec(atributos ?? "")?.[1] ?? "";
+    const classe = /\sclass="([^"]+)"/.exec(atributos ?? "")?.[1] ?? "";
+    return `${tag}#${id}.${classe}`;
+  });
+
+describe("páginas em inglês", () => {
+  it("en/index.html tem lang en, um único h1 e um único main", async () => {
+    const html = semComentarios(await ler("en/index.html"));
+
+    assert.match(html, /<html lang="en">/);
+    assert.equal(html.match(/<h1\b/g)?.length, 1);
+    assert.equal(html.match(/<main\b/g)?.length, 1);
+  });
+
+  it("en/404.html tem lang en, um h1, o link de volta para /en/ e nenhum script", async () => {
+    const html = semComentarios(await ler("en/404.html"));
+
+    assert.match(html, /<html lang="en">/);
+    assert.equal(html.match(/<h1\b/g)?.length, 1);
+    assert.match(html, /<a class="botao" href="\/en\/">/);
+    assert.doesNotMatch(html, /<script\b/i);
+  });
+
+  it("en/404.html usa só caminhos absolutos a partir da raiz", async () => {
+    const html = semComentarios(await ler("en/404.html"));
+    const caminhos = [...html.matchAll(/\s(?:href|src)="([^"]+)"/g)].map(
+      (achado) => achado[1] ?? "",
+    );
+
+    assert.ok(caminhos.length >= 3);
+    for (const caminho of caminhos) {
+      assert.match(caminho, /^\/(?!\/)/, `caminho não absoluto: ${caminho}`);
+    }
+  });
+
+  it("en/index.html carrega a entrada em inglês, e a entrada importa o catálogo em inglês", async () => {
+    const html = await ler("en/index.html");
+    const entrada = semComentarios(await ler("js/entrada-en.js"));
+
+    assert.match(html, /<script type="module" src="\/js\/entrada-en\.js"><\/script>/);
+    assert.doesNotMatch(html, /entrada-pt/);
+    assert.match(html, /<link rel="stylesheet" href="\/css\/pagina\.css"/);
+    assert.match(entrada, /import \{ iniciarPagina \} from "\.\/pagina\.js";/);
+    assert.match(entrada, /import \{ textos \} from "\.\/textos\/en\/index\.js";/);
+    assert.match(entrada, /iniciarPagina\(textos\);/);
+  });
+
+  it("a CSP da <meta> de cada página em inglês é igual à da página em português", async () => {
+    const politica = async (/** @type {string} */ arquivo) =>
+      /http-equiv="Content-Security-Policy"\s+content="([^"]+)"/.exec(await ler(arquivo))?.[1];
+
+    assert.ok((await politica("index.html")) !== undefined);
+    assert.equal(await politica("en/index.html"), await politica("index.html"));
+    assert.equal(await politica("en/404.html"), await politica("404.html"));
+  });
+
+  it("o esqueleto de en/index.html é o de index.html (ids, classes e ordem)", async () => {
+    assert.deepEqual(esqueleto(await ler("en/index.html")), esqueleto(await ler("index.html")));
+  });
+
+  it("o esqueleto de en/404.html é o de 404.html", async () => {
+    assert.deepEqual(esqueleto(await ler("en/404.html")), esqueleto(await ler("404.html")));
+  });
+
+  it("o texto da página em inglês não é o da portuguesa", async () => {
+    const texto = async (/** @type {string} */ arquivo) =>
+      semComentarios(await ler(arquivo))
+        .replace(/<[^>]+>/g, " ")
+        .replace(/\s+/g, " ");
+
+    assert.doesNotMatch(await texto("en/index.html"), /Verificar|Domínio|Próximo|seletores/);
+    assert.doesNotMatch(await texto("en/404.html"), /Voltar|Erro 404|não achei/i);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// SELETOR DE IDIOMA (spec 008)
+// ---------------------------------------------------------------------------
+
+describe("seletor de idioma", () => {
+  /** @param {string} html @returns {string[]} Os `<nav class="idioma">` com o que há dentro. */
+  const navs = (html) => [...html.matchAll(/<nav class="idioma"[\s\S]*?<\/nav>/g)].map((m) => m[0]);
+
+  for (const [arquivo, atual, outro, rotulos] of /** @type {const} */ ([
+    ["index.html", "PT", "EN", ["Idioma", "Idioma (rodapé)"]],
+    ["en/index.html", "EN", "PT", ["Language", "Language (footer)"]],
+  ])) {
+    describe(arquivo, () => {
+      it("tem um seletor no cabeçalho e outro no rodapé, com nomes diferentes", async () => {
+        const html = semComentarios(await ler(arquivo));
+        const encontrados = navs(html);
+
+        assert.equal(encontrados.length, 2);
+        assert.deepEqual(
+          encontrados.map((nav) => /aria-label="([^"]+)"/.exec(nav)?.[1]),
+          rotulos,
+        );
+        assert.ok(html.indexOf(encontrados[0] ?? "") < html.indexOf("<main"));
+        assert.ok(html.indexOf(encontrados[1] ?? "") > html.indexOf("</main>"));
+      });
+
+      it(`marca ${atual} como a página atual e só ele`, async () => {
+        for (const nav of navs(semComentarios(await ler(arquivo)))) {
+          assert.equal(nav.match(/aria-current="page"/g)?.length, 1);
+          assert.match(nav, new RegExp(`aria-current="page"[^>]*>\\s*${atual}\\s*</a`));
+          assert.doesNotMatch(nav, new RegExp(`aria-current="page"[^>]*>\\s*${outro}\\s*</a`));
+        }
+      });
+
+      it("os dois links são links reais, com o nome do idioma por extenso no próprio idioma", async () => {
+        for (const nav of navs(semComentarios(await ler(arquivo)))) {
+          assert.match(
+            nav,
+            /<a href="\/" lang="pt-BR" hreflang="pt-BR"[^>]*aria-label="PT: Português"/,
+          );
+          assert.match(
+            nav,
+            /<a href="\/en\/" lang="en" hreflang="en"[^>]*aria-label="EN: English"/,
+          );
+        }
+      });
+    });
+  }
+
+  it("as 404 não têm seletor de idioma", async () => {
+    for (const arquivo of ["404.html", "en/404.html"]) {
+      assert.doesNotMatch(await ler(arquivo), /class="idioma"/, arquivo);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
 // LOGO
 // ---------------------------------------------------------------------------
 
@@ -369,13 +517,13 @@ describe("logo nas páginas", () => {
     );
 
     assert.ok(oficial !== undefined && oficial.length > 20);
-    for (const arquivo of ["index.html", "404.html", "favicon.svg"]) {
+    for (const arquivo of [...PAGINAS, "favicon.svg"]) {
       assert.equal(caminhoDoLogo(await ler(arquivo)), oficial, arquivo);
     }
   });
 
   it("usa fill-rule como atributo (style= não passa na CSP)", async () => {
-    for (const arquivo of ["index.html", "404.html"]) {
+    for (const arquivo of PAGINAS) {
       assert.match(await ler(arquivo), /<path[^>]*fill-rule="evenodd"/, arquivo);
     }
   });

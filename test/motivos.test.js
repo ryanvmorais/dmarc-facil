@@ -15,7 +15,7 @@ import { readdir, readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 
 import { textoDoMotivo } from "../public/js/textos/resolver.js";
-import { textos } from "./ajudas/textos.js";
+import { catalogos, textos } from "./ajudas/textos.js";
 
 // Os motivos do catálogo em português, o idioma de referência.
 const MOTIVOS = textos.motivos;
@@ -66,26 +66,36 @@ describe("motivos: cobertura dos códigos", () => {
     }
   });
 
-  it("todo código emitido pelos módulos tem entrada em MOTIVOS", async () => {
-    const semEntrada = [...(await codigosEmitidos()).keys()].filter(
-      (codigo) => !Object.hasOwn(MOTIVOS, codigo),
-    );
+  for (const [idioma, catalogo] of Object.entries(catalogos)) {
+    it(`${idioma}: todo código emitido pelos módulos tem entrada em motivos`, async () => {
+      const semEntrada = [...(await codigosEmitidos()).keys()].filter(
+        (codigo) => !Object.hasOwn(catalogo.motivos, codigo),
+      );
 
-    assert.deepEqual(semEntrada, []);
-  });
+      assert.deepEqual(semEntrada, []);
+    });
 
-  it("toda entrada de MOTIVOS é emitida por algum módulo", async () => {
-    const emitidos = await codigosEmitidos();
-    const mortas = Object.keys(MOTIVOS).filter((codigo) => !emitidos.has(codigo));
+    it(`${idioma}: toda entrada de motivos é emitida por algum módulo`, async () => {
+      const emitidos = await codigosEmitidos();
+      const mortas = Object.keys(catalogo.motivos).filter((codigo) => !emitidos.has(codigo));
 
-    assert.deepEqual(mortas, []);
-  });
+      assert.deepEqual(mortas, []);
+    });
 
-  it("nenhuma entrada de MOTIVOS tem texto vazio", () => {
-    for (const [codigo, { texto }] of Object.entries(MOTIVOS)) {
-      assert.notEqual(texto.trim(), "", codigo);
-    }
-  });
+    it(`${idioma}: nenhuma entrada de motivos tem texto vazio`, () => {
+      for (const [codigo, { texto }] of Object.entries(catalogo.motivos)) {
+        assert.notEqual(texto.trim(), "", codigo);
+      }
+    });
+
+    it(`${idioma}: código sem entrada devolve a frase de sem-motivo do idioma, nunca o código`, () => {
+      const esperada = catalogo.motivos["sem-motivo"]?.texto;
+
+      for (const motivo of ["", "codigo-que-ninguem-cadastrou", "constructor", "__proto__"]) {
+        assert.equal(textoDoMotivo(catalogo, { motivo }), esperada);
+      }
+    });
+  }
 });
 
 // ---------------------------------------------------------------------------

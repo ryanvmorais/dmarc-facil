@@ -22,7 +22,7 @@ import { describe, it } from "node:test";
 
 // A referência vem primeiro: acrescentar texto começa por ela (ADR-4).
 const REFERENCIA = "pt";
-const IDIOMAS = ["pt"];
+const IDIOMAS = ["pt", "en"];
 
 /** @type {Record<string, unknown>} */
 const CATALOGOS = Object.fromEntries(

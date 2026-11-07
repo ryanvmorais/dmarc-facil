@@ -33,6 +33,10 @@ const TEMPO_LIMITE_MS = 20_000;
 const AGENTE = "dmarc-facil-conferir-hospedagem (+https://github.com/ryanvmorais/dmarc-facil)";
 // Um caminho que não existe em `public/` e é aninhado, para provar a 404 em qualquer nível.
 const CAMINHO_INEXISTENTE = "/conferencia-caminho-inexistente/a/b";
+// O mesmo, sob `/en/`: a 404 mais próxima da hospedagem tem de ser a em inglês (ADR-9 da spec 008).
+const CAMINHO_INEXISTENTE_EN = "/en/conferencia-caminho-inexistente/a/b";
+// As entradas de JavaScript, uma por idioma: o código que a página carrega primeiro.
+const ENTRADAS_JS = ["js/entrada-pt.js", "js/entrada-en.js"];
 // `http://` só pode terminar em redirecionamento (para `https://`) ou em conexão recusada; nunca em 200.
 const REDIRECIONAMENTOS = [301, 302, 307, 308];
 // Com o "Bot Preference Sync" ligado na zona, a Cloudflare põe o seu bloco de content signals na
@@ -199,7 +203,7 @@ const semBlocoGerenciado = (aberto) => {
 };
 
 /**
- * Roda as verificações de RF-07 contra o endereço publicado.
+ * Roda as verificações de RF-07 (e de RF-08 da spec 008, o inglês) contra o endereço publicado.
  *
  * @param {{ endereco: string, pasta: string, buscar?: typeof fetch }} opcoes - ``endereco`` é a
  *   raiz do site, com `https://` e a barra final; ``pasta`` é o caminho da pasta `public/` do
@@ -247,27 +251,74 @@ export const conferirHospedagem = async ({ endereco, pasta, buscar = fetch }) =>
     ),
   );
 
-  // 3. JavaScript e CSS: idênticos (nada reescrito) e, no código, cache que obriga a revalidar.
-  const js = await abrir(url("/js/entrada-pt.js"), buscar);
+  // 3. A página em inglês, o `/en` sem a barra e a 404 sob `/en/` (spec 008, ADR-9). O que a
+  //    spec supôs, esta conferência mede: `/en` pode responder com um redirecionamento para
+  //    `/en/` ou com o próprio arquivo, e as duas formas contam como servir a página.
+  const ingles = await abrir(url("/en/"), buscar);
+  verificacoes.push(
+    resultado(
+      "Página em inglês",
+      ingles === null
+        ? naoAbriu
+        : [
+            ...conferirCorpo(ingles, 200, await arquivo("en/index.html")),
+            ...compararCabecalhos(gerais, ingles.resposta.headers),
+          ],
+      "200, corpo idêntico ao en/index.html, cabeçalhos de segurança presentes",
+    ),
+  );
+
+  const semBarra = await abrir(url("/en"), buscar);
+  const destinoSemBarra = semBarra?.resposta.headers.get("location") ?? "";
+  verificacoes.push(
+    resultado(
+      "/en sem a barra",
+      semBarra === null
+        ? naoAbriu
+        : REDIRECIONAMENTOS.includes(semBarra.resposta.status)
+          ? new URL(destinoSemBarra, endereco).href === url("/en/")
+            ? []
+            : [`/en redirecionou para "${destinoSemBarra}" em vez de /en/`]
+          : conferirCorpo(semBarra, 200, await arquivo("en/index.html")),
+      "redireciona para /en/ ou serve o en/index.html",
+    ),
+  );
+
+  const inexistenteEn = await abrir(url(CAMINHO_INEXISTENTE_EN), buscar);
+  verificacoes.push(
+    resultado(
+      "Página 404 em inglês",
+      inexistenteEn === null
+        ? naoAbriu
+        : [
+            ...conferirCorpo(inexistenteEn, 404, await arquivo("en/404.html")),
+            ...compararCabecalhos(gerais, inexistenteEn.resposta.headers),
+          ],
+      "status 404, corpo idêntico ao en/404.html, cabeçalhos de segurança presentes",
+    ),
+  );
+
+  // 4. JavaScript e CSS: idênticos (nada reescrito) e, no código, cache que obriga a revalidar.
   const css = await abrir(url("/css/pagina.css"), buscar);
   /** @type {string[]} */
   const problemasCodigo = [];
-  if (js === null) {
-    problemasCodigo.push("js/entrada-pt.js: não foi possível abrir o endereço");
-  } else {
+  for (const entrada of ENTRADAS_JS) {
+    const js = await abrir(url(`/${entrada}`), buscar);
+    if (js === null) {
+      problemasCodigo.push(`${entrada}: não foi possível abrir o endereço`);
+      continue;
+    }
     problemasCodigo.push(
-      ...conferirCorpo(js, 200, await arquivo("js/entrada-pt.js")).map(
-        (p) => `js/entrada-pt.js: ${p}`,
-      ),
+      ...conferirCorpo(js, 200, await arquivo(entrada)).map((p) => `${entrada}: ${p}`),
     );
     if (!/javascript/i.test(js.resposta.headers.get("content-type") ?? "")) {
       problemasCodigo.push(
-        `js/entrada-pt.js: content-type "${js.resposta.headers.get("content-type")}" não é JavaScript`,
+        `${entrada}: content-type "${js.resposta.headers.get("content-type")}" não é JavaScript`,
       );
     }
     const cache = js.resposta.headers.get("cache-control") ?? "";
     if (!/no-cache|must-revalidate|max-age=0/i.test(cache) || /immutable/i.test(cache)) {
-      problemasCodigo.push(`js/entrada-pt.js: cache-control "${cache}" não obriga a revalidar`);
+      problemasCodigo.push(`${entrada}: cache-control "${cache}" não obriga a revalidar`);
     }
   }
   if (css === null) {
@@ -283,7 +334,7 @@ export const conferirHospedagem = async ({ endereco, pasta, buscar = fetch }) =>
     resultado("JavaScript e CSS", problemasCodigo, "200, corpos idênticos, cache revalida"),
   );
 
-  // 4. Uma fonte: idêntica e com o cache longo do `_headers` (a plataforma pode juntá-lo ao padrão).
+  // 5. Uma fonte: idêntica e com o cache longo do `_headers` (a plataforma pode juntá-lo ao padrão).
   const fonte = (await readdir(join(pasta, "fonts"))).filter((f) => f.endsWith(".woff2")).sort()[0];
   const aberta = fonte === undefined ? null : await abrir(url(`/fonts/${fonte}`), buscar);
   verificacoes.push(
@@ -301,7 +352,7 @@ export const conferirHospedagem = async ({ endereco, pasta, buscar = fetch }) =>
     ),
   );
 
-  // 5. Descoberta: robots.txt e sitemap.xml idênticos aos arquivos.
+  // 6. Descoberta: robots.txt e sitemap.xml idênticos aos arquivos.
   /** @type {string[]} */
   const problemasDescoberta = [];
   for (const nome of ["robots.txt", "sitemap.xml"]) {
@@ -323,7 +374,7 @@ export const conferirHospedagem = async ({ endereco, pasta, buscar = fetch }) =>
     ),
   );
 
-  // 6. O `_headers` é consumido pela plataforma e não pode ser publicado.
+  // 7. O `_headers` é consumido pela plataforma e não pode ser publicado.
   const headers = await abrir(url("/_headers"), buscar);
   verificacoes.push(
     resultado(
@@ -337,7 +388,7 @@ export const conferirHospedagem = async ({ endereco, pasta, buscar = fetch }) =>
     ),
   );
 
-  // 7. `http://` redireciona para `https://` ou é recusado; nunca é servido. Se nem o https abre
+  // 8. `http://` redireciona para `https://` ou é recusado; nunca é servido. Se nem o https abre
   //    (DNS, certificado), "recusado" seria um falso verde: não dá para afirmar nada.
   const claro = new URL("/", endereco);
   claro.protocol = "http:";

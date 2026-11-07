@@ -191,9 +191,46 @@ a {
 }
 
 .topo-interno {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
   max-width: 1120px;
   margin-inline: auto;
   padding-inline: 16px;
+}
+
+/* Seletor de idioma: dois links de texto (PT e EN), no cabeçalho e no rodapé. O atual leva
+ * `aria-current="page"` e o sublinhado da marca; o alvo tem 44 px (RNF-04 da spec 008). */
+.idioma {
+  display: flex;
+  align-items: center;
+}
+
+.idioma a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--cor-texto-2);
+  text-decoration: none;
+}
+
+.idioma a:hover {
+  color: var(--cor-marca-hover);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.idioma a[aria-current="page"] {
+  color: var(--cor-marca-escura);
+  text-decoration: underline;
+  text-decoration-color: var(--cor-marca);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
 }
 
 .marca {

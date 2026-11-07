@@ -23,6 +23,27 @@ export class NoFalso {
     this.atributos = {};
     /** @type {NoFalso[]} */
     this.filhos = [];
+    // Para o campo de formulário e os links que `pagina.js` liga: o valor digitado e os ouvintes.
+    this.value = "";
+    /** @type {Record<string, Array<() => void>>} */
+    this.ouvintes = {};
+  }
+
+  /** @param {string} nome @returns {string | null} */
+  getAttribute(nome) {
+    return this.atributos[nome] ?? null;
+  }
+
+  /** @param {string} tipo @param {() => void} ouvinte */
+  addEventListener(tipo, ouvinte) {
+    this.ouvintes[tipo] = [...(this.ouvintes[tipo] ?? []), ouvinte];
+  }
+
+  /** @param {string} tipo O evento a disparar, como o navegador faria ao digitar. */
+  disparar(tipo) {
+    for (const ouvinte of this.ouvintes[tipo] ?? []) {
+      ouvinte();
+    }
   }
 
   /** @param {string} nome @param {string} valor */

@@ -105,6 +105,11 @@ describe("_headers: Content-Security-Policy", () => {
     assert.equal(cabecalho, `${meta}; frame-ancestors 'none'`);
   });
 
+  it("a <meta> de en/index.html é a mesma do index.html, e a de en/404.html a da 404.html (spec 008)", async () => {
+    assert.equal(cspDaMeta(await ler("en/index.html")), cspDaMeta(await ler("index.html")));
+    assert.equal(cspDaMeta(await ler("en/404.html")), cspDaMeta(await ler("404.html")));
+  });
+
   it("lista no connect-src exatamente os resolvedores de doh.js", async () => {
     const cabecalho = (await cabecalhosGerais()).get("content-security-policy") ?? "";
     const hosts = RESOLVEDORES.map((r) => new URL(r.url).origin).sort();
@@ -116,6 +121,8 @@ describe("_headers: Content-Security-Policy", () => {
       (await cabecalhosGerais()).get("content-security-policy") ?? "",
       cspDaMeta(await ler("index.html")),
       cspDaMeta(await ler("404.html")),
+      cspDaMeta(await ler("en/index.html")),
+      cspDaMeta(await ler("en/404.html")),
     ];
     for (const politica of politicas) {
       assert.doesNotMatch(politica, /unsafe-inline|unsafe-eval/);
@@ -124,11 +131,16 @@ describe("_headers: Content-Security-Policy", () => {
 
   it("não deixa a <meta> da 404 mais frouxa que o cabeçalho", async () => {
     const cabecalho = diretivas((await cabecalhosGerais()).get("content-security-policy") ?? "");
-    const meta404 = diretivas(cspDaMeta(await ler("404.html")));
-    for (const [nome, valores] of meta404) {
-      const permitidos = cabecalho.get(nome) ?? cabecalho.get("default-src") ?? [];
-      for (const valor of valores) {
-        assert.ok(permitidos.includes(valor), `${nome} ${valor} da 404 não está no cabeçalho`);
+    for (const pagina of ["404.html", "en/404.html"]) {
+      const meta404 = diretivas(cspDaMeta(await ler(pagina)));
+      for (const [nome, valores] of meta404) {
+        const permitidos = cabecalho.get(nome) ?? cabecalho.get("default-src") ?? [];
+        for (const valor of valores) {
+          assert.ok(
+            permitidos.includes(valor),
+            `${nome} ${valor} de ${pagina} não está no cabeçalho`,
+          );
+        }
       }
     }
   });

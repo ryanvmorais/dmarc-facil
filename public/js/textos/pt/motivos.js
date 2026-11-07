@@ -57,7 +57,6 @@ export const motivos = {
   "consulta-falhou": {
     texto: "A consulta ao resolvedor falhou (rede, tempo ou resposta inválida).",
   },
-  // [provisório]
   "resolvedores-indisponiveis": {
     texto:
       "Não consegui consultar o DNS agora, nem pela Cloudflare nem pelo Google. Confira sua conexão e tente de novo.",

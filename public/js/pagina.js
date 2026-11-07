@@ -33,7 +33,7 @@ import {
 import { consultarTxt } from "./doh.js";
 import { criar, urlHttps } from "./dom.js";
 import { normalizarDominio } from "./dominio.js";
-import { lerDominioDoEndereco, montarEndereco } from "./endereco.js";
+import { lerDominioDoEndereco, montarEndereco, montarEnderecoIdioma } from "./endereco.js";
 import { montarEscada, textoDoFim } from "./escada.js";
 import { SELETORES_COMUNS } from "./seletores-dkim.js";
 import { textoDoMotivo } from "./textos/resolver.js";
@@ -425,6 +425,36 @@ const desenharMailvigil = (textos) => {
 };
 
 // ---------------------------------------------------------------------------
+// LINKS DE IDIOMA
+// ---------------------------------------------------------------------------
+
+/**
+ * Faz os links de idioma levarem o domínio do campo para a outra página (ADR-6 da spec 008).
+ *
+ * Guarda o `href` de cada link como base e o regrava como `base + ?dominio=` a cada tecla e a
+ * cada chamada do que devolve (ao fim de uma verificação, quando o campo já tem o domínio
+ * normalizado). Com o `href` já pronto, o clique do meio e o "copiar link" levam o domínio junto.
+ * Sem script os links continuam funcionando, só sem o domínio.
+ *
+ * @param {Array<{ getAttribute(nome: string): string | null, setAttribute(nome: string, valor: string): void }>} links -
+ *   Os links de idioma da página.
+ * @param {{ value: string, addEventListener(tipo: string, ouvinte: () => void): void }} campo -
+ *   O campo de domínio.
+ * @returns {() => void} Regrava os `href` com o que está no campo agora.
+ */
+export const ligarLinksDeIdioma = (links, campo) => {
+  const bases = links.map((link) => link.getAttribute("href") ?? "/");
+  const atualizar = () => {
+    links.forEach((link, indice) => {
+      link.setAttribute("href", montarEnderecoIdioma(bases[indice] ?? "/", campo.value));
+    });
+  };
+  campo.addEventListener("input", atualizar);
+  atualizar();
+  return atualizar;
+};
+
+// ---------------------------------------------------------------------------
 // PÁGINA
 // ---------------------------------------------------------------------------
 
@@ -448,6 +478,8 @@ export const iniciarPagina = (textos) => {
   const erroDominioTexto = pegar("erro-dominio-texto");
   const anuncio = pegar("anuncio");
   const resultado = pegar("resultado");
+  // Os dois seletores de idioma (cabeçalho e rodapé): só os links, que existem no HTML estático.
+  const linksDeIdioma = [...document.querySelectorAll(".idioma a")];
 
   // ---------------------------------------------------------------------------
   // ESTADO DA TELA
@@ -700,6 +732,9 @@ export const iniciarPagina = (textos) => {
     }
   };
 
+  // Preenchido na ENTRADA, no fim: o link de idioma só se liga depois de o campo receber o `?dominio=`.
+  let atualizarIdiomas = () => {};
+
   formularioDominio.addEventListener("submit", (evento) => {
     evento.preventDefault();
     const lido = normalizarDominio(campo.value);
@@ -716,6 +751,7 @@ export const iniciarPagina = (textos) => {
       recusadosExtras = [];
     }
     atualizarEndereco(lido.dominio);
+    atualizarIdiomas();
     void verificador.verificar(lido.dominio, seletoresExtras);
   });
 
@@ -726,4 +762,5 @@ export const iniciarPagina = (textos) => {
   // O endereço compartilhável só preenche o campo: quem decide quando o domínio sai do navegador
   // é o visitante, apertando o botão (ADR-8).
   campo.value = lerDominioDoEndereco(location.search);
+  atualizarIdiomas = ligarLinksDeIdioma(linksDeIdioma, campo);
 };

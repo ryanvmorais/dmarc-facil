@@ -1,7 +1,7 @@
 /**
- * @file Testes da descoberta e do compartilhamento: `canonical`, `robots.txt`, `sitemap.xml` (RF-09
- * da spec 007; ADR-2 e ADR-8) e o cartão que a rede social monta (`og:*`, `twitter:card`, imagem
- * e ícone de tela inicial).
+ * @file Testes da descoberta e do compartilhamento: `canonical`, `hreflang`, `robots.txt`,
+ * `sitemap.xml` (RF-09 da spec 007, ADR-2 e ADR-8; RF-06 da spec 008, ADR-7) e o cartão que a rede
+ * social monta (`og:*`, `twitter:card`, imagem e ícone de tela inicial), nos dois idiomas.
  *
  * O endereço público tem uma fonte só, a rota do `wrangler.json`. `public/` é estático e não
  * pode lê-lo, então os arquivos repetem o texto e estes testes fazem a ligação.
@@ -29,20 +29,92 @@ const enderecoDaRota = async () => {
   return `https://${routes[0].pattern}/`;
 };
 
+// As duas páginas do site, com o que muda de uma para a outra. O endereço de cada uma sai do
+// endereço da rota.
+const PAGINAS = /** @type {const} */ ([
+  {
+    arquivo: "public/index.html",
+    idioma: "pt-BR",
+    caminho: "",
+    locale: "pt_BR",
+    imagem: "social-pt.png",
+    docs: "dmarc-facil-dmarc-checker-social-preview.png",
+  },
+  {
+    arquivo: "public/en/index.html",
+    idioma: "en",
+    caminho: "en/",
+    locale: "en_US",
+    imagem: "social-en.png",
+    docs: "dmarc-facil-dmarc-checker-social-preview-en.png",
+  },
+]);
+
+/**
+ * @param {string} html - O HTML de uma página.
+ * @returns {Array<[string, string]>} Os `hreflang` e `href` dos `<link rel="alternate">`.
+ */
+const alternativas = (html) =>
+  [...html.matchAll(/<link\s+rel="alternate"\s+hreflang="([^"]*)"\s+href="([^"]*)"/g)].map((m) => [
+    m[1] ?? "",
+    m[2] ?? "",
+  ]);
+
 // ---------------------------------------------------------------------------
 // TESTES
 // ---------------------------------------------------------------------------
 
 describe("canonical", () => {
-  it("o index.html aponta para o endereço da rota, sem ?dominio=", async () => {
-    const html = await ler("public/index.html");
-    const achados = [...html.matchAll(/<link\s+rel="canonical"\s+href="([^"]*)"/g)];
-    assert.equal(achados.length, 1);
-    assert.equal(achados[0]?.[1], await enderecoDaRota());
+  for (const pagina of PAGINAS) {
+    it(`${pagina.arquivo} aponta para si mesma, a partir do endereço da rota, sem ?dominio=`, async () => {
+      const html = await ler(pagina.arquivo);
+      const achados = [...html.matchAll(/<link\s+rel="canonical"\s+href="([^"]*)"/g)];
+      assert.equal(achados.length, 1);
+      assert.equal(achados[0]?.[1], `${await enderecoDaRota()}${pagina.caminho}`);
+    });
+  }
+
+  it("as 404 não têm canonical", async () => {
+    for (const arquivo of ["public/404.html", "public/en/404.html"]) {
+      assert.doesNotMatch(await ler(arquivo), /rel="canonical"/, arquivo);
+    }
+  });
+});
+
+describe("hreflang", () => {
+  it("cada página cita as duas e a si mesma, e o x-default é a portuguesa", async () => {
+    const endereco = await enderecoDaRota();
+    const esperado = [
+      ["pt-BR", endereco],
+      ["en", `${endereco}en/`],
+      ["x-default", endereco],
+    ];
+
+    for (const pagina of PAGINAS) {
+      assert.deepEqual(alternativas(await ler(pagina.arquivo)), esperado, pagina.arquivo);
+    }
   });
 
-  it("a 404.html não tem canonical", async () => {
-    assert.doesNotMatch(await ler("public/404.html"), /rel="canonical"/);
+  it("é recíproco: o que uma página cita para a outra, a outra cita de volta", async () => {
+    const [pt, en] = await Promise.all(
+      PAGINAS.map(async (p) => alternativas(await ler(p.arquivo))),
+    );
+
+    assert.deepEqual(pt, en);
+    for (const pagina of PAGINAS) {
+      assert.ok(
+        (pt ?? []).some(
+          ([idioma, href]) => idioma === pagina.idioma && href.endsWith(`/${pagina.caminho}`),
+        ),
+        `${pagina.arquivo} não aparece na lista que ela mesma cita`,
+      );
+    }
+  });
+
+  it("as 404 não têm hreflang", async () => {
+    for (const arquivo of ["public/404.html", "public/en/404.html"]) {
+      assert.doesNotMatch(await ler(arquivo), /hreflang=/, arquivo);
+    }
   });
 });
 
@@ -56,20 +128,45 @@ describe("robots.txt", () => {
 });
 
 describe("sitemap.xml", () => {
-  it("é um sitemap bem formado com uma URL só, a da página inicial, sem lastmod", async () => {
+  it("é um sitemap bem formado com exatamente as duas páginas, sem lastmod", async () => {
     const xml = await ler("public/sitemap.xml");
+    const endereco = await enderecoDaRota();
     assert.match(
       xml,
-      /^<\?xml version="1\.0" encoding="UTF-8"\?>\n<urlset xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9">/,
+      /^<\?xml version="1\.0" encoding="UTF-8"\?>\n<urlset xmlns="http:\/\/www\.sitemaps\.org\/schemas\/sitemap\/0\.9" xmlns:xhtml="http:\/\/www\.w3\.org\/1999\/xhtml">/,
     );
     assert.match(xml, /<\/urlset>\s*$/);
-    assert.equal(xml.match(/<url>/g)?.length, 1);
-    assert.equal(xml.match(/<\/url>/g)?.length, 1);
+    assert.equal(xml.match(/<url>/g)?.length, 2);
+    assert.equal(xml.match(/<\/url>/g)?.length, 2);
     assert.deepEqual(
-      [...xml.matchAll(/<loc>([^<]*)<\/loc>/g)].map((m) => m[1]),
-      [await enderecoDaRota()],
+      [...xml.matchAll(/<url>\s*<loc>([^<]*)<\/loc>/g)].map((m) => m[1]),
+      [endereco, `${endereco}en/`],
     );
     assert.doesNotMatch(xml, /lastmod/);
+  });
+
+  it("cada URL lista as duas versões e a si mesma, como o hreflang das páginas", async () => {
+    const xml = await ler("public/sitemap.xml");
+    const endereco = await enderecoDaRota();
+    const blocos = [...xml.matchAll(/<url>[\s\S]*?<\/url>/g)].map((m) => m[0]);
+    const esperado = [
+      ["pt-BR", endereco],
+      ["en", `${endereco}en/`],
+    ];
+
+    assert.equal(blocos.length, 2);
+    for (const bloco of blocos) {
+      assert.deepEqual(
+        [
+          ...bloco.matchAll(
+            /<xhtml:link\s+rel="alternate"\s+hreflang="([^"]*)"\s+href="([^"]*)"\s*\/>/g,
+          ),
+        ]
+          .map((m) => [m[1], m[2]])
+          .filter(([idioma]) => idioma !== "x-default"),
+        esperado,
+      );
+    }
   });
 });
 
@@ -112,50 +209,72 @@ const conferirPng = async (caminho, largura, altura) => {
 };
 
 describe("cartão de compartilhamento", () => {
-  it("og:url é o endereço da rota, sem ?dominio=, e og:image fica na mesma origem", async () => {
-    const html = await ler("public/index.html");
-    const endereco = await enderecoDaRota();
+  for (const pagina of PAGINAS) {
+    describe(pagina.arquivo, () => {
+      it("og:url é o endereço da página, sem ?dominio=, e og:image fica na mesma origem", async () => {
+        const html = await ler(pagina.arquivo);
+        const endereco = await enderecoDaRota();
 
-    assert.deepEqual(metas(html, "property", "og:url"), [endereco]);
-    assert.deepEqual(metas(html, "property", "og:image"), [`${endereco}social-pt.png`]);
-  });
+        assert.deepEqual(metas(html, "property", "og:url"), [`${endereco}${pagina.caminho}`]);
+        assert.deepEqual(metas(html, "property", "og:image"), [`${endereco}${pagina.imagem}`]);
+      });
 
-  it("tem tipo, nome do site, título, descrição, idioma e texto alternativo da imagem", async () => {
-    const html = await ler("public/index.html");
+      it("tem tipo, nome do site, título, descrição, idioma e texto alternativo da imagem", async () => {
+        const html = await ler(pagina.arquivo);
 
-    assert.deepEqual(metas(html, "property", "og:type"), ["website"]);
-    assert.deepEqual(metas(html, "property", "og:locale"), ["pt_BR"]);
-    assert.deepEqual(metas(html, "name", "twitter:card"), ["summary_large_image"]);
-    for (const chave of ["og:site_name", "og:title", "og:description", "og:image:alt"]) {
-      const valores = metas(html, "property", chave);
-      assert.equal(valores.length, 1, chave);
-      assert.notEqual(valores[0], "", chave);
-    }
-  });
+        assert.deepEqual(metas(html, "property", "og:type"), ["website"]);
+        assert.deepEqual(metas(html, "property", "og:locale"), [pagina.locale]);
+        assert.deepEqual(metas(html, "name", "twitter:card"), ["summary_large_image"]);
+        for (const chave of ["og:site_name", "og:title", "og:description", "og:image:alt"]) {
+          const valores = metas(html, "property", chave);
+          assert.equal(valores.length, 1, chave);
+          assert.notEqual(valores[0], "", chave);
+        }
+      });
 
-  it("og:title e og:description repetem o <title> e a description da página", async () => {
-    const html = await ler("public/index.html");
-    const titulo = html.match(/<title>([^<]+)<\/title>/)?.[1];
+      it("og:title e og:description repetem o <title> e a description da página", async () => {
+        const html = await ler(pagina.arquivo);
+        const titulo = html.match(/<title>([^<]+)<\/title>/)?.[1];
 
-    assert.deepEqual(metas(html, "property", "og:title"), [titulo]);
-    assert.deepEqual(metas(html, "property", "og:description"), metas(html, "name", "description"));
-  });
+        assert.deepEqual(metas(html, "property", "og:title"), [titulo]);
+        assert.deepEqual(
+          metas(html, "property", "og:description"),
+          metas(html, "name", "description"),
+        );
+      });
 
-  it("a imagem social é um PNG 1280 x 640, dentro do limite, igual à do repositório", async () => {
-    const png = await conferirPng("public/social-pt.png", 1280, 640);
-    const doRepositorio = await readFile(
-      new URL("../docs/images/dmarc-facil-dmarc-checker-social-preview.png", import.meta.url),
+      it("a imagem social é um PNG 1280 x 640, dentro do limite, igual à do repositório", async () => {
+        const png = await conferirPng(`public/${pagina.imagem}`, 1280, 640);
+        const doRepositorio = await readFile(
+          new URL(`../docs/images/${pagina.docs}`, import.meta.url),
+        );
+
+        assert.ok(png.length <= LIMITE_BYTES_IMAGEM, `${png.length} bytes passa de 1 MB`);
+        assert.ok(png.equals(doRepositorio), `public/${pagina.imagem} difere de docs/images/`);
+      });
+    });
+  }
+
+  it("o título e a descrição em inglês não são os do português", async () => {
+    const [pt, en] = await Promise.all(PAGINAS.map((p) => ler(p.arquivo)));
+
+    assert.notEqual(
+      pt?.match(/<title>([^<]+)<\/title>/)?.[1],
+      en?.match(/<title>([^<]+)<\/title>/)?.[1],
     );
-
-    assert.ok(png.length <= LIMITE_BYTES_IMAGEM, `${png.length} bytes passa de 1 MB`);
-    assert.ok(png.equals(doRepositorio), "public/social-pt.png difere da imagem de docs/images/");
+    assert.notDeepEqual(
+      metas(pt ?? "", "name", "description"),
+      metas(en ?? "", "name", "description"),
+    );
   });
 
-  it("a 404 não tem og:* nem twitter:card", async () => {
-    const html = await ler("public/404.html");
+  it("as 404 não têm og:* nem twitter:card", async () => {
+    for (const arquivo of ["public/404.html", "public/en/404.html"]) {
+      const html = await ler(arquivo);
 
-    assert.doesNotMatch(html, /property="og:/);
-    assert.doesNotMatch(html, /name="twitter:/);
+      assert.doesNotMatch(html, /property="og:/, arquivo);
+      assert.doesNotMatch(html, /name="twitter:/, arquivo);
+    }
   });
 });
 

@@ -1,7 +1,9 @@
 # yaml-language-server: $schema=https://json.schemastore.org/github-workflow.json
 # Lighthouse CI sobre a pasta estática `public/` (spec 006, ADR-13): mede desempenho,
-# acessibilidade, boas práticas e SEO das duas páginas (index.html e 404.html), em celular e em
-# desktop, com 3 medições e a mediana. Limites em .github/lighthouse/{mobile,desktop}.json.
+# acessibilidade, boas práticas e SEO das quatro páginas (index.html, 404.html e as duas em en/),
+# em celular e em desktop, com 3 medições e a mediana. Limites em
+# .github/lighthouse/{mobile,desktop}.json. O `staticDistDir` mede todo HTML da pasta, então
+# `en/index.html` e `en/404.html` entram sem ser listados (test/lighthouse-producao.test.js confere).
 # NÃO é check obrigatório: a nota varia em runner compartilhado. O que ele pega é regressão de
 # carga, de acessibilidade e de estrutura antes do deploy; a consulta DoH real fica de fora.
 # O `@lhci/cli` vem por `npx` numa variável, e não como dependência do package.json: a árvore dele

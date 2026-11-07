@@ -16,7 +16,7 @@ import { readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
 
 import { textoDoAchado } from "../public/js/textos/resolver.js";
-import { textos } from "./ajudas/textos.js";
+import { catalogos, textos } from "./ajudas/textos.js";
 
 // Os achados do catálogo em português, o idioma de referência, por código.
 const TEXTOS_ACHADOS = textos.achados.porCodigo;
@@ -76,59 +76,78 @@ describe("catálogo de textos: cobertura dos códigos", () => {
     });
   }
 
-  it("todo código emitido pelos módulos tem entrada no catálogo", async () => {
-    const semEntrada = [...(await todosOsCodigos())].filter(
-      (codigo) => !Object.hasOwn(TEXTOS_ACHADOS, codigo),
-    );
+  for (const [idioma, catalogo] of Object.entries(catalogos)) {
+    it(`${idioma}: todo código emitido pelos módulos tem entrada no catálogo`, async () => {
+      const semEntrada = [...(await todosOsCodigos())].filter(
+        (codigo) => !Object.hasOwn(catalogo.achados.porCodigo, codigo),
+      );
 
-    assert.deepEqual(semEntrada, []);
-  });
+      assert.deepEqual(semEntrada, []);
+    });
 
-  it("toda entrada do catálogo é de um código que algum módulo emite", async () => {
-    const emitidos = await todosOsCodigos();
-    const sobrando = Object.keys(TEXTOS_ACHADOS).filter((codigo) => !emitidos.has(codigo));
+    it(`${idioma}: toda entrada do catálogo é de um código que algum módulo emite`, async () => {
+      const emitidos = await todosOsCodigos();
+      const sobrando = Object.keys(catalogo.achados.porCodigo).filter(
+        (codigo) => !emitidos.has(codigo),
+      );
 
-    assert.deepEqual(sobrando, []);
-  });
+      assert.deepEqual(sobrando, []);
+    });
+  }
 });
 
 // ---------------------------------------------------------------------------
 // CONTEÚDO
 // ---------------------------------------------------------------------------
 
+// O que a ferramenta não pode prometer, em cada idioma: "você não tem DKIM", "protegido",
+// "garante" (e o equivalente em inglês).
+const PROIBIDAS = {
+  pt: /você não tem dkim|não tem dkim|protegid[oa]|garant(?:e|ia|ido)|100 ?%/i,
+  en: /you (?:do not|don't) have dkim|you have no dkim|no dkim\b|protected|guarantee[sd]?|100 ?%/i,
+};
+
+// O título do achado de DKIM não encontrado: nunca "não tem", sempre "não encontrei nesses".
+const NAO_ENCONTRADO = {
+  pt: /não encontrei nesses seletores/i,
+  en: /not found in these selectors/i,
+};
+
 describe("catálogo de textos: conteúdo", () => {
-  it("nenhuma entrada tem campo vazio", () => {
-    for (const [codigo, entrada] of Object.entries(TEXTOS_ACHADOS)) {
-      for (const campo of /** @type {const} */ (["titulo", "explicacao", "acao"])) {
-        assert.ok(entrada[campo].trim().length > 0, `${codigo}.${campo} está vazio`);
+  for (const [idioma, catalogo] of Object.entries(catalogos)) {
+    const porCodigo = catalogo.achados.porCodigo;
+    const chave = /** @type {"pt" | "en"} */ (idioma);
+
+    it(`${idioma}: nenhuma entrada tem campo vazio`, () => {
+      for (const [codigo, entrada] of Object.entries(porCodigo)) {
+        for (const campo of /** @type {const} */ (["titulo", "explicacao", "acao"])) {
+          assert.ok(entrada[campo].trim().length > 0, `${codigo}.${campo} está vazio`);
+        }
       }
-    }
-  });
+    });
 
-  it("nenhum texto afirma o que a ferramenta não sabe", () => {
-    // "Você não tem DKIM", "protegido" e "garante" são promessas que a ferramenta não cumpre.
-    const proibidas = /você não tem dkim|não tem dkim|protegid[oa]|garant(?:e|ia|ido)|100 ?%/i;
-
-    for (const [codigo, entrada] of Object.entries(TEXTOS_ACHADOS)) {
-      const texto = `${entrada.titulo} ${entrada.explicacao} ${entrada.acao}`;
-      assert.doesNotMatch(texto, proibidas, `${codigo} tem frase proibida`);
-    }
-  });
-
-  it("os crases abrem e fecham em pares, para o trecho de código não ficar solto", () => {
-    for (const [codigo, entrada] of Object.entries(TEXTOS_ACHADOS)) {
-      for (const campo of /** @type {const} */ (["titulo", "explicacao", "acao"])) {
-        const crases = entrada[campo].split("`").length - 1;
-        assert.equal(crases % 2, 0, `${codigo}.${campo} tem crase sem par`);
+    it(`${idioma}: nenhum texto afirma o que a ferramenta não sabe`, () => {
+      for (const [codigo, entrada] of Object.entries(porCodigo)) {
+        const texto = `${entrada.titulo} ${entrada.explicacao} ${entrada.acao}`;
+        assert.doesNotMatch(texto, PROIBIDAS[chave], `${codigo} tem frase proibida`);
       }
-    }
-  });
+    });
 
-  it("o texto do DKIM não achado diz que não encontrou nesses seletores", () => {
-    const entrada = TEXTOS_ACHADOS["nenhum-seletor-encontrado"];
+    it(`${idioma}: os crases abrem e fecham em pares, para o trecho de código não ficar solto`, () => {
+      for (const [codigo, entrada] of Object.entries(porCodigo)) {
+        for (const campo of /** @type {const} */ (["titulo", "explicacao", "acao"])) {
+          const crases = entrada[campo].split("`").length - 1;
+          assert.equal(crases % 2, 0, `${codigo}.${campo} tem crase sem par`);
+        }
+      }
+    });
 
-    assert.match(entrada?.titulo ?? "", /não encontrei nesses seletores/i);
-  });
+    it(`${idioma}: o texto do DKIM não achado diz que não encontrou nesses seletores`, () => {
+      const entrada = porCodigo["nenhum-seletor-encontrado"];
+
+      assert.match(entrada?.titulo ?? "", NAO_ENCONTRADO[chave]);
+    });
+  }
 });
 
 // ---------------------------------------------------------------------------
