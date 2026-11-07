@@ -1,6 +1,6 @@
 ---
 feature: Inglês — o DMARC Fácil inteiro em /en/, com o mesmo código e os textos por idioma
-status: aprovado
+status: concluído
 date: 2026-11-07
 related: [006-pagina, 007-hospedagem]
 origin: conception

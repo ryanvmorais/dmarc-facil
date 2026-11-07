@@ -1,6 +1,6 @@
 ---
 feature: Inglês — o DMARC Fácil inteiro em /en/, com o mesmo código e os textos por idioma
-status: aprovado
+status: concluído
 date: 2026-11-07
 related: [006-pagina, 007-hospedagem]
 origin: conception
@@ -95,12 +95,12 @@ Um PR só. Os textos em inglês foram revisados e aprovados na 3.19.
 
 Roda depois do merge da etapa 3 e do deploy.
 
-- [ ] 4.1 `pnpm hospedagem:conferir` contra o endereço real, com `/en/`, `/en` e a 404 sob `/en/`. Se `/en` ou a 404 se comportarem diferente do que o ADR-9 supõe, ajustar a spec e o teste, e não o `public/`. Resultado: _a registrar_. — RF-08
-- [ ] 4.2 Lighthouse do endereço real em `/en/` (mobile e desktop): acessibilidade 1, demais ≥ 0,95, peso abaixo de 150 KB. Resultado: _a registrar_. — RNF-03
-- [ ] 4.3 leitor de tela (NVDA) em português e em inglês: cada página anuncia o idioma certo, o seletor de idioma é lido como "PT: Português" e "EN: English", o campo de domínio, o resultado e as frases do `aria-live` saem no idioma da página. Resultado: _a registrar_. — RF-05, RNF-04
-- [ ] 4.4 Conferir pelo endereço real as tags de compartilhamento e `hreflang` das duas páginas e a imagem `social-en.png` (200, `image/png`, 1280 × 640). Resultado: _a registrar_. — RF-06
-- [ ] 4.5 `specs/README.md`: linha `008-ingles` com entrega `v0.8` e status `concluído`; os três documentos da spec com `status: concluído`; conferir `CLAUDE.md`, `docs/stack.md` e os dois READMEs contra o que foi entregue. — RF-06, RF-08
-- [ ] 4.6 **Portão de qualidade final.** Resultado: _a registrar_.
+- [x] 4.1 `pnpm hospedagem:conferir` contra o endereço real, com `/en/`, `/en` e a 404 sob `/en/`. Se `/en` ou a 404 se comportarem diferente do que o ADR-9 supõe, ajustar a spec e o teste, e não o `public/`. Resultado: as dez verificações passam no deploy do `main` (`6585b4d` e depois `e3aab56`): `/en/` 200 com o corpo idêntico a `en/index.html`; `/en` responde 307 com `location` para `/en/` (como o ADR-9 supôs); um caminho inexistente sob `/en/` responde 404 com o corpo de `en/404.html`; `entrada-en.js` idêntica e revalidando. Nada a ajustar na spec nem em `public/`. — RF-08
+- [x] 4.2 Lighthouse do endereço real em `/en/` (mobile e desktop): acessibilidade 1, demais ≥ 0,95, peso abaixo de 150 KB. Resultado: no deploy de `e3aab56`, as quatro medições (celular e desktop, `/` e `/en/`, mediana de três) dão acessibilidade, desempenho, boas práticas e SEO em 100, e peso de 142 KB (142 288 e 142 241 bytes no desktop; 142 578 e 142 269 no celular). A primeira medição, em `6585b4d`, reprovou só o peso (156 190 bytes em `/` e 155 924 em `/en/`, contra 153 600; já eram 154 823 em `/` no deploy da etapa 2). A causa estava na `JetBrains Mono` (21 KB): reduzida a ASCII e Latin-1, sem ligaduras, caiu para 7 KB. — RNF-03
+- [x] 4.3 leitor de tela (NVDA) em português e em inglês: cada página anuncia o idioma certo, o seletor de idioma é lido como "PT: Português" e "EN: English", o campo de domínio, o resultado e as frases do `aria-live` saem no idioma da página. Resultado: NVDA 2026.3 com o log de fala, sobre o endereço real. Em português: `lang="pt-BR"`, navegação "Idioma", links lidos como "PT: Português, página atual" e "EN: English", campo "Domínio, edição" com a nota de privacidade, anúncios "Verificando ryanmorais.com.br." e "Resultado pronto para ryanmorais.com.br. DMARC: ok. SPF: atenção. DKIM: atenção.", título "Resultado para ryanmorais.com.br, nível 2". Em inglês: navegação "Language", mesmos links, campo "Domain, edição", "Checking ryanmorais.com.br." e "Result ready for ryanmorais.com.br. DMARC: ok. SPF: attention. DKIM: attention.", "Result for ryanmorais.com.br", botão "See the 15 selectors tried". O NVDA reconhece o `lang="en"` (troca de idioma no título e no nome da marca), mas a instalação de teste não tem voz em inglês ("Inglês (não suportado)"), então a pronúncia em inglês não foi ouvida e o rótulo "EN: English" foi falado na voz em português. — RF-05, RNF-04
+- [x] 4.4 Conferir pelo endereço real as tags de compartilhamento e `hreflang` das duas páginas e a imagem `social-en.png` (200, `image/png`, 1280 × 640). Resultado: no ar, `/` e `/en/` têm `canonical` próprio, os três `hreflang` iguais nas duas, `og:url`, `og:locale` (`pt_BR` e `en_US`) e `og:image` (`social-pt.png` e `social-en.png`); o sitemap lista as duas URLs; as duas imagens respondem 200, `image/png`, 1280 × 640 (65 359 e 61 363 bytes). — RF-06
+- [x] 4.5 `specs/README.md`: linha `008-ingles` com entrega `v0.8` e status `concluído`; os três documentos da spec com `status: concluído`; conferir `CLAUDE.md`, `docs/stack.md` e os dois READMEs contra o que foi entregue. Conferidos: `docs/stack.md` já traz a fonte reduzida (PR #34) e a seção de idiomas; `CLAUDE.md` e os READMEs descrevem a página em inglês, sem número de peso nem tamanho de fonte a corrigir. — RF-06, RF-08
+- [x] 4.6 **Portão de qualidade final.** Resultado: `format:check`, `lint` e `typecheck` limpos; 974 testes, 974 passam.
 
 ## Apêndice A — Códigos de recusa e falha (etapa 1)
 
