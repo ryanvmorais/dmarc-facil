@@ -5,11 +5,11 @@
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES2024-F7DF1E?logo=javascript&logoColor=black)
 ![deps](https://img.shields.io/badge/deps-pnpm-F69220?logo=pnpm&logoColor=white)
 ![runtime deps](https://img.shields.io/badge/runtime%20deps-0-brightgreen)
-[![CI](https://github.com/ryanvmorais/dmarc-facil/actions/workflows/ci.yml/badge.svg)](https://github.com/ryanvmorais/dmarc-facil/actions/workflows/ci.yml)
+[![CI](https://img.shields.io/github/actions/workflow/status/ryanvmorais/dmarc-facil/ci.yml?label=CI&logo=githubactions&logoColor=white)](https://github.com/ryanvmorais/dmarc-facil/actions/workflows/ci.yml)
 ![lint](https://img.shields.io/badge/lint-ESLint-4B32C3?logo=eslint&logoColor=white)
 ![style](https://img.shields.io/badge/style-Prettier-F7B93E?logo=prettier&logoColor=black)
 ![types](https://img.shields.io/badge/types-JSDoc%20%2B%20tsc-3178C6?logo=typescript&logoColor=white)
-![license](https://img.shields.io/badge/license-Apache%202.0-blue)
+![license](https://img.shields.io/badge/license-Apache%202.0-blue?logo=apache&logoColor=white)
 
 **DMARC Fácil is a DMARC, SPF and DKIM checker that runs in your browser: you type a domain, it queries the DNS, explains each record in plain language, in Brazilian Portuguese or in English, and tells you the next step to stop your email from being spoofed.**
 
