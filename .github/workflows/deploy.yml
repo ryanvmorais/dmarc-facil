@@ -89,6 +89,14 @@ jobs:
         with:
           node-version: 26
 
+      - name: Baixar o wrangler
+        if: steps.ponta.outputs.atual == 'true'
+        # Instala antes, num passo sem segredo: os scripts de instalação da árvore do `wrangler` rodam
+        # aqui, longe do token da Cloudflare, e o passo seguinte só reaproveita o cache do `npx`.
+        env:
+          WRANGLER_SEND_METRICS: "false"
+        run: npx --yes wrangler@${{ env.WRANGLER_VERSION }} --version
+
       - name: Publicar na Cloudflare
         id: deploy
         if: steps.ponta.outputs.atual == 'true'

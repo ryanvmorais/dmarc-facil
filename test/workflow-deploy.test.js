@@ -138,6 +138,16 @@ describe("deploy.yml: ferramentas e concorrência", () => {
     assert.match(deploy, /npx --yes wrangler@\$\{\{ env\.WRANGLER_VERSION \}\} deploy/);
   });
 
+  it("baixa o wrangler num passo sem segredo, logo antes do que publica", () => {
+    const passos = deploy.split(/\n {6}- name: /).slice(1);
+    const nomes = passos.map((passo) => passo.split("\n")[0]);
+    const baixar = passos[nomes.indexOf("Baixar o wrangler")] ?? "";
+    assert.match(baixar, /run: npx --yes wrangler@\$\{\{ env\.WRANGLER_VERSION \}\} --version/);
+    assert.match(baixar, /if: steps\.ponta\.outputs\.atual == 'true'/);
+    assert.doesNotMatch(baixar, /secrets\./);
+    assert.equal(nomes.indexOf("Publicar na Cloudflare"), nomes.indexOf("Baixar o wrangler") + 1);
+  });
+
   it("usa a mesma versão do Lighthouse CI que o lighthouse.yml", async () => {
     const lighthouse = semComentarios(await ler(".github/workflows/lighthouse.yml"));
     const doDeploy = deploy.match(/LHCI_VERSION: "([^"]+)"/)?.[1];
