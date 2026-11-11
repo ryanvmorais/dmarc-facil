@@ -60,6 +60,10 @@ const ROTAS = {
   [`/fonts/${FONTE}`]: { arquivo: `fonts/${FONTE}`, tipo: "font/woff2" },
   "/robots.txt": { arquivo: "robots.txt", tipo: "text/plain; charset=utf-8" },
   "/sitemap.xml": { arquivo: "sitemap.xml", tipo: "application/xml" },
+  "/.well-known/security.txt": {
+    arquivo: ".well-known/security.txt",
+    tipo: "text/plain; charset=utf-8",
+  },
 };
 
 /**
@@ -434,8 +438,18 @@ describe("conferirHospedagem: o que derruba cada verificação", () => {
         ? resposta("User-agent: *\nDisallow: /\n", 200, { "content-type": "text/plain" })
         : undefined,
     );
-    assert.deepEqual(falhas(resultado), ["robots.txt e sitemap.xml"]);
+    assert.deepEqual(falhas(resultado), ["robots.txt, sitemap.xml e security.txt"]);
     assert.match(resultado.verificacoes[7]?.detalhe ?? "", /^robots\.txt: /);
+  });
+
+  it("security.txt fora do ar (a pasta .well-known não chegou à hospedagem)", async () => {
+    const resultado = await conferir(async (url) =>
+      url.pathname === "/.well-known/security.txt"
+        ? resposta(await arquivo("404.html"), 404, { "content-type": "text/html" })
+        : undefined,
+    );
+    assert.deepEqual(falhas(resultado), ["robots.txt, sitemap.xml e security.txt"]);
+    assert.match(resultado.verificacoes[7]?.detalhe ?? "", /^\.well-known\/security\.txt: /);
   });
 
   it("robots.txt com o bloco gerenciado da Cloudflare na frente passa (Bot Preference Sync)", async () => {
@@ -469,7 +483,7 @@ Disallow: /
           )
         : undefined,
     );
-    assert.deepEqual(falhas(resultado), ["robots.txt e sitemap.xml"]);
+    assert.deepEqual(falhas(resultado), ["robots.txt, sitemap.xml e security.txt"]);
   });
 
   it("nenhuma conexão abre: o http:// também falha, porque a recusa não prova nada", async () => {
@@ -482,7 +496,7 @@ Disallow: /
       "Página 404 em inglês",
       "JavaScript e CSS",
       "Fonte",
-      "robots.txt e sitemap.xml",
+      "robots.txt, sitemap.xml e security.txt",
       "_headers não é público",
       "http:// não é servido",
     ]);
@@ -501,7 +515,7 @@ Disallow: /
       "Página 404 em inglês",
       "JavaScript e CSS",
       "Fonte",
-      "robots.txt e sitemap.xml",
+      "robots.txt, sitemap.xml e security.txt",
       "_headers não é público",
     ]);
   });

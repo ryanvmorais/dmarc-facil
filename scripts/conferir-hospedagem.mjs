@@ -352,10 +352,11 @@ export const conferirHospedagem = async ({ endereco, pasta, buscar = fetch }) =>
     ),
   );
 
-  // 6. Descoberta: robots.txt e sitemap.xml idênticos aos arquivos.
+  // 6. Descoberta: robots.txt, sitemap.xml e security.txt idênticos aos arquivos. O security.txt
+  //    fica sob `.well-known/`, e a pasta com ponto no nome tem de ter chegado à hospedagem.
   /** @type {string[]} */
   const problemasDescoberta = [];
-  for (const nome of ["robots.txt", "sitemap.xml"]) {
+  for (const nome of ["robots.txt", "sitemap.xml", ".well-known/security.txt"]) {
     const recebido = await abrir(url(`/${nome}`), buscar);
     // O `robots.txt` chega com o bloco gerenciado da zona na frente; o resto tem de ser o nosso.
     const aberto =
@@ -368,7 +369,7 @@ export const conferirHospedagem = async ({ endereco, pasta, buscar = fetch }) =>
   }
   verificacoes.push(
     resultado(
-      "robots.txt e sitemap.xml",
+      "robots.txt, sitemap.xml e security.txt",
       problemasDescoberta,
       "200, corpos idênticos (o bloco gerenciado da Cloudflare no robots.txt não conta)",
     ),
