@@ -56,7 +56,7 @@ Tarefas pequenas, na ordem. Cada etapa fecha com o portão de qualidade (`pnpm f
 
 ## Etapa 6 — Páginas, CSS e fontes
 
-Começa só com os mockups aprovados à mão. Carregar a checklist de `.html`, `.css` e `.js` de `/estilo-arquivos` antes de escrever.
+Começa só com os mockups aprovados à mão. Seguir o estilo de `.html`, `.css` e `.js` do projeto ao escrever.
 
 - [x] `public/fonts/`: copiar `Sora-800-latin.woff2` e `JetBrainsMono-400-latin.woff2` (baixados em 2026-10-31 de `fonts.gstatic.com`, o endereço que o CSS do Google Fonts devolve para o subconjunto latino, `wOF2` conferido; 14 864 e 21 168 bytes; sha256 `b3058cd0…f176e` e `14425ba9…d89eb`) e os dois `OFL-*.txt` baixados dos repositórios oficiais (`sora-xor/sora-font` e `JetBrains/JetBrainsMono`); registrar origem, hash e licença em `docs/stack.md`. — RNF-01, ADR-11
 - [x] `public/css/pagina.css`: tokens como custom properties, `@font-face` com URL relativa, fonte do corpo `system-ui`, layout de 320 a 1440 px (coluna de 720 px), cartões, selos com ícone, escada (papéis `atual`/`proximo`), esqueletos e larguras por classe, foco visível, alvos de 44 px, `prefers-reduced-motion`; sem `@import`, sem URL externa, sem `style=` nas páginas. — RF-07, RF-13, ADR-3, ADR-10, ADR-11

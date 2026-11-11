@@ -50,7 +50,7 @@ Tarefas pequenas, na ordem. Cada etapa fecha com o portão de qualidade (`pnpm f
 
 - [x] `CLAUDE.md`: acrescentar `seletor-dkim.js`, `chave-rsa.js`, `dkim.js`, `dkim-busca.js` e `seletores-dkim.js` ao mapa de arquitetura. — ADR-1
 - [x] `specs/005-dkim/requirements.md`: acrescentar `test/chave-rsa.test.js` à seção Testes. — ADR-1
-- [x] `specs/README.md`: linha `005-dkim` no roadmap com entrega `v0.5` e `concluído`; a tabela de marcos do `README.md` e do `README.en.md`, nos dois idiomas. — fluxo `/spec implementar`
+- [x] `specs/README.md`: linha `005-dkim` no roadmap com entrega `v0.5` e `concluído`; a tabela de marcos do `README.md` e do `README.en.md`, nos dois idiomas.
 - [x] Frontmatter dos três documentos para `status: concluído`.
 - [x] Portão de qualidade final. — `format:check`, `lint`, `typecheck` e `test` verdes (459 testes, 160 novos na spec); cobertura de linhas 100% nos cinco módulos (`chave-rsa.js`, `dkim-busca.js`, `dkim.js`, `seletor-dkim.js`, `seletores-dkim.js`).
 
