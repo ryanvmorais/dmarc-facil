@@ -36,6 +36,9 @@ env:
   # Mais de 7 dias de publicada (0.15.1 saiu em 2025-06-25). O Dependabot não vê `npx`: a
   # revisão desta versão é manual.
   LHCI_VERSION: "0.15.1"
+  # Carência de release para o `npx`, em dias: a árvore do `@lhci/cli` é resolvida na hora, sem
+  # lockfile. O mesmo prazo do `minimumReleaseAge` do pnpm-workspace.yaml (um teste confere).
+  npm_config_min_release_age: "7"
 
 jobs:
   lighthouse:

@@ -145,6 +145,17 @@ describe("deploy.yml: ferramentas e concorrência", () => {
     assert.equal(lighthouse.match(/LHCI_VERSION: "([^"]+)"/)?.[1], doDeploy);
   });
 
+  it("o npx tem a mesma carência de release do pnpm, nos dois workflows", async () => {
+    const pnpm = await ler("pnpm-workspace.yaml");
+    const minutos = Number(pnpm.match(/^minimumReleaseAge: (\d+)$/m)?.[1]);
+    assert.ok(minutos > 0);
+    const dias = String(minutos / (24 * 60));
+    const lighthouse = semComentarios(await ler(".github/workflows/lighthouse.yml"));
+    for (const workflow of [deploy, lighthouse]) {
+      assert.equal(workflow.match(/^ {2}npm_config_min_release_age: "(\d+)"$/m)?.[1], dias);
+    }
+  });
+
   it("confere o que está no ar e mede os dois modos depois de publicar", () => {
     assert.match(deploy, /run: node scripts\/conferir-hospedagem\.mjs/);
     assert.match(deploy, /--config=\.github\/lighthouse\/producao-mobile\.json/);
