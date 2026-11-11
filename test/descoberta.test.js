@@ -1,7 +1,8 @@
 /**
  * @file Testes da descoberta e do compartilhamento: `canonical`, `hreflang`, `robots.txt`,
- * `sitemap.xml` (RF-09 da spec 007, ADR-2 e ADR-8; RF-06 da spec 008, ADR-7) e o cartão que a rede
- * social monta (`og:*`, `twitter:card`, imagem e ícone de tela inicial), nos dois idiomas.
+ * `security.txt`, `sitemap.xml` (RF-09 da spec 007, ADR-2 e ADR-8; RF-06 da spec 008, ADR-7) e
+ * o cartão que a rede social monta (`og:*`, `twitter:card`, imagem e ícone de tela inicial), nos
+ * dois idiomas.
  *
  * O endereço público tem uma fonte só, a rota do `wrangler.json`. `public/` é estático e não
  * pode lê-lo, então os arquivos repetem o texto e estes testes fazem a ligação.
@@ -124,6 +125,52 @@ describe("robots.txt", () => {
     assert.ok(linhas.includes("User-agent: *"));
     assert.ok(linhas.includes("Allow: /"));
     assert.ok(linhas.includes(`Sitemap: ${await enderecoDaRota()}sitemap.xml`));
+  });
+});
+
+// O `Expires` do security.txt é obrigatório (RFC 9116, 2.5.5) e vence: este prazo deixa o
+// portão vermelho um mês antes, com tempo de renovar sem o arquivo passar a valer como vencido.
+const AVISO_EXPIRES_DIAS = 30;
+// A RFC recomenda `Expires` a menos de um ano; a folga de um dia cobre a renovação no dia exato.
+const MAXIMO_EXPIRES_DIAS = 366;
+const DIA_MS = 24 * 60 * 60 * 1000;
+
+describe("security.txt", () => {
+  /**
+   * @returns {Promise<Map<string, string[]>>} Os valores de cada campo, sem os comentários.
+   */
+  const campos = async () => {
+    const mapa = new Map();
+    for (const linha of (await ler("public/.well-known/security.txt")).split("\n")) {
+      const casou = linha.match(/^([A-Za-z-]+): (.+)$/);
+      if (casou?.[1] !== undefined && casou[2] !== undefined) {
+        mapa.set(casou[1], [...(mapa.get(casou[1]) ?? []), casou[2]]);
+      }
+    }
+    return mapa;
+  };
+
+  it("tem Contact https e um Expires só, e o Canonical é o endereço da rota", async () => {
+    const lidos = await campos();
+    const contatos = lidos.get("Contact") ?? [];
+    assert.ok(contatos.length >= 1);
+    for (const contato of contatos) {
+      assert.match(contato, /^https:\/\//);
+    }
+    assert.equal(lidos.get("Expires")?.length, 1);
+    assert.deepEqual(lidos.get("Canonical"), [`${await enderecoDaRota()}.well-known/security.txt`]);
+    assert.deepEqual(lidos.get("Preferred-Languages"), ["pt, en"]);
+  });
+
+  it(`o Expires vale por mais ${AVISO_EXPIRES_DIAS} dias e por menos de um ano`, async () => {
+    const texto = (await campos()).get("Expires")?.[0] ?? "";
+    assert.match(texto, /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$/);
+    const restam = (Date.parse(texto) - Date.now()) / DIA_MS;
+    assert.ok(
+      restam > AVISO_EXPIRES_DIAS,
+      `Expires vence em ${Math.floor(restam)} dias: renove para até um ano à frente.`,
+    );
+    assert.ok(restam <= MAXIMO_EXPIRES_DIAS, "Expires a mais de um ano (RFC 9116, 2.5.5).");
   });
 });
 

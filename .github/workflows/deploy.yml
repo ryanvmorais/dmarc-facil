@@ -39,6 +39,11 @@ env:
   WRANGLER_VERSION: "4.152.0"
   # A mesma do lighthouse.yml (um teste confere).
   LHCI_VERSION: "0.15.1"
+  # Carência de release para o `npx`, em dias: a versão do pacote é fixa, mas a árvore dele é
+  # resolvida na hora, sem lockfile, e roda no passo que tem o token da Cloudflare. Uma
+  # dependência indireta publicada há menos de 7 dias não entra. É o mesmo prazo do
+  # `minimumReleaseAge` do pnpm-workspace.yaml (um teste confere).
+  npm_config_min_release_age: "7"
 
 jobs:
   publicar:

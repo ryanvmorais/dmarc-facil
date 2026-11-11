@@ -1,0 +1,7 @@
+# Contato de segurança do DMARC Fácil (RFC 9116). Relate em privado, pelos avisos de segurança
+# do GitHub; o escopo e os prazos estão na política.
+Contact: https://github.com/ryanvmorais/dmarc-facil/security/advisories/new
+Expires: 2027-11-01T00:00:00.000Z
+Preferred-Languages: pt, en
+Canonical: https://dmarc-facil.ryanmorais.com.br/.well-known/security.txt
+Policy: https://github.com/ryanvmorais/dmarc-facil/blob/main/SECURITY.md
