@@ -58,6 +58,10 @@ pnpm format
 
 ```text
 wrangler.json            # projeto de hospedagem (Worker só de assets): rota do domínio, ./public, 404-page; FONTE ÚNICA do endereço
+package.json             # scripts do portão, devDependencies, packageManager (pnpm 12) e engines (Node 26)
+pnpm-workspace.yaml      # configuração do pnpm 12: minimumReleaseAge e as exceções comentadas do pnpm audit
+eslint.config.mjs, tsconfig.json, .prettierrc.json, .prettierignore # configuração do lint, da checagem de tipos e da formatação
+CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md # como contribuir, como avisar uma vulnerabilidade, código de conduta
 public/                  # o site: é o que vai para a hospedagem, sem build
   index.html, 404.html   # as páginas em português (CSP por <meta>, sem style= nem script inline; caminhos absolutos; canonical, hreflang e og:* só no index; o texto de apoio, o rodapé e o seletor de idioma são HTML estático, fora do pagina.js)
   en/index.html, en/404.html # as mesmas em inglês, escritas à mão com o mesmo esqueleto (ids, classes e ordem; `test/pagina-estatica.test.js` compara); só mudam o texto, o `lang`, o `canonical` (`/en/`), a entrada (`entrada-en.js`) e a imagem social; CSS, fontes, favicon e módulos são os da raiz, por caminho absoluto
