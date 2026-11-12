@@ -215,7 +215,7 @@ O `deploy.yml` publica com `npx --yes wrangler@<versão fixa> deploy`; o `wrangl
 
 ### GitHub Actions
 
-O CI tem o job `qualidade` (Prettier, ESLint, `tsc`, testes: o mesmo do pre-commit) e o job `seguranca` (`pnpm audit`). Toda `uses:` é fixada por SHA de commit, com a versão no comentário, e o runner é `ubuntu-26.04`, nunca `ubuntu-latest`. Um terceiro workflow, semanal (`links-dkim.yml`), abre os links de documentação da lista de seletores DKIM e acusa o que quebrou ou deixou de citar o seletor; não é check obrigatório, porque depende de sites de terceiros.
+O CI tem o job `qualidade` (Prettier, ESLint, `tsc`, testes: o mesmo do pre-commit) e o job `seguranca` (`pnpm audit`). Toda `uses:` é fixada por SHA de commit, com a versão no comentário, e o runner é `ubuntu-26.04`, nunca `ubuntu-latest`. Um terceiro workflow, semanal (`links-dkim.yml`), abre os links de documentação da lista de seletores DKIM e acusa o que quebrou ou deixou de citar o seletor (ou, na página do provedor que define a chave, o tamanho de 2048 bits); não é check obrigatório, porque depende de sites de terceiros.
 
 **Por que esta:** é grátis em repositório público e fica ao lado do código. Fixar por SHA impede que uma tag movida troque o código que roda no CI sem ninguém ver.
 
