@@ -718,7 +718,7 @@
     "Ed25519",
     "Em que degrau do DMARC você está",
     "Encontrei a chave no seletor `{seletor}` ({chave}). Procurei em {total} seletores.",
-    "Encontrei chaves em {quantidade} seletores: {seletores}. Procurei em {total} seletores.",
+    "Encontrei chaves em {quantidade} seletores. Procurei em {total} seletores.",
     "Endereço IP não tem DMARC: digite o nome do domínio.",
     "Endereço de relatório que não vale",
     "Enxugue o registro: tire serviços que você não usa mais e troque faixas de IP repetidas por uma só.",

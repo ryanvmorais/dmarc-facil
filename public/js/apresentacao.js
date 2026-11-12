@@ -408,6 +408,8 @@ const resumoDoDkim = (textos, busca, encontrados) => {
   const total = busca.seletores.length;
   const [primeiro] = encontrados;
   if (busca.situacao === "encontrado" && primeiro !== undefined) {
+    // Com mais de um seletor, o resumo só conta: a página lista cada seletor com a chave dele
+    // (`extra.encontrados`), para ficar claro qual chave gerou um aviso e que a outra foi lida.
     const cabecalho =
       encontrados.length === 1
         ? preencher(frases.encontrado.texto, {
@@ -415,11 +417,7 @@ const resumoDoDkim = (textos, busca, encontrados) => {
             chave: primeiro.chave,
             total,
           })
-        : preencher(frases.encontradoVarios.texto, {
-            quantidade: encontrados.length,
-            seletores: encontrados.map((item) => `\`${item.seletor}\``).join(", "),
-            total,
-          });
+        : preencher(frases.encontradoVarios.texto, { quantidade: encontrados.length, total });
     return busca.incompleta ? `${cabecalho} ${parcial(textos, busca)}` : cabecalho;
   }
   return busca.situacao === "nao-encontrado"

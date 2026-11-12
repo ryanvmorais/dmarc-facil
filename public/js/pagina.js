@@ -314,6 +314,20 @@ const desenharCartao = (textos, cartao, acoes) => {
   if (cartao.resumo !== "") {
     filhos.push(c("p", { class: "resumo" }, trechos(cartao.resumo)));
   }
+  // DKIM com chave em mais de um seletor: uma linha por seletor, com o tipo e o tamanho da
+  // chave (com um só, o próprio resumo já os diz).
+  const encontrados = cartao.extra?.encontrados ?? [];
+  if (encontrados.length > 1) {
+    filhos.push(
+      c(
+        "ul",
+        { class: "lista-seletores lista-chaves" },
+        encontrados.map((item) =>
+          c("li", {}, [c("code", { class: "codigo" }, item.seletor), ` · ${item.chave}`]),
+        ),
+      ),
+    );
+  }
   if (cartao.fase === "verificando") {
     filhos.push(c("div", { class: "esqueleto esqueleto-80" }));
   }

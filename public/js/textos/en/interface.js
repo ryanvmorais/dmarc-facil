@@ -192,7 +192,7 @@ const dkim = {
     texto: "I found the key at the selector `{seletor}` ({chave}). I searched {total} selectors.",
   },
   encontradoVarios: {
-    texto: "I found keys at {quantidade} selectors: {seletores}. I searched {total} selectors.",
+    texto: "I found keys at {quantidade} selectors. I searched {total} selectors.",
   },
   naoEncontrado: {
     texto:

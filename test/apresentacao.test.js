@@ -29,7 +29,7 @@ import {
   rodapeDosResolvedores,
 } from "../public/js/apresentacao.js";
 import { ORIENTACOES, SELETORES_COMUNS } from "../public/js/seletores-dkim.js";
-import { chaveEd25519 } from "./ajudas/chave-sintetica.js";
+import { chaveEd25519, chaveRsa } from "./ajudas/chave-sintetica.js";
 import {
   DOMINIO,
   estadoDkim,
@@ -438,16 +438,23 @@ describe("apresentarDkim", () => {
     assert.equal(cartao.extra?.encontrados[0]?.provedor, "Google Workspace");
   });
 
-  it("encontrado em mais de um seletor cita todos", async () => {
+  it("encontrado em mais de um seletor: o resumo conta, e cada um traz o tamanho da chave", async () => {
     const cartao = apresentarDkim(
       textos,
       await estadoDkim(["google", "selector1"], {
-        [NOME_GOOGLE]: [REGISTRO_DKIM],
+        [NOME_GOOGLE]: [`v=DKIM1; k=rsa; p=${chaveRsa(1024)}`],
         "selector1._domainkey.exemplo.com.br": [REGISTRO_DKIM],
       }),
     );
 
-    assert.match(cartao.resumo, /2 seletores: `google`, `selector1`/);
+    assert.equal(cartao.resumo, "Encontrei chaves em 2 seletores. Procurei em 2 seletores.");
+    assert.deepEqual(
+      cartao.extra?.encontrados.map(({ seletor, chave }) => [seletor, chave]),
+      [
+        ["google", "RSA de 1024 bits"],
+        ["selector1", "RSA de 2048 bits"],
+      ],
+    );
   });
 
   it("não encontrado: 'não encontrei', nunca 'você não tem'; selo atenção", async () => {
