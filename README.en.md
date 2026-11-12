@@ -21,9 +21,9 @@ It is built for site owners, developers and small agencies who work in Portugues
 
 **Use it now:** [dmarc-facil.ryanmorais.com.br](https://dmarc-facil.ryanmorais.com.br). No install and no account needed.
 
-![DMARC, SPF and DKIM checker: DMARC Fácil result for ryanmorais.com.br, with the DMARC ladder (domain at p=quarantine, next step at p=reject) and the DMARC (OK), SPF (Atenção) and DKIM (Atenção) cards](docs/images/dmarc-facil-dmarc-spf-dkim-checker-result.png)
+![DMARC, SPF and DKIM checker: DMARC Fácil result for example.com, with the DMARC ladder (domain at p=quarantine, next step at p=reject, pct=50 caveat) and the DMARC (Attention, with a warning), SPF (Problem, with an error) and DKIM (OK, with an information note and the keys of two selectors) cards](docs/images/dmarc-facil-dmarc-spf-dkim-checker-result-en.png)
 
-_The whole page on a real check of `ryanmorais.com.br`, the maintainer's domain: DMARC is at `p=quarantine` and the next step is `p=reject`; SPF and DKIM have one warning each. The screenshot is of the Portuguese page._
+_The whole page with an example domain (`example.com`, with records set up to show each kind of alert): DMARC is at `p=quarantine` with `pct=50` (warning), SPF ends in `+all` (error) and DKIM has a 1024-bit key from Resend, which the provider does not let you change (information)._
 
 ## What it checks
 
@@ -45,7 +45,11 @@ The page shows three cards, one for each record (DMARC, SPF and DKIM), and the D
 - **Problema** (problem): the record has an error that stops the protection from working, or does not exist.
 - **Não verificado** (not checked): the query did not finish or the resolver did not answer.
 
-The **ladder** shows which step your DMARC is on (`p=none`, `p=quarantine` or `p=reject`) and marks the next one with the "Próximo passo" (in English, "Next step") label. Each finding comes with a sentence, in the language of the page, saying what it means and what to do.
+The **ladder** shows which step your DMARC is on (`p=none`, `p=quarantine` or `p=reject`) and marks the next one with the "Próximo passo" (in English, "Next step") label. Each finding comes with a sentence, in the language of the page, saying what it means and what to do, and with a severity label:
+
+- **Error:** stops the protection from working and puts the card at "Problem".
+- **Warning:** the record works, but there is a next step to make it safer; puts the card at "Attention".
+- **Information:** context, with nothing to do; does not change the badge.
 
 ## Privacy and use
 

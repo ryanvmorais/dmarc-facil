@@ -21,9 +21,9 @@ Ele é feito para donos de site, desenvolvedores e agências pequenas, no Brasil
 
 **Use agora:** [dmarc-facil.ryanmorais.com.br](https://dmarc-facil.ryanmorais.com.br). Não precisa instalar nada nem criar conta.
 
-![Verificador de DMARC, SPF e DKIM: resultado do DMARC Fácil para ryanmorais.com.br, com a escada do DMARC (domínio em p=quarantine, próximo passo em p=reject) e os cartões de DMARC (OK), SPF (Atenção) e DKIM (Atenção)](docs/images/dmarc-facil-dmarc-spf-dkim-checker-result.png)
+![Verificador de DMARC, SPF e DKIM: resultado do DMARC Fácil para example.com, com a escada do DMARC (domínio em p=quarantine, próximo passo em p=reject, ressalva de pct=50) e os cartões de DMARC (Atenção, com um aviso), SPF (Problema, com um erro) e DKIM (OK, com uma informação e as chaves de dois seletores)](docs/images/dmarc-facil-dmarc-spf-dkim-checker-result.png)
 
-_A página inteira numa verificação real de `ryanmorais.com.br`, o domínio do mantenedor: o DMARC está em `p=quarantine` e o próximo passo é `p=reject`; o SPF e o DKIM têm um aviso cada._
+_A página inteira com um domínio de exemplo (`example.com`, com registros montados para mostrar cada tipo de alerta): o DMARC está em `p=quarantine` com `pct=50` (aviso), o SPF termina em `+all` (erro) e o DKIM tem uma chave de 1024 bits do Resend, que o provedor não deixa trocar (informação)._
 
 ## O que ele verifica
 
@@ -45,7 +45,11 @@ A página mostra três cartões, um para cada registro (DMARC, SPF e DKIM), e a 
 - **Problema:** o registro tem um erro que impede a proteção de funcionar, ou não existe.
 - **Não verificado:** a consulta não terminou ou o resolvedor não respondeu.
 
-A **escada** mostra em que degrau o seu DMARC está (`p=none`, `p=quarantine` ou `p=reject`) e marca o seguinte com a etiqueta "Próximo passo". Cada achado vem com uma frase dizendo o que significa e o que fazer.
+A **escada** mostra em que degrau o seu DMARC está (`p=none`, `p=quarantine` ou `p=reject`) e marca o seguinte com a etiqueta "Próximo passo". Cada achado vem com uma frase dizendo o que significa e o que fazer, e com uma etiqueta de gravidade:
+
+- **Erro:** impede a proteção de funcionar e deixa o cartão em "Problema".
+- **Aviso:** o registro funciona, mas há um próximo passo para deixá-lo mais seguro; deixa o cartão em "Atenção".
+- **Informação:** contexto, sem nada a fazer; não muda o selo.
 
 ## Privacidade e uso
 
