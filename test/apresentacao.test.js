@@ -29,7 +29,7 @@ import {
   rodapeDosResolvedores,
 } from "../public/js/apresentacao.js";
 import { ORIENTACOES, SELETORES_COMUNS } from "../public/js/seletores-dkim.js";
-import { chaveEd25519 } from "./ajudas/chave-sintetica.js";
+import { chaveEd25519, chaveRsa } from "./ajudas/chave-sintetica.js";
 import {
   DOMINIO,
   estadoDkim,
@@ -458,6 +458,59 @@ describe("apresentarDkim", () => {
     assert.match(cartao.resumo, /quem envia o e-mail escolhe o nome do seletor/);
     assert.doesNotMatch(JSON.stringify(cartao), /você não tem/i);
     assert.equal(cartao.extra?.mostrarCampo, true);
+  });
+
+  it("chave de 1024 bits no Resend: conselho do provedor e link, ainda como aviso", async () => {
+    const resend = SELETORES_COMUNS.find((item) => item.seletor === "resend");
+    const cartao = apresentarDkim(
+      textos,
+      await estadoDkim(["resend"], {
+        "resend._domainkey.exemplo.com.br": [`v=DKIM1; k=rsa; p=${chaveRsa(1024)}`],
+      }),
+    );
+
+    const [achado] = cartao.achados;
+    assert.equal(achado?.codigo, "chave-abaixo-do-recomendado");
+    assert.equal(achado?.gravidade, "aviso");
+    assert.equal(cartao.selo.estado, "atencao");
+    assert.match(achado?.acao ?? "", /^No Resend, quem define a chave é o próprio provedor/);
+    assert.doesNotMatch(achado?.acao ?? "", /Gere uma chave/);
+    assert.equal(achado?.provedor, "Resend");
+    assert.equal(achado?.documentacao, resend?.chaveFixa?.documentacao);
+  });
+
+  it("chave de 1024 bits fora de provedor com chave fixa: conselho genérico, sem link", async () => {
+    const cartao = apresentarDkim(
+      textos,
+      await estadoDkim(["google"], { [NOME_GOOGLE]: [`v=DKIM1; k=rsa; p=${chaveRsa(1024)}`] }),
+    );
+
+    const [achado] = cartao.achados;
+    assert.match(achado?.acao ?? "", /^Gere uma chave de 2048 bits/);
+    assert.equal(achado?.documentacao, undefined);
+    assert.equal(achado?.provedor, undefined);
+  });
+
+  it("1024 bits no Resend e em outro seletor: dois achados, cada um com o seu conselho", async () => {
+    const curta = `v=DKIM1; k=rsa; p=${chaveRsa(1024)}`;
+    const cartao = apresentarDkim(
+      textos,
+      await estadoDkim(["google", "resend"], {
+        [NOME_GOOGLE]: [curta],
+        "resend._domainkey.exemplo.com.br": [curta],
+      }),
+    );
+
+    const curtos = cartao.achados.filter(
+      (achado) => achado.codigo === "chave-abaixo-do-recomendado",
+    );
+    assert.deepEqual(
+      curtos.map((achado) => [achado.seletor, achado.seletores, achado.provedor]),
+      [
+        ["google", undefined, undefined],
+        ["resend", undefined, "Resend"],
+      ],
+    );
   });
 
   it("indeterminado: diz que a lista não foi toda verificada", async () => {

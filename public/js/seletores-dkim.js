@@ -10,6 +10,12 @@
  * Nome genérico (`default`, `mail`, `smtp`), nome só de fonte de terceiros e nome que
  * depende da conta ficam de fora: o visitante os digita no campo livre.
  *
+ * `chaveFixa` marca o provedor que define a chave DKIM e não deixa o cliente trocar o tamanho
+ * dela. Ali, o conselho de gerar uma chave de 2048 bits no painel não tem como ser seguido, e a
+ * página troca a ação do achado `chave-abaixo-do-recomendado` pela frase da chave fixa, com o
+ * link desta `documentacao` (a página oficial em que o provedor diz isso). O `conferido` dela
+ * tem o mesmo papel do item.
+ *
  * É um módulo e não um JSON para carregar junto com o resto, sem requisição nem estado de
  * falha, e para o `tsc` conferir a forma. Editar a lista é editar este arquivo; o teste de
  * dados guarda a forma, não a verdade.
@@ -17,9 +23,11 @@
 
 // @ts-check
 
+/** @typedef {{ documentacao: string, conferido: string }} ChaveFixa */
 /**
  * @typedef {{
- *   seletor: string, provedor: string, documentacao: string, conferido: string
+ *   seletor: string, provedor: string, documentacao: string, conferido: string,
+ *   chaveFixa?: ChaveFixa
  * }} SeletorComum
  */
 /** @typedef {{ provedor: string, documentacao: string, conferido: string }} Orientacao */
@@ -69,6 +77,11 @@ export const SELETORES_COMUNS = [
     provedor: "Resend",
     documentacao: "https://resend.com/docs/knowledge-base/cloudflare",
     conferido: "2026-10-31",
+    // O Resend não oferece chave de 2048 bits nem troca a chave a pedido.
+    chaveFixa: {
+      documentacao: "https://resend.com/docs/knowledge-base/do-i-need-2048-dkim",
+      conferido: "2026-11-12",
+    },
   },
   {
     seletor: "fm1",

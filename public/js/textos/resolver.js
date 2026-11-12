@@ -25,12 +25,13 @@ import { preencher } from "../preencher.js";
  */
 /**
  * O achado pronto para a tela. `detalhe` já é texto (e, no `seletor-invalido`, já na língua da
- * página); quem desenha o corta e o põe como texto puro.
+ * página); quem desenha o corta e o põe como texto puro. `documentacao` (só `https`) e
+ * `provedor` existem quando a ação aponta a página oficial de um provedor.
  *
  * @typedef {{
  *   codigo: string, gravidade: "erro" | "aviso" | "info", titulo: string, explicacao: string,
  *   acao: string, tag?: string, detalhe?: string, seletor?: string, seletores?: string[],
- *   dominio?: string
+ *   dominio?: string, provedor?: string, documentacao?: string
  * }} AchadoVisivel
  */
 

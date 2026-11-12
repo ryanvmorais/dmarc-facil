@@ -5,7 +5,9 @@
  * `public/js/seletores-dkim.js` e diz o que mudou: o link quebrou (falha), a página abriu mas
  * não cita mais o seletor (falha), o site bloqueou a leitura automática ou estava fora do ar
  * (inconclusivo: não derruba nada, porque vários sites respondem 403 a robô), ou a data
- * `conferido` do item já tem mais de um ano (aviso).
+ * `conferido` do item já tem mais de um ano (aviso). A `documentacao` de `chaveFixa` passa
+ * pelo mesmo crivo, mas o que a página precisa citar é o tamanho de 2048 bits, que é o assunto
+ * dela, e não o seletor.
  *
  * Roda toda semana no workflow `links-dkim.yml` e à mão com `pnpm links:dkim`. Nenhum dado do
  * visitante entra aqui: a lista é a do repositório, e nada é gravado fora do resumo do run.
@@ -73,6 +75,14 @@ export const paginaCitaSeletor = (texto, seletor) => {
 };
 
 /**
+ * Diz se a página de `chaveFixa` ainda fala do tamanho de chave que o provedor não oferece.
+ *
+ * @param {string} texto - Corpo da página.
+ * @returns {boolean} `true` se "2048" aparece como número solto (não dentro de outro número).
+ */
+export const paginaCitaTamanho = (texto) => /(?<!\d)2048(?!\d)/.test(texto);
+
+/**
  * @param {string} conferido - Data `AAAA-MM-DD` do item.
  * @param {Date} agora - O dia de hoje.
  * @returns {boolean} `true` se a data tem mais de `DIAS_PARA_REVISAR` dias.
@@ -117,7 +127,8 @@ export const lerPagina = async (url, buscar) => {
  * Confere todos os itens da lista.
  *
  * Cada endereço é aberto uma vez só, mesmo quando vários seletores o usam. Seletor comum
- * precisa ser citado na página; orientação só precisa abrir.
+ * precisa ser citado na página; a página de `chaveFixa` precisa citar 2048; orientação só
+ * precisa abrir.
  *
  * @param {{ buscar?: typeof fetch, agora?: Date }} [opcoes={}] - ``buscar`` troca o `fetch`
  *   (testes); ``agora`` troca o relógio (testes).
@@ -157,6 +168,24 @@ export const conferirTudo = async ({ buscar = fetch, agora = new Date() } = {}) 
     }
     if (estaVelha(item.conferido, agora)) {
       avisos.push(`${item.seletor}: conferido em ${item.conferido}, reabra a página`);
+    }
+  }
+
+  for (const { seletor, chaveFixa } of SELETORES_COMUNS) {
+    if (chaveFixa === undefined) {
+      continue;
+    }
+    const nome = `${seletor} (chave fixa)`;
+    const pagina = await abrir(chaveFixa.documentacao);
+    const perdeuOAssunto = pagina.veredito === "ok" && !paginaCitaTamanho(pagina.texto ?? "");
+    linhas.push({
+      nome,
+      url: chaveFixa.documentacao,
+      veredito: perdeuOAssunto ? "falha" : pagina.veredito,
+      detalhe: perdeuOAssunto ? "a página abriu, mas não fala mais de 2048 bits" : pagina.detalhe,
+    });
+    if (estaVelha(chaveFixa.conferido, agora)) {
+      avisos.push(`${nome}: conferido em ${chaveFixa.conferido}, reabra a página`);
     }
   }
 

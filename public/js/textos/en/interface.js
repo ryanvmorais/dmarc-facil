@@ -184,7 +184,8 @@ const spf = {
  *   parcial: TextoFixo, chaveRsa: TextoFixo, chaveRsaSemTamanho: TextoFixo, chaveEd25519: TextoFixo, chaveOutra: TextoFixo,
  *   verTentados: TextoFixo, documentacao: TextoFixo, documentacaoDe: TextoFixo, seletorDigitado: TextoFixo,
  *   orientacaoTitulo: TextoFixo,
- *   orientacao: TextoFixo, recusado: TextoFixo
+ *   orientacao: TextoFixo, recusado: TextoFixo, acaoChaveFixa: TextoFixo,
+ *   documentacaoDoProvedor: TextoFixo
  * }}
  */
 const dkim = {
@@ -218,6 +219,14 @@ const dkim = {
     texto: "{provedor}: type the selector that the provider's panel shows.",
   },
   recusado: { texto: "I did not accept `{texto}`: {motivo}." },
+  // A ação do achado `chave-abaixo-do-recomendado` no seletor de um provedor com `chaveFixa`
+  // (seletores-dkim.js): o conselho genérico manda gerar uma chave que o provedor não oferece.
+  acaoChaveFixa: {
+    texto:
+      "With {provedor}, the provider itself sets the key: there is no way to generate a 2048-bit key in the panel. 1024-bit keys are still accepted by the major mailbox providers.",
+  },
+  // O link que acompanha essa ação; o texto visível já diz de qual provedor é.
+  documentacaoDoProvedor: { texto: "{provedor} documentation" },
 };
 
 // ---------------------------------------------------------------------------

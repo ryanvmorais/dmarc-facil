@@ -216,7 +216,9 @@ const cartao = (textos, id, estado, resto) => ({
 /**
  * Junta os achados iguais de seletores diferentes num só (`seletores` lista todos). Um domínio
  * com um coringa `*._domainkey` revogado teria o mesmo achado repetido em cada seletor tentado.
- * A ordem é a da primeira aparição, a mesma que o módulo devolveu.
+ * A ordem é a da primeira aparição, a mesma que o módulo devolveu. A ação e o link entram na
+ * comparação: o mesmo código com um conselho próprio do provedor (`chaveFixa`) não se junta ao
+ * genérico, senão um dos dois seletores ficaria com o conselho errado.
  *
  * @param {AchadoVisivel[]} achados - Achados com texto, na ordem do módulo.
  * @returns {AchadoVisivel[]} Os achados, sem repetição por seletor.
@@ -227,7 +229,14 @@ const agruparPorSeletor = (achados) => {
   /** @type {AchadoVisivel[]} */
   const lista = [];
   for (const achado of achados) {
-    const chave = [achado.codigo, achado.tag, achado.detalhe, achado.dominio].join("|");
+    const chave = [
+      achado.codigo,
+      achado.tag,
+      achado.detalhe,
+      achado.dominio,
+      achado.acao,
+      achado.documentacao,
+    ].join("|");
     const grupo = achado.seletor === undefined ? undefined : grupos.get(chave);
     if (grupo !== undefined && achado.seletor !== undefined) {
       grupo.seletores = [...(grupo.seletores ?? [grupo.seletor ?? ""]), achado.seletor];
@@ -245,13 +254,16 @@ const agruparPorSeletor = (achados) => {
 /**
  * @param {Textos} textos - O catálogo do idioma da página.
  * @param {Array<import("./textos/resolver.js").AchadoLido>} achados - Achados do módulo.
+ * @param {(achado: AchadoVisivel) => AchadoVisivel} [ajustar=identidade] - Troca o texto de um
+ *   achado antes do agrupamento (o DKIM a usa para o conselho de `chaveFixa`); por padrão, a
+ *   identidade, que devolve o achado como veio.
  * @returns {AchadoVisivel[]} Os achados com texto, o `detalhe` cortado e os de seletores
  *   diferentes agrupados, na ordem do módulo.
  */
-const achadosVisiveis = (textos, achados) =>
+const achadosVisiveis = (textos, achados, ajustar = (achado) => achado) =>
   agruparPorSeletor(
     achados.map((achado) => {
-      const visivel = textoDoAchado(textos, achado);
+      const visivel = ajustar(textoDoAchado(textos, achado));
       return visivel.detalhe === undefined
         ? visivel
         : { ...visivel, detalhe: cortarTexto(visivel.detalhe, MAXIMO_DETALHE).texto };
@@ -380,6 +392,33 @@ const seletoresMostrados = (tentados) =>
   });
 
 /**
+ * Troca a ação do achado de chave abaixo de 2048 bits quando o seletor é de um provedor que
+ * define a chave e não deixa o cliente trocar o tamanho (`chaveFixa` em seletores-dkim.js): ali o
+ * conselho genérico, gerar uma chave de 2048 bits no painel, não tem como ser seguido. A
+ * gravidade continua a mesma; só a ação muda, com o link da página oficial do provedor.
+ *
+ * @param {Textos} textos - O catálogo do idioma da página.
+ * @param {AchadoVisivel} achado - Um achado do DKIM, já com texto.
+ * @returns {AchadoVisivel} O mesmo achado, ou com a ação e o link do provedor.
+ */
+const conselhoDaChaveFixa = (textos, achado) => {
+  if (achado.codigo !== "chave-abaixo-do-recomendado" || achado.seletor === undefined) {
+    return achado;
+  }
+  const comum = SELETORES_COMUNS.find((item) => item.seletor === achado.seletor);
+  if (comum?.chaveFixa === undefined) {
+    return achado;
+  }
+  const documentacao = urlHttps(comum.chaveFixa.documentacao);
+  return {
+    ...achado,
+    acao: preencher(textos.interface.dkim.acaoChaveFixa.texto, { provedor: comum.provedor }),
+    provedor: comum.provedor,
+    ...(documentacao === null ? {} : { documentacao }),
+  };
+};
+
+/**
  * @param {Textos} textos - O catálogo do idioma da página.
  * @param {import("./dkim.js").DkimValido} dkim - A leitura de um seletor com registro válido.
  * @returns {string} O tipo e o tamanho da chave, na língua da página.
@@ -470,7 +509,9 @@ export const apresentarDkim = (textos, estado, { recusados = [], totalSeletores 
 
   return cartao(textos, "dkim", estado, {
     resumo: resumoDoDkim(textos, busca, encontrados),
-    achados: achadosVisiveis(textos, busca.achados),
+    achados: achadosVisiveis(textos, busca.achados, (achado) =>
+      conselhoDaChaveFixa(textos, achado),
+    ),
     extra: {
       total: busca.seletores.length,
       tentados: seletoresMostrados(busca.seletores),

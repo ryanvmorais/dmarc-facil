@@ -71,6 +71,17 @@ describe("SELETORES_COMUNS", () => {
       assert.ok(ehDataConferida(conferido), `${seletor}: data inválida (${conferido})`);
     }
   });
+
+  it("dá à chave fixa, onde houver, um link https próprio e a data da conferência", () => {
+    for (const { seletor, documentacao, chaveFixa } of SELETORES_COMUNS) {
+      if (chaveFixa === undefined) {
+        continue;
+      }
+      assert.ok(ehLinkSeguro(chaveFixa.documentacao), `${seletor}: link da chave fixa inválido`);
+      assert.notEqual(chaveFixa.documentacao, documentacao, `${seletor}: repete o link do item`);
+      assert.ok(ehDataConferida(chaveFixa.conferido), `${seletor}: data da chave fixa inválida`);
+    }
+  });
 });
 
 describe("ORIENTACOES", () => {

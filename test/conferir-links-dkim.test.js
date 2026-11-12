@@ -3,8 +3,8 @@
  * confere os links da lista de seletores DKIM.
  *
  * Offline: o `fetch` é um falso que responde por endereço. O que importa é o veredito de cada
- * caso: só link quebrado e página que deixou de citar o seletor derrubam o run; site que barra
- * o robô ou está fora do ar é aviso.
+ * caso: só link quebrado e página que deixou de citar o seletor (ou, na de `chaveFixa`, os 2048
+ * bits) derrubam o run; site que barra o robô ou está fora do ar é aviso.
  */
 
 // @ts-check
@@ -18,10 +18,20 @@ import {
   conferirTudo,
   estaVelha,
   paginaCitaSeletor,
+  paginaCitaTamanho,
 } from "../scripts/conferir-links-dkim.mjs";
 
-/** Corpo de página que cita todos os seletores da lista. */
-const CORPO = SELETORES_COMUNS.map((item) => `${item.seletor}._domainkey.exemplo.com`).join(" ");
+/** Corpo de página que cita todos os seletores da lista e o tamanho das páginas de chave fixa. */
+const CORPO = [
+  ...SELETORES_COMUNS.map((item) => `${item.seletor}._domainkey.exemplo.com`),
+  "chave de 2048 bits",
+].join(" ");
+
+/** Os seletores cuja chave o provedor define, cada um com uma linha a mais na conferência. */
+const CHAVES_FIXAS = SELETORES_COMUNS.flatMap(({ seletor, chaveFixa }) =>
+  chaveFixa === undefined ? [] : [{ seletor, ...chaveFixa }],
+);
+const TOTAL_DE_LINHAS = SELETORES_COMUNS.length + CHAVES_FIXAS.length + ORIENTACOES.length;
 
 /**
  * @param {Record<string, number | Error>} [excecoes] - Resposta por endereço: um código HTTP
@@ -102,6 +112,18 @@ describe("paginaCitaSeletor", () => {
   });
 });
 
+describe("paginaCitaTamanho", () => {
+  it("acha 2048 como número solto, também colado a bits", () => {
+    assert.equal(paginaCitaTamanho("Do You Need 2048-bit DKIM?"), true);
+    assert.equal(paginaCitaTamanho("chave de 2048 bits"), true);
+  });
+
+  it("não acha 2048 dentro de outro número", () => {
+    assert.equal(paginaCitaTamanho("pedido 120489"), false);
+    assert.equal(paginaCitaTamanho("chave de 1024 bits"), false);
+  });
+});
+
 describe("estaVelha", () => {
   const agora = new Date("2027-11-01T00:00:00Z");
 
@@ -126,7 +148,7 @@ describe("conferirTudo", () => {
     const { buscar } = criarBuscar();
     const resultado = await conferirTudo({ buscar, agora });
 
-    assert.equal(resultado.linhas.length, SELETORES_COMUNS.length + ORIENTACOES.length);
+    assert.equal(resultado.linhas.length, TOTAL_DE_LINHAS);
     assert.ok(resultado.linhas.every((linha) => linha.veredito === "ok"));
     assert.deepEqual(resultado.avisos, []);
   });
@@ -137,6 +159,7 @@ describe("conferirTudo", () => {
 
     const distintos = new Set([
       ...SELETORES_COMUNS.map((item) => item.documentacao),
+      ...CHAVES_FIXAS.map((item) => item.documentacao),
       ...ORIENTACOES.map((item) => item.documentacao),
     ]);
     assert.equal(pedidos.length, distintos.size);
@@ -164,6 +187,16 @@ describe("conferirTudo", () => {
 
     assert.equal(vereditoDe(resultado, "resend"), "falha");
     assert.equal(vereditoDe(resultado, "google"), "ok");
+  });
+
+  it("dá falha para a página de chave fixa que abriu mas não fala mais de 2048 bits", async () => {
+    const [alvo] = CHAVES_FIXAS;
+    assert.ok(alvo);
+    const { buscar } = criarBuscar({}, { [alvo.documentacao]: "página sobre outro assunto" });
+    const resultado = await conferirTudo({ buscar, agora });
+
+    assert.equal(vereditoDe(resultado, `${alvo.seletor} (chave fixa)`), "falha");
+    assert.equal(vereditoDe(resultado, alvo.seletor), "ok");
   });
 
   it("dá inconclusivo, não falha, quando o site barra o robô ou está fora do ar", async () => {
@@ -196,7 +229,7 @@ describe("conferirTudo", () => {
     const { buscar } = criarBuscar();
     const resultado = await conferirTudo({ buscar, agora: new Date("2028-01-01T00:00:00Z") });
 
-    assert.equal(resultado.avisos.length, SELETORES_COMUNS.length + ORIENTACOES.length);
+    assert.equal(resultado.avisos.length, TOTAL_DE_LINHAS);
     assert.match(resultado.avisos[0] ?? "", /conferido em 2026-10-31/);
   });
 });
