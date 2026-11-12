@@ -37,7 +37,7 @@ Nenhuma fase começa sem a aprovação explícita da anterior.
 
 ## Roadmap
 
-A entrega é o marco da construção (`v0.x`), como no README. O site não tem versão numerada: cada merge na `main` com o CI verde publica a página.
+A entrega é o marco da construção (`v0.x`), na tabela abaixo. O site não tem versão numerada: cada merge na `main` com o CI verde publica a página.
 
 | Spec                                    | Escopo                                                                                                                                                                                                      | Entrega | Status    |
 | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | --------- |

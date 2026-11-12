@@ -11,11 +11,11 @@
 ![types](https://img.shields.io/badge/types-JSDoc%20%2B%20tsc-3178C6?logo=typescript&logoColor=white)
 ![license](https://img.shields.io/badge/license-Apache%202.0-blue?logo=apache&logoColor=white)
 
-**O DMARC Fácil é um verificador de DMARC, SPF e DKIM que roda no navegador: você digita o domínio, ele consulta o DNS, explica cada registro em português e diz qual é o próximo passo para o seu e-mail deixar de ser falsificado.**
+**O DMARC Fácil é um verificador de DMARC, SPF e DKIM que roda no navegador: você digita o domínio, ele consulta o DNS, explica cada registro em linguagem simples, em português ou em inglês, e diz qual é o próximo passo para o seu e-mail deixar de ser falsificado.**
 
-Quem pesquisa "verificar DMARC" ou "meu e-mail cai no spam" encontra, quase sempre, ferramentas em inglês que mostram o registro e deixam o resto por conta de quem lê. Aqui o registro vem traduzido (e há uma versão da página em inglês, em [`/en/`](https://dmarc-facil.ryanmorais.com.br/en/)), com o estado de cada parte e a escada do DMARC (`p=none`, `p=quarantine`, `p=reject`) mostrando em que degrau o domínio está e o que fazer para subir.
+Quem pesquisa "verificar DMARC" ou "meu e-mail cai no spam" encontra, quase sempre, ferramentas em inglês que mostram o registro e deixam o resto por conta de quem lê. Aqui cada registro vem explicado, com o estado de cada parte e a escada do DMARC (`p=none`, `p=quarantine`, `p=reject`) mostrando em que degrau o domínio está e o que fazer para subir.
 
-Ele é feito para donos de site, desenvolvedores e agências pequenas, no Brasil ou fora dele, e qualquer pessoa pode usá-lo de qualquer lugar: a ferramenta só consulta o DNS público. É JavaScript puro, sem build e sem dependência de runtime, e não tem servidor: a página consulta o DNS direto do seu navegador.
+Ele é feito para donos de site, desenvolvedores e agências pequenas, no Brasil ou fora dele, e qualquer pessoa pode usá-lo de qualquer lugar: a ferramenta só consulta o DNS público. É JavaScript puro, sem build e sem dependência de runtime, e não tem servidor: a página consulta o DNS direto do seu navegador. A página tem dois idiomas: português em [dmarc-facil.ryanmorais.com.br](https://dmarc-facil.ryanmorais.com.br) e inglês em [/en/](https://dmarc-facil.ryanmorais.com.br/en/), com o seletor PT/EN no cabeçalho e no rodapé.
 
 > **Status:** no ar em [dmarc-facil.ryanmorais.com.br](https://dmarc-facil.ryanmorais.com.br). Verifica o DMARC, o SPF e o DKIM de um domínio, e a verificação roda inteira no navegador de quem usa.
 

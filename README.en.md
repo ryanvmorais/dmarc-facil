@@ -13,7 +13,7 @@
 
 **DMARC Fácil is a DMARC, SPF and DKIM checker that runs in your browser: you type a domain, it queries the DNS, explains each record in plain language, in Brazilian Portuguese or in English, and tells you the next step to stop your email from being spoofed.**
 
-Anyone searching for "verificar DMARC" or "meu e-mail cai no spam" mostly lands on English-language tools that show the record and leave the rest to the reader. Here the record comes translated, with the state of each part and the DMARC ladder (`p=none`, `p=quarantine`, `p=reject`) showing which step the domain is on and what to do to move up.
+Most DMARC checkers show the raw record and leave the rest to the reader, and nearly all of them are in English only, which leaves out anyone searching for "verificar DMARC" or "meu e-mail cai no spam". Here each record comes explained in plain language, with the state of each part and the DMARC ladder (`p=none`, `p=quarantine`, `p=reject`) showing which step the domain is on and what to do to move up.
 
 It is built for site owners, developers and small agencies who work in Portuguese or English, in Brazil or elsewhere, and anyone can use it from anywhere: the tool only queries public DNS. It is plain JavaScript, with no build step and no runtime dependency, and has no server: the page queries DNS straight from your browser. The page comes in two languages, Portuguese at [dmarc-facil.ryanmorais.com.br](https://dmarc-facil.ryanmorais.com.br) and English at [/en/](https://dmarc-facil.ryanmorais.com.br/en/), with a PT/EN switch in the header and the footer.
 
