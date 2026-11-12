@@ -136,6 +136,27 @@ const desenharSelo = (selo) =>
   c("span", { class: `selo selo-${selo.estado}` }, [icone(ICONES_SELO[selo.estado]), selo.texto]);
 
 /**
+ * O link da página oficial do provedor que acompanha a ação de um achado (o conselho de
+ * `chaveFixa`). Fica numa linha própria, logo abaixo da ação, e o texto visível já diz de qual
+ * provedor é, então não precisa de outro nome acessível.
+ *
+ * @param {Textos} textos - O catálogo do idioma da página.
+ * @param {import("./textos/resolver.js").AchadoVisivel} achado - O achado com texto.
+ * @returns {Element | null} O link, ou ``null`` se o achado não tem documentação `https`.
+ */
+const linkDoAchado = (textos, achado) => {
+  const url = achado.documentacao === undefined ? null : urlHttps(achado.documentacao);
+  if (url === null || achado.provedor === undefined) {
+    return null;
+  }
+  return c(
+    "a",
+    { class: "link-doc", href: url },
+    preencher(textos.interface.dkim.documentacaoDoProvedor.texto, { provedor: achado.provedor }),
+  );
+};
+
+/**
  * @param {Textos} textos - O catálogo do idioma da página.
  * @param {import("./textos/resolver.js").AchadoVisivel} achado - O achado com texto.
  * @returns {Element} O item da lista de achados.
@@ -168,6 +189,7 @@ const desenharAchado = (textos, achado) => {
     ]),
     c("p", { class: "achado-explicacao" }, trechos(achado.explicacao)),
     c("p", { class: "achado-acao" }, trechos(achado.acao)),
+    linkDoAchado(textos, achado),
     linhas.length === 0
       ? null
       : c(

@@ -507,6 +507,15 @@ a {
   overflow-wrap: anywhere;
 }
 
+/* O link do provedor no achado (`linkDoAchado`, em pagina.js): alinhado ao texto da ação, sem
+ * esticar na coluna, e com a mesma altura de toque dos outros links de documentação (o
+ * `.link-doc` da seção 7). */
+.achado .link-doc {
+  align-self: flex-start;
+  padding-inline: 0;
+  font-size: 14px;
+}
+
 /* Gravidade em texto, para a cor nunca ser a única diferença (RF-08). */
 .gravidade {
   padding: 0 8px;
