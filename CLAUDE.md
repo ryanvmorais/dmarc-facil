@@ -82,6 +82,7 @@ public/                  # o site: é o que vai para a hospedagem, sem build
     chave-rsa.js         # lerChaveRsa: mede o módulo da chave pública RSA do p= (leitor ASN.1 mínimo, puro)
     dkim.js              # lerDkim: escolhe o registro de um seletor, lê as tags e aponta os achados (puro)
     dkim-busca.js        # buscarDkim: tenta os seletores com concorrência limitada (consulta injetada, sem fetch)
+    chave-fixa.js        # ajustarChaveFixa: chave abaixo de 2048 bits num seletor com `chaveFixa` vira `info`; selo e cartão usam a mesma função (puro)
     tipos.js             # só typedef: a recusa (motivo em código + valor), o estado de cada parte (verificando, pronto, falha) e da verificação
     selo.js              # calcularSelo: a regra única do selo dos três cartões (puro)
     escada.js            # montarEscada: degraus none/quarantine/reject, próximo passo e ressalvas (puro)

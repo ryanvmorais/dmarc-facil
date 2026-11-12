@@ -10,6 +10,8 @@
 
 // @ts-check
 
+import { ajustarChaveFixa } from "./chave-fixa.js";
+
 /** @typedef {import("./textos/tipos.js").Textos} Textos */
 /** @typedef {import("./tipos.js").EstadoParte} EstadoParte */
 /** @typedef {import("./tipos.js").EstadoDe<unknown>} EstadoQualquer */
@@ -61,9 +63,9 @@ const comIncompleta = (estado, incompleta) => (incompleta && estado === "ok" ? "
  * 1. Parte que não terminou (`verificando`) ou falhou: `nao-verificado`.
  * 2. DMARC e SPF: registro `ausente`, `invalido` ou `multiplos` é `problema`; `valido` vale o
  *    pior achado.
- * 3. DKIM: `encontrado` vale o pior achado; `nao-encontrado` é `atencao` (não achar não é erro,
- *    mas também não é "tudo bem": o seletor é escolha de quem envia); `indeterminado` é
- *    `nao-verificado`.
+ * 3. DKIM: `encontrado` vale o pior achado, com a gravidade ajustada pela regra da chave fixa
+ *    (chave-fixa.js); `nao-encontrado` é `atencao` (não achar não é erro, mas também não é
+ *    "tudo bem": o seletor é escolha de quem envia); `indeterminado` é `nao-verificado`.
  * 4. Leitura `incompleta` sobe `ok` para `atencao`.
  *
  * @param {Textos} textos - O catálogo do idioma da página.
@@ -84,7 +86,11 @@ export const calcularSelo = (textos, parte, estadoParte) => {
     if (busca.situacao === "nao-encontrado") {
       return selo(textos, "atencao");
     }
-    return selo(textos, comIncompleta(pelaGravidade(busca.achados), busca.incompleta));
+    // A gravidade que conta é a da tela: a chave curta de quem tem `chaveFixa` é `info`.
+    return selo(
+      textos,
+      comIncompleta(pelaGravidade(ajustarChaveFixa(busca.achados)), busca.incompleta),
+    );
   }
 
   if (parte === "spf") {

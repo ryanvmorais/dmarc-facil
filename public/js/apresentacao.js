@@ -14,6 +14,7 @@
 
 import { urlHttps } from "./dom.js";
 import { calcularSelo } from "./selo.js";
+import { ajustarChaveFixa, ehChaveFixaCurta, seletorComChaveFixa } from "./chave-fixa.js";
 import { normalizarSeletor } from "./seletor-dkim.js";
 import { ORIENTACOES, SELETORES_COMUNS } from "./seletores-dkim.js";
 import { preencher } from "./preencher.js";
@@ -395,17 +396,15 @@ const seletoresMostrados = (tentados) =>
  * Troca a ação do achado de chave abaixo de 2048 bits quando o seletor é de um provedor que
  * define a chave e não deixa o cliente trocar o tamanho (`chaveFixa` em seletores-dkim.js): ali o
  * conselho genérico, gerar uma chave de 2048 bits no painel, não tem como ser seguido. A
- * gravidade continua a mesma; só a ação muda, com o link da página oficial do provedor.
+ * gravidade (`info`) já vem de `ajustarChaveFixa`; aqui muda a ação, com o link da página
+ * oficial do provedor.
  *
  * @param {Textos} textos - O catálogo do idioma da página.
  * @param {AchadoVisivel} achado - Um achado do DKIM, já com texto.
  * @returns {AchadoVisivel} O mesmo achado, ou com a ação e o link do provedor.
  */
 const conselhoDaChaveFixa = (textos, achado) => {
-  if (achado.codigo !== "chave-abaixo-do-recomendado" || achado.seletor === undefined) {
-    return achado;
-  }
-  const comum = SELETORES_COMUNS.find((item) => item.seletor === achado.seletor);
+  const comum = ehChaveFixaCurta(achado) ? seletorComChaveFixa(achado.seletor) : undefined;
   if (comum?.chaveFixa === undefined) {
     return achado;
   }
@@ -507,7 +506,7 @@ export const apresentarDkim = (textos, estado, { recusados = [], totalSeletores 
 
   return cartao(textos, "dkim", estado, {
     resumo: resumoDoDkim(textos, busca, encontrados),
-    achados: achadosVisiveis(textos, busca.achados, (achado) =>
+    achados: achadosVisiveis(textos, ajustarChaveFixa(busca.achados), (achado) =>
       conselhoDaChaveFixa(textos, achado),
     ),
     extra: {

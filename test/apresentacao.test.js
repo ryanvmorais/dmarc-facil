@@ -467,7 +467,7 @@ describe("apresentarDkim", () => {
     assert.equal(cartao.extra?.mostrarCampo, true);
   });
 
-  it("chave de 1024 bits no Resend: conselho do provedor e link, ainda como aviso", async () => {
+  it("chave de 1024 bits no Resend: conselho do provedor e link, como informação", async () => {
     const resend = SELETORES_COMUNS.find((item) => item.seletor === "resend");
     const cartao = apresentarDkim(
       textos,
@@ -478,8 +478,8 @@ describe("apresentarDkim", () => {
 
     const [achado] = cartao.achados;
     assert.equal(achado?.codigo, "chave-abaixo-do-recomendado");
-    assert.equal(achado?.gravidade, "aviso");
-    assert.equal(cartao.selo.estado, "atencao");
+    assert.equal(achado?.gravidade, "info");
+    assert.equal(cartao.selo.estado, "ok");
     assert.match(achado?.acao ?? "", /^No Resend, quem define a chave é o próprio provedor/);
     assert.doesNotMatch(achado?.acao ?? "", /Gere uma chave/);
     assert.equal(achado?.provedor, "Resend");
@@ -512,12 +512,14 @@ describe("apresentarDkim", () => {
       (achado) => achado.codigo === "chave-abaixo-do-recomendado",
     );
     assert.deepEqual(
-      curtos.map((achado) => [achado.seletor, achado.seletores, achado.provedor]),
+      curtos.map((achado) => [achado.seletor, achado.seletores, achado.provedor, achado.gravidade]),
       [
-        ["google", undefined, undefined],
-        ["resend", undefined, "Resend"],
+        ["google", undefined, undefined, "aviso"],
+        ["resend", undefined, "Resend", "info"],
       ],
     );
+    // O aviso do outro seletor ainda pede ação, então o selo continua atenção.
+    assert.equal(cartao.selo.estado, "atencao");
   });
 
   it("indeterminado: diz que a lista não foi toda verificada", async () => {
