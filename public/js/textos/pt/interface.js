@@ -198,8 +198,7 @@ const dkim = {
     texto: "Encontrei a chave no seletor `{seletor}` ({chave}). Procurei em {total} seletores.",
   },
   encontradoVarios: {
-    texto:
-      "Encontrei chaves em {quantidade} seletores: {seletores}. Procurei em {total} seletores.",
+    texto: "Encontrei chaves em {quantidade} seletores. Procurei em {total} seletores.",
   },
   naoEncontrado: {
     texto:

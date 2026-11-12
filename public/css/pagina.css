@@ -647,6 +647,12 @@ a {
   overflow-wrap: anywhere;
 }
 
+/* As chaves achadas em mais de um seletor (`desenharCartao`, em pagina.js), logo abaixo do
+ * resumo: mais perto dele que o resto do cartão, porque completam a mesma frase. */
+.lista-chaves {
+  margin-top: -4px;
+}
+
 .titulo-orientacoes {
   margin: 8px 0 0;
   font-size: 14px;
