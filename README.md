@@ -3,27 +3,30 @@
 **Português (Brasil)** · [English](README.en.md)
 
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES2024-F7DF1E?logo=javascript&logoColor=black)
-![deps](https://img.shields.io/badge/deps-pnpm-F69220?logo=pnpm&logoColor=white)
 ![runtime deps](https://img.shields.io/badge/runtime%20deps-0-brightgreen)
 [![CI](https://img.shields.io/github/actions/workflow/status/ryanvmorais/dmarc-facil/ci.yml?label=CI&logo=githubactions&logoColor=white)](https://github.com/ryanvmorais/dmarc-facil/actions/workflows/ci.yml)
-![lint](https://img.shields.io/badge/lint-ESLint-4B32C3?logo=eslint&logoColor=white)
-![style](https://img.shields.io/badge/style-Prettier-F7B93E?logo=prettier&logoColor=black)
-![types](https://img.shields.io/badge/types-JSDoc%20%2B%20tsc-3178C6?logo=typescript&logoColor=white)
 ![license](https://img.shields.io/badge/license-Apache%202.0-blue?logo=apache&logoColor=white)
 
 **O DMARC Fácil é um verificador de DMARC, SPF e DKIM que roda no navegador: você digita o domínio, ele consulta o DNS, explica cada registro em linguagem simples, em português ou em inglês, e diz qual é o próximo passo para o seu e-mail deixar de ser falsificado.**
 
+**Use agora:** [dmarc-facil.ryanmorais.com.br](https://dmarc-facil.ryanmorais.com.br). Não precisa instalar nada nem criar conta.
+
+![O topo do DMARC Fácil: a pergunta "Alguém pode enviar e-mail em nome do seu domínio?", o campo do domínio e a escada do DMARC, com example.com em p=quarantine e o próximo passo em p=reject](docs/images/dmarc-facil-dmarc-spf-dkim-checker-hero.png)
+
 Quem pesquisa "verificar DMARC" ou "meu e-mail cai no spam" encontra, quase sempre, ferramentas em inglês que mostram o registro e deixam o resto por conta de quem lê. Aqui cada registro vem explicado, com o estado de cada parte e a escada do DMARC (`p=none`, `p=quarantine`, `p=reject`) mostrando em que degrau o domínio está e o que fazer para subir.
 
-Ele é feito para donos de site, desenvolvedores e agências pequenas, no Brasil ou fora dele, e qualquer pessoa pode usá-lo de qualquer lugar: a ferramenta só consulta o DNS público. É JavaScript puro, sem build e sem dependência de runtime, e não tem servidor: a página consulta o DNS direto do seu navegador. A página tem dois idiomas: português em [dmarc-facil.ryanmorais.com.br](https://dmarc-facil.ryanmorais.com.br) e inglês em [/en/](https://dmarc-facil.ryanmorais.com.br/en/), com o seletor PT/EN no cabeçalho e no rodapé.
+Ele é feito para donos de site, desenvolvedores e agências pequenas, no Brasil ou fora dele, e qualquer pessoa pode usá-lo de qualquer lugar: a ferramenta só consulta o DNS público. É JavaScript puro, sem build e sem dependência de runtime, e não tem servidor: a página consulta o DNS direto do seu navegador. Segue o tema claro ou escuro do sistema. A página tem dois idiomas: português em [dmarc-facil.ryanmorais.com.br](https://dmarc-facil.ryanmorais.com.br) e inglês em [/en/](https://dmarc-facil.ryanmorais.com.br/en/), com o seletor PT/EN no cabeçalho e no rodapé.
 
 > **Status:** no ar em [dmarc-facil.ryanmorais.com.br](https://dmarc-facil.ryanmorais.com.br). Verifica o DMARC, o SPF e o DKIM de um domínio, e a verificação roda inteira no navegador de quem usa.
 
-**Use agora:** [dmarc-facil.ryanmorais.com.br](https://dmarc-facil.ryanmorais.com.br). Não precisa instalar nada nem criar conta.
+<details>
+<summary>Ver a página inteira do resultado</summary>
 
 ![Verificador de DMARC, SPF e DKIM: resultado do DMARC Fácil para example.com, com a escada do DMARC (domínio em p=quarantine, próximo passo em p=reject, ressalva de pct=50) e os cartões de DMARC (Atenção, com um aviso), SPF (Problema, com um erro) e DKIM (OK, com uma informação e as chaves de dois seletores)](docs/images/dmarc-facil-dmarc-spf-dkim-checker-result.png)
 
 _A página inteira com um domínio de exemplo (`example.com`, com registros montados para mostrar cada tipo de alerta): o DMARC está em `p=quarantine` com `pct=50` (aviso), o SPF termina em `+all` (erro) e o DKIM tem uma chave de 1024 bits do Resend, que o provedor não deixa trocar (informação)._
+
+</details>
 
 ## O que ele verifica
 
@@ -60,13 +63,15 @@ A **escada** mostra em que degrau o seu DMARC está (`p=none`, `p=quarantine` ou
 
 ## DMARC Fácil e outras ferramentas
 
-|                         | DMARC Fácil                                                                        | [MXToolbox](https://mxtoolbox.com/SuperTool.aspx)       | [EasyDMARC](https://easydmarc.com/tools/domain-scanner)                      |
-| ----------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Registros por consulta  | DMARC, SPF e DKIM numa página só                                                   | Uma consulta por registro                               | O Domain Scanner junta os três; as ferramentas avulsas são separadas         |
-| DKIM                    | Procura em 15 seletores comuns e aceita o seu                                      | Exige que você informe o seletor                        | Campo de seletor e "detectar seletores", que depende de relatórios já vistos |
-| Próximo passo do DMARC  | Escada `none` → `quarantine` → `reject`, com o degrau atual marcado                | Confere se a política está ativa, sem orientar a subida | Aconselha subir para `reject`, com botão para a plataforma deles             |
-| Para onde vai o domínio | A um resolvedor DNS público (Cloudflare ou Google); nenhum servidor nosso o recebe | Ao servidor do serviço                                  | Ao servidor do serviço                                                       |
-| Cadastro                | Nenhum                                                                             | Não pede                                                | O básico não pede; o relatório completo pede nome e e-mail                   |
+|                         | DMARC Fácil                                                                        | [MXToolbox](https://mxtoolbox.com/SuperTool.aspx)                              | [EasyDMARC](https://easydmarc.com/tools/domain-scanner)                                    |
+| ----------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| Registros por consulta  | DMARC, SPF e DKIM numa página só                                                   | Uma consulta por registro                                                      | O Domain Scanner junta os três; as ferramentas avulsas são separadas                       |
+| DKIM                    | Procura em 15 seletores comuns e aceita o seu                                      | Exige que você informe o seletor                                               | Campo de seletor e "detectar seletores", por seletores predefinidos e relatórios já vistos |
+| Próximo passo do DMARC  | Escada `none` → `quarantine` → `reject`, com o degrau atual marcado                | Marca `p=none` como falha, sem mostrar os degraus                              | Aconselha subir para `reject`, com botão para a plataforma deles                           |
+| Para onde vai o domínio | A um resolvedor DNS público (Cloudflare ou Google); nenhum servidor nosso o recebe | Ao servidor do serviço e, na URL da página, a ferramentas de análise e anúncio | Ao servidor do serviço                                                                     |
+| Cadastro                | Nenhum                                                                             | Não pede                                                                       | O básico não pede; o relatório completo pede nome e e-mail                                 |
+
+_Comparação conferida nos sites oficiais, com consultas a domínios públicos, em novembro de 2026._
 
 Use o DMARC Fácil para ver o DMARC, o SPF e o DKIM de um domínio de uma vez, saber qual é o próximo passo e não precisar conhecer o seletor do DKIM. Para monitorar o domínio de forma contínua ou diagnosticar DNS e e-mail em geral, use um serviço de monitoramento; o que o DMARC Fácil não faz está em [Escopo e limitações](#escopo-e-limitações).
 
