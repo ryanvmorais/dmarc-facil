@@ -3,27 +3,30 @@
 [Português (Brasil)](README.md) · **English**
 
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES2024-F7DF1E?logo=javascript&logoColor=black)
-![deps](https://img.shields.io/badge/deps-pnpm-F69220?logo=pnpm&logoColor=white)
 ![runtime deps](https://img.shields.io/badge/runtime%20deps-0-brightgreen)
 [![CI](https://img.shields.io/github/actions/workflow/status/ryanvmorais/dmarc-facil/ci.yml?label=CI&logo=githubactions&logoColor=white)](https://github.com/ryanvmorais/dmarc-facil/actions/workflows/ci.yml)
-![lint](https://img.shields.io/badge/lint-ESLint-4B32C3?logo=eslint&logoColor=white)
-![style](https://img.shields.io/badge/style-Prettier-F7B93E?logo=prettier&logoColor=black)
-![types](https://img.shields.io/badge/types-JSDoc%20%2B%20tsc-3178C6?logo=typescript&logoColor=white)
 ![license](https://img.shields.io/badge/license-Apache%202.0-blue?logo=apache&logoColor=white)
 
 **DMARC Fácil is a DMARC, SPF and DKIM checker that runs in your browser: you type a domain, it queries the DNS, explains each record in plain language, in Brazilian Portuguese or in English, and tells you the next step to stop your email from being spoofed.**
 
+**Use it now:** [dmarc-facil.ryanmorais.com.br](https://dmarc-facil.ryanmorais.com.br). No install and no account needed.
+
+![The top of DMARC Fácil: the question "Can someone send email on behalf of your domain?", the domain field and the DMARC ladder, with example.com at p=quarantine and the next step at p=reject](docs/images/dmarc-facil-dmarc-spf-dkim-checker-hero-en.png)
+
 Most DMARC checkers show the raw record and leave the rest to the reader, and nearly all of them are in English only, which leaves out anyone searching for "verificar DMARC" or "meu e-mail cai no spam". Here each record comes explained in plain language, with the state of each part and the DMARC ladder (`p=none`, `p=quarantine`, `p=reject`) showing which step the domain is on and what to do to move up.
 
-It is built for site owners, developers and small agencies who work in Portuguese or English, in Brazil or elsewhere, and anyone can use it from anywhere: the tool only queries public DNS. It is plain JavaScript, with no build step and no runtime dependency, and has no server: the page queries DNS straight from your browser. The page comes in two languages, Portuguese at [dmarc-facil.ryanmorais.com.br](https://dmarc-facil.ryanmorais.com.br) and English at [/en/](https://dmarc-facil.ryanmorais.com.br/en/), with a PT/EN switch in the header and the footer.
+It is built for site owners, developers and small agencies who work in Portuguese or English, in Brazil or elsewhere, and anyone can use it from anywhere: the tool only queries public DNS. It is plain JavaScript, with no build step and no runtime dependency, and has no server: the page queries DNS straight from your browser. It follows the system's light or dark theme. The page comes in two languages, Portuguese at [dmarc-facil.ryanmorais.com.br](https://dmarc-facil.ryanmorais.com.br) and English at [/en/](https://dmarc-facil.ryanmorais.com.br/en/), with a PT/EN switch in the header and the footer.
 
 > **Status:** live at [dmarc-facil.ryanmorais.com.br](https://dmarc-facil.ryanmorais.com.br). It checks the DMARC, SPF and DKIM of a domain, and the check runs entirely in the browser of whoever uses it.
 
-**Use it now:** [dmarc-facil.ryanmorais.com.br](https://dmarc-facil.ryanmorais.com.br). No install and no account needed.
+<details>
+<summary>See the whole result page</summary>
 
 ![DMARC, SPF and DKIM checker: DMARC Fácil result for example.com, with the DMARC ladder (domain at p=quarantine, next step at p=reject, pct=50 caveat) and the DMARC (Attention, with a warning), SPF (Problem, with an error) and DKIM (OK, with an information note and the keys of two selectors) cards](docs/images/dmarc-facil-dmarc-spf-dkim-checker-result-en.png)
 
 _The whole page with an example domain (`example.com`, with records set up to show each kind of alert): DMARC is at `p=quarantine` with `pct=50` (warning), SPF ends in `+all` (error) and DKIM has a 1024-bit key from Resend, which the provider does not let you change (information)._
+
+</details>
 
 ## What it checks
 
@@ -54,19 +57,21 @@ The **ladder** shows which step your DMARC is on (`p=none`, `p=quarantine` or `p
 ## Privacy and use
 
 - **The query leaves your browser.** The domain goes to a public DNS-over-HTTPS resolver (Cloudflare or Google), which sees the domain and your IP address. No project server receives what you type, and the project keeps no log of domains.
-- **Public DNS only.** The tool reads records anyone can query. It does not scan, does not connect to and does not send anything to the server of the domain being checked.
+- **Public DNS only.** The tool reads records anyone can query. It does not scan or connect to the server of the domain being checked, and sends nothing to it.
 - **No trackers.** The page loads no third-party script, font or image. It is served by Cloudflare, which measures access only in aggregate.
 - **DKIM:** the selector is chosen by whoever sends the email, and DNS does not allow listing them. So the page looks at common selectors and says "I did not find it in these selectors", never "you have no DKIM". You can also enter your own selector.
 
 ## DMARC Fácil and other tools
 
-|                       | DMARC Fácil                                                                | [MXToolbox](https://mxtoolbox.com/SuperTool.aspx)       | [EasyDMARC](https://easydmarc.com/tools/domain-scanner)                         |
-| --------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| Records per lookup    | DMARC, SPF and DKIM on a single page                                       | One lookup per record                                   | The Domain Scanner combines the three; the standalone tools are separate        |
-| DKIM                  | Looks at 15 common selectors and accepts your own                          | You must enter the selector                             | Selector field and "detect all selectors", which relies on reports already seen |
-| DMARC next step       | A `none` → `quarantine` → `reject` ladder with the current step marked     | Checks that the policy is on, without guiding the climb | Advises moving to `reject`, with a button to their platform                     |
-| Where the domain goes | To a public DNS resolver (Cloudflare or Google); no server of ours gets it | To the service's server                                 | To the service's server                                                         |
-| Sign-up               | None                                                                       | Not asked                                               | The basic result needs none; the full report asks for name and email            |
+|                       | DMARC Fácil                                                                | [MXToolbox](https://mxtoolbox.com/SuperTool.aspx)                       | [EasyDMARC](https://easydmarc.com/tools/domain-scanner)                                       |
+| --------------------- | -------------------------------------------------------------------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Records per lookup    | DMARC, SPF and DKIM on a single page                                       | One lookup per record                                                   | The Domain Scanner combines the three; the standalone tools are separate                      |
+| DKIM                  | Looks at 15 common selectors and accepts your own                          | You must enter the selector                                             | Selector field and "detect all selectors", from predefined selectors and reports already seen |
+| DMARC next step       | A `none` → `quarantine` → `reject` ladder with the current step marked     | Flags `p=none` as a failure, without showing the steps                  | Advises moving to `reject`, with a button to their platform                                   |
+| Where the domain goes | To a public DNS resolver (Cloudflare or Google); no server of ours gets it | To the service's server and, in the page URL, to analytics and ad tools | To the service's server                                                                       |
+| Sign-up               | None                                                                       | Not asked                                                               | The basic result needs none; the full report asks for name and email                          |
+
+_Comparison checked against the official websites, with lookups of public domains, in November 2026._
 
 Use DMARC Fácil to see the DMARC, SPF and DKIM of a domain at once, learn the next step and not have to know the DKIM selector. To monitor a domain continuously or to diagnose DNS and email in general, use a monitoring service; what DMARC Fácil does not do is in [Scope and limitations](#scope-and-limitations).
 
@@ -76,7 +81,7 @@ DMARC Fácil is small on purpose: it reads the DNS and explains what it finds. F
 
 - **It reads DNS only.** It does not send email or test whether a message reaches the inbox. _Instead:_ use an email deliverability testing tool.
 - **It does not read DMARC reports.** Aggregate (RUA) reports tell you who sends email on behalf of the domain. _Instead:_ [MailVigil](https://github.com/ryanvmorais/mailvigil) reads those reports on your machine.
-- **DKIM depends on the selector.** The page only finds the key in common selectors and in the one you type. _Instead:_ find the selector in the header of an email of yours (`DKIM-Signature`, the `s=` field) and enter it on the page.
+- **DKIM depends on the selector.** The page only finds the key in common selectors and in the one you type. _Instead:_ find the selector in the header of one of your emails (`DKIM-Signature`, the `s=` field) and enter it on the page.
 - **It shows what the public resolver returned right now.** A recent DNS change may take a while to show up because of caching. _Instead:_ wait for the record's TTL and check again.
 
 ## Development
