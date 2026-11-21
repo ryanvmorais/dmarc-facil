@@ -59,7 +59,7 @@ pnpm format
 ```text
 wrangler.json            # projeto de hospedagem (Worker só de assets): rota do domínio, ./public, 404-page; FONTE ÚNICA do endereço
 package.json             # scripts do portão, devDependencies, packageManager (pnpm 12) e engines (Node 26)
-pnpm-workspace.yaml      # configuração do pnpm 12: minimumReleaseAge e as exceções comentadas do pnpm audit
+pnpm-workspace.yaml      # configuração do pnpm 12: minimumReleaseAge e, quando houver, as exceções comentadas do pnpm audit
 eslint.config.mjs, tsconfig.json, .prettierrc.json, .prettierignore # configuração do lint, da checagem de tipos e da formatação
 CONTRIBUTING.md, SECURITY.md, CODE_OF_CONDUCT.md # como contribuir, como avisar uma vulnerabilidade, código de conduta
 public/                  # o site: é o que vai para a hospedagem, sem build
@@ -151,6 +151,6 @@ Desenvolvimento guiado por specs: requirements, design e tasks, cada um aprovado
 
 pnpm 12 (campo `packageManager` do `package.json`); `package.json` e `pnpm-lock.yaml` sempre juntos no commit. **Não há dependência de runtime**: o que vai ao navegador é código nosso, sem biblioteca. Só ferramentas de desenvolvimento (ESLint, Prettier, TypeScript como verificador de JSDoc, `@types/node`).
 
-> Cuidado: `pnpm-workspace.yaml` guarda a configuração do pnpm 12 (o campo `pnpm` do `package.json` é ignorado): `minimumReleaseAge` de uma semana e as exceções aceitas do `pnpm audit`, cada uma com o motivo e a condição de saída comentados ali.
+> Cuidado: `pnpm-workspace.yaml` guarda a configuração do pnpm 12 (o campo `pnpm` do `package.json` é ignorado): `minimumReleaseAge` de uma semana e, quando houver, as exceções aceitas do `pnpm audit` (`auditConfig.ignoreGhsas`), cada uma com o motivo e a condição de saída comentados ali.
 
 > Cuidado: o Dependabot agrupa minor e patch num PR por ecossistema, com cooldown de 7 dias. Revise cada PR pelo diff e pelo changelog do pacote.
